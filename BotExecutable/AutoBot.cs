@@ -10,6 +10,7 @@ using System.Text;
 using System.Timers;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 using Demo_Bot;
 
 namespace BotExecutable
@@ -32,12 +33,13 @@ namespace BotExecutable
         private int lower3, upper3;
         private int lower4, upper4;
         private int lower5, upper5;
-        Random rand = new Random();
+        Random rand = new Random(); 
 
         public AutoBot()
         {
             InitializeComponent();
         }
+
 
         private void runBot(object source, ElapsedEventArgs e)
         {
@@ -220,7 +222,8 @@ namespace BotExecutable
                 timer5.Enabled = true;
             }
         }
-
+        
+        
         // button1 is Run Bot
         private void button1_Click(object sender, EventArgs e)
         {
@@ -235,6 +238,8 @@ namespace BotExecutable
                     if (shiftPM5.Text == "")
                         shiftPM5.Text = "5:30";
 
+                    timer5 = new System.Timers.Timer();
+
                     if (DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftAM5.Text + "AM") ).ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftPM5.Text + "PM")).ToUniversalTime()) <= 0)
                     {
                         userLabel5.Text = "User: " + userIDBox5.Text;
@@ -242,7 +247,6 @@ namespace BotExecutable
                         robot5.setStopCommand(false);
                         lower5 = Convert.ToInt32(lowerBound5.Value);
                         upper5 = Convert.ToInt32(upperBound5.Value);
-                        timer5 = new System.Timers.Timer();
                         timer5.Elapsed += new ElapsedEventHandler(runBot5);
                         timer5.Enabled = true;
                     }
@@ -251,21 +255,29 @@ namespace BotExecutable
                         DateTime morning = Convert.ToDateTime(shiftAM5.Text + "AM");
                         DateTime afternoon = Convert.ToDateTime(shiftPM5.Text + "PM");
                         int hour = 0, minute = 0;
-                        if (DateTime.Now.Hour < morning.Hour && DateTime.Now.Minute < morning.Minute)
+                        if (DateTime.Now.Hour <= morning.Hour && DateTime.Now.Minute <= morning.Minute)
                         {
                             hour = morning.Hour - DateTime.Now.Hour;
                             minute = morning.Minute - DateTime.Now.Minute;
                         }
-                        if (DateTime.Now.Hour > afternoon.Hour && DateTime.Now.Minute > afternoon.Minute)
+                        if (DateTime.Now.Hour >= afternoon.Hour && DateTime.Now.Minute >= afternoon.Minute)
                         {
                             hour = (24 - DateTime.Now.Hour) + morning.Hour;
                             minute = morning.Minute - DateTime.Now.Minute;
+                            if (minute < 0)
+                            {
+                                hour--;
+                                minute = minute + 60;
+                            }
                         }
-                        double time5 = (hour * 3600 * 100) + (minute * 60 * 100);
+                        robot5 = new Bot(client, shiftAM5.Text, shiftPM5.Text, userIDBox5.Text, passwordBox5.Text, progressLabel5, activitiesCreated5, notesCreated5, activitiesCompleted5, leadsCreated5, accountsCreated5, contactsCreated5, oppsCreated5, ticketsCreated5, oppsUpdated5, leadsPromoted5, role5, activityCompleteAmount5.Value, roleSelector5, noteCheckBox5.Checked, activityCheckBox5.Checked, leadCheckBox5.Checked, accountCheckBox5.Checked, contactCheckBox5.Checked, oppCheckBox5.Checked, ticketCheckBox5.Checked, oppUpdateCheckBox5.Checked, completeActCheckBox5.Checked, promoteLeadCheckBox5.Checked, reliabilityValue5.Value, creationUpperBound.Text);
+                        robot5.setStopCommand(false);
+                        double time5 = (hour * 3600 * 1000) + (minute * 60 * 1000);
                         timer5.Interval = time5;
                         time5 = time5 / 1000;
                         string temp5 = time5.ToString("G4");
                         SetText5("Waiting... " + temp5 + " seconds");
+                        timer5.Elapsed += new ElapsedEventHandler(runBot5);
                         timer5.Enabled = true;
                     }
                     goto case 3;
@@ -275,6 +287,8 @@ namespace BotExecutable
                     if (shiftPM4.Text == "")
                         shiftPM4.Text = "5:30";
 
+                    timer4 = new System.Timers.Timer();
+
                     if (DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftAM4.Text + "AM")).ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftPM4.Text + "PM")).ToUniversalTime()) <= 0)
                     {
                         userLabel4.Text = "User: " + userIDBox4.Text;
@@ -282,7 +296,6 @@ namespace BotExecutable
                         robot4.setStopCommand(false);
                         lower4 = Convert.ToInt32(lowerBound4.Value);
                         upper4 = Convert.ToInt32(upperBound4.Value);
-                        timer4 = new System.Timers.Timer();
                         timer4.Elapsed += new ElapsedEventHandler(runBot4);
                         timer4.Enabled = true;
                     }
@@ -291,21 +304,29 @@ namespace BotExecutable
                         DateTime morning = Convert.ToDateTime(shiftAM4.Text + "AM");
                         DateTime afternoon = Convert.ToDateTime(shiftPM4.Text + "PM");
                         int hour = 0, minute = 0;
-                        if (DateTime.Now.Hour < morning.Hour && DateTime.Now.Minute < morning.Minute)
+                        if (DateTime.Now.Hour <= morning.Hour && DateTime.Now.Minute <= morning.Minute)
                         {
                             hour = morning.Hour - DateTime.Now.Hour;
                             minute = morning.Minute - DateTime.Now.Minute;
                         }
-                        if (DateTime.Now.Hour > afternoon.Hour && DateTime.Now.Minute > afternoon.Minute)
+                        if (DateTime.Now.Hour >= afternoon.Hour && DateTime.Now.Minute >= afternoon.Minute)
                         {
                             hour = (24 - DateTime.Now.Hour) + morning.Hour;
                             minute = morning.Minute - DateTime.Now.Minute;
+                            if (minute < 0)
+                            {
+                                hour--;
+                                minute = minute + 60;
+                            }
                         }
-                        double time4 = (hour * 3600 * 100) + (minute * 60 * 100);
+                        robot4 = new Bot(client, shiftAM4.Text, shiftPM4.Text, userIDBox4.Text, passwordBox4.Text, progressLabel4, activitiesCreated4, notesCreated4, activitiesCompleted4, leadsCreated4, accountsCreated4, contactsCreated4, oppsCreated4, ticketsCreated4, oppsUpdated4, leadsPromoted4, role4, activityCompleteAmount4.Value, roleSelector4, noteCheckBox4.Checked, activityCheckBox4.Checked, leadCheckBox4.Checked, accountCheckBox4.Checked, contactCheckBox4.Checked, oppCheckBox4.Checked, ticketCheckBox4.Checked, oppUpdateCheckBox4.Checked, completeActCheckBox4.Checked, promoteLeadCheckBox4.Checked, reliabilityValue4.Value, creationUpperBound.Text);
+                        robot4.setStopCommand(false);
+                        double time4 = (hour * 3600 * 1000) + (minute * 60 * 1000);
                         timer4.Interval = time4;
                         time4 = time4 / 1000;
                         string temp4 = time4.ToString("G4");
                         SetText4("Waiting... " + temp4 + " seconds");
+                        timer4.Elapsed += new ElapsedEventHandler(runBot4);
                         timer4.Enabled = true;
                     }
                     goto case 2;
@@ -315,6 +336,8 @@ namespace BotExecutable
                     if (shiftPM3.Text == "")
                         shiftPM3.Text = "5:30";
 
+                    timer3 = new System.Timers.Timer();
+
                     if (DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftAM3.Text + "AM")).ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftPM3.Text + "PM")).ToUniversalTime()) <= 0)
                     {
                         userLabel3.Text = "User: " + userIDBox3.Text;
@@ -322,7 +345,6 @@ namespace BotExecutable
                         robot3.setStopCommand(false);
                         lower3 = Convert.ToInt32(lowerBound3.Value);
                         upper3 = Convert.ToInt32(upperBound3.Value);
-                        timer3 = new System.Timers.Timer();
                         timer3.Elapsed += new ElapsedEventHandler(runBot3);
                         timer3.Enabled = true;
                     }
@@ -331,21 +353,29 @@ namespace BotExecutable
                         DateTime morning = Convert.ToDateTime(shiftAM3.Text + "AM");
                         DateTime afternoon = Convert.ToDateTime(shiftPM3.Text + "PM");
                         int hour = 0, minute = 0;
-                        if (DateTime.Now.Hour < morning.Hour && DateTime.Now.Minute < morning.Minute)
+                        if (DateTime.Now.Hour <= morning.Hour && DateTime.Now.Minute <= morning.Minute)
                         {
                             hour = morning.Hour - DateTime.Now.Hour;
                             minute = morning.Minute - DateTime.Now.Minute;
                         }
-                        if (DateTime.Now.Hour > afternoon.Hour && DateTime.Now.Minute > afternoon.Minute)
+                        if (DateTime.Now.Hour >= afternoon.Hour && DateTime.Now.Minute >= afternoon.Minute)
                         {
                             hour = (24 - DateTime.Now.Hour) + morning.Hour;
                             minute = morning.Minute - DateTime.Now.Minute;
+                            if (minute < 0)
+                            {
+                                hour--;
+                                minute = minute + 60;
+                            }
                         }
-                        double time3 = (hour * 3600 * 100) + (minute * 60 * 100);
+                        robot3 = new Bot(client, shiftAM3.Text, shiftPM3.Text, userIDBox3.Text, passwordBox3.Text, progressLabel3, activitiesCreated3, notesCreated3, activitiesCompleted3, leadsCreated3, accountsCreated3, contactsCreated3, oppsCreated3, ticketsCreated3, oppsUpdated3, leadsPromoted3, role3, activityCompleteAmount3.Value, roleSelector3, noteCheckBox3.Checked, activityCheckBox3.Checked, leadCheckBox3.Checked, accountCheckBox3.Checked, contactCheckBox3.Checked, oppCheckBox3.Checked, ticketCheckBox3.Checked, oppUpdateCheckBox3.Checked, completeActCheckBox3.Checked, promoteLeadCheckBox3.Checked, reliabilityValue3.Value, creationUpperBound.Text);
+                        robot3.setStopCommand(false);
+                        double time3 = (hour * 3600 * 1000) + (minute * 60 * 1000);
                         timer3.Interval = time3;
                         time3 = time3 / 1000;
                         string temp3 = time3.ToString("G4");
                         SetText3("Waiting... " + temp3 + " seconds");
+                        timer3.Elapsed += new ElapsedEventHandler(runBot3);
                         timer3.Enabled = true;
                     }
                     goto case 1;
@@ -355,6 +385,8 @@ namespace BotExecutable
                     if (shiftPM2.Text == "")
                         shiftPM2.Text = "5:30";
 
+                    timer2 = new System.Timers.Timer();
+
                     if (DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftAM2.Text + "AM")).ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftPM2.Text + "PM")).ToUniversalTime()) <= 0)
                     {
                         userLabel2.Text = "User: " + userIDBox2.Text;
@@ -362,7 +394,6 @@ namespace BotExecutable
                         robot2.setStopCommand(false);
                         lower2 = Convert.ToInt32(lowerBound2.Value);
                         upper2 = Convert.ToInt32(upperBound2.Value);
-                        timer2 = new System.Timers.Timer();
                         timer2.Elapsed += new ElapsedEventHandler(runBot2);
                         timer2.Enabled = true;
                     }
@@ -371,21 +402,29 @@ namespace BotExecutable
                         DateTime morning = Convert.ToDateTime(shiftAM2.Text + "AM");
                         DateTime afternoon = Convert.ToDateTime(shiftPM2.Text + "PM");
                         int hour = 0, minute = 0;
-                        if (DateTime.Now.Hour < morning.Hour && DateTime.Now.Minute < morning.Minute)
+                        if (DateTime.Now.Hour <= morning.Hour && DateTime.Now.Minute <= morning.Minute)
                         {
                             hour = morning.Hour - DateTime.Now.Hour;
                             minute = morning.Minute - DateTime.Now.Minute;
                         }
-                        if (DateTime.Now.Hour > afternoon.Hour && DateTime.Now.Minute > afternoon.Minute)
+                        if (DateTime.Now.Hour >= afternoon.Hour && DateTime.Now.Minute >= afternoon.Minute)
                         {
                             hour = (24 - DateTime.Now.Hour) + morning.Hour;
                             minute = morning.Minute - DateTime.Now.Minute;
+                            if (minute < 0)
+                            {
+                                hour--;
+                                minute = minute + 60;
+                            }
                         }
-                        double time2 = (hour * 3600 * 100) + (minute * 60 * 100);
+                        robot2 = new Bot(client, shiftAM2.Text, shiftPM2.Text, userIDBox2.Text, passwordBox2.Text, progressLabel2, activitiesCreated2, notesCreated2, activitiesCompleted2, leadsCreated2, accountsCreated2, contactsCreated2, oppsCreated2, ticketsCreated2, oppsUpdated2, leadsPromoted2, role2, activityCompleteAmount2.Value, roleSelector2, noteCheckBox2.Checked, activityCheckBox2.Checked, leadCheckBox2.Checked, accountCheckBox2.Checked, contactCheckBox2.Checked, oppCheckBox2.Checked, ticketCheckBox2.Checked, oppUpdateCheckBox2.Checked, completeActCheckBox2.Checked, promoteLeadCheckBox2.Checked, reliabilityValue2.Value, creationUpperBound.Text);
+                        robot2.setStopCommand(false);
+                        double time2 = (hour * 3600 * 1000) + (minute * 60 * 1000);
                         timer2.Interval = time2;
                         time2 = time2 / 1000;
                         string temp2 = time2.ToString("G4");
                         SetText2("Waiting... " + temp2 + " seconds");
+                        timer2.Elapsed += new ElapsedEventHandler(runBot2);
                         timer2.Enabled = true;
                     }
                     goto case 0;
@@ -394,7 +433,7 @@ namespace BotExecutable
                         shiftAM.Text = "7:30";
                     if (shiftPM.Text == "")
                         shiftPM.Text = "5:30";
-
+                    timer = new System.Timers.Timer();
                     if (DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftAM.Text + "AM")).ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftPM.Text + "PM")).ToUniversalTime()) <= 0)
                     {
                         userLabel.Text = "User: " + userIDBox.Text;
@@ -402,7 +441,6 @@ namespace BotExecutable
                         robot.setStopCommand(false);
                         lower = Convert.ToInt32(lowerBound.Value);
                         upper = Convert.ToInt32(upperBound.Value);
-                        timer = new System.Timers.Timer();
                         timer.Elapsed += new ElapsedEventHandler(runBot);
                         timer.Enabled = true;
                     }
@@ -411,35 +449,40 @@ namespace BotExecutable
                         DateTime morning = Convert.ToDateTime(shiftAM.Text + "AM");
                         DateTime afternoon = Convert.ToDateTime(shiftPM.Text + "PM");
                         int hour = 0, minute = 0;
-                        if (DateTime.Now.Hour < morning.Hour && DateTime.Now.Minute < morning.Minute)
+                        if (DateTime.Now.Hour <= morning.Hour && DateTime.Now.Minute <= morning.Minute)
                         {
                             hour = morning.Hour - DateTime.Now.Hour;
                             minute = morning.Minute - DateTime.Now.Minute;
                         }
-                        if (DateTime.Now.Hour > afternoon.Hour && DateTime.Now.Minute > afternoon.Minute)
+                        if (DateTime.Now.Hour >= afternoon.Hour && DateTime.Now.Minute >= afternoon.Minute)
                         {
                             hour = (24 - DateTime.Now.Hour) + morning.Hour;
                             minute = morning.Minute - DateTime.Now.Minute;
                             if (minute < 0)
                             {
                                 hour--;
-                                minute = minute * -1;
+                                minute = minute + 60;
                             }
                         }
-                        double time = (hour * 3600 * 100) + (minute * 60 * 100);
+                        robot = new Bot(client, shiftAM.Text, shiftPM.Text, userIDBox.Text, passwordBox.Text, progressLabel, activitiesCreated, notesCreated, activitiesCompleted, leadsCreated, accountsCreated, contactsCreated, oppsCreated, ticketsCreated, oppsUpdated, leadsPromoted, role, activityCompleteAmount.Value, roleSelector, noteCheckBox.Checked, activityCheckBox.Checked, leadCheckBox.Checked, accountCheckBox.Checked, contactCheckBox.Checked, oppCheckBox.Checked, ticketCheckBox.Checked, oppUpdateCheckBox.Checked, completeActCheckBox.Checked, promoteLeadCheckBox.Checked, reliabilityValue.Value, creationUpperBound.Text);
+                        robot.setStopCommand(false);
+                        double time = (hour * 3600 * 1000) + (minute * 60 * 1000);
                         timer.Interval = time;
                         time = time / 1000;
                         string temp = time.ToString("G4");
                         SetText("Waiting... " + temp + " seconds");
+                        timer.Elapsed += new ElapsedEventHandler(runBot);
                         timer.Enabled = true;
                     }
                     break; 
             } 
         }
-
+         
+        
         // button2 is Stop Bot
         private void button2_Click(object sender, EventArgs e)
         {
+            
             if (robot != null)
             {
                 robot.stop();
@@ -469,9 +512,10 @@ namespace BotExecutable
                 robot5.stop();
                 robot5.remove();
                 SetText5("Progress:");
-            }
+            } 
         }
 
+        /*
         private void dataRefreshButton_Click(object sender, EventArgs e)
         {
             try
@@ -491,7 +535,7 @@ namespace BotExecutable
                 progressLabel.ForeColor = Color.Crimson;
                 SetText("Please run the bot first.");
             }
-        }
+        } */
 
         #region Threading
         delegate void SetTextCallback(string text);
@@ -942,15 +986,15 @@ namespace BotExecutable
                     ticketsCreatedLabel.Visible = true;
                     //leadsPromoted.Visible = true;
                     //leadsPromotedLabel.Visible = true;
-                    noteCheckBox.Visible = true;
-                    activityCheckBox.Visible = true;
-                    leadCheckBox.Visible = true;
-                    accountCheckBox.Visible = true;
-                    contactCheckBox.Visible = true;
-                    oppCheckBox.Visible = true;
-                    ticketCheckBox.Visible = true;
-                    oppUpdateCheckBox.Visible = true;
-                    completeActCheckBox.Visible = true;
+                    //noteCheckBox.Visible = true;
+                    //activityCheckBox.Visible = true;
+                    //leadCheckBox.Visible = true;
+                    //accountCheckBox.Visible = true;
+                    //contactCheckBox.Visible = true;
+                    //oppCheckBox.Visible = true;
+                    //ticketCheckBox.Visible = true;
+                    //oppUpdateCheckBox.Visible = true;
+                    //completeActCheckBox.Visible = true;
                     //promoteLeadCheckBox.Visible = true;
                     reliabilityLabel.Visible = true;
                     reliabilityValue.Visible = true;
@@ -999,15 +1043,15 @@ namespace BotExecutable
                     //leadsPromoted2.Visible = false;
                     //leadsPromotedLabel2.Visible = false;
                     progressLabel2.Visible = false;
-                    noteCheckBox2.Visible = false;
-                    activityCheckBox2.Visible = false;
-                    leadCheckBox2.Visible = false;
-                    accountCheckBox2.Visible = false;
-                    contactCheckBox2.Visible = false;
-                    oppCheckBox2.Visible = false;
-                    ticketCheckBox2.Visible = false;
-                    oppUpdateCheckBox2.Visible = false;
-                    completeActCheckBox2.Visible = false;
+                    //noteCheckBox2.Visible = false;
+                    //activityCheckBox2.Visible = false;
+                    //leadCheckBox2.Visible = false;
+                    //accountCheckBox2.Visible = false;
+                    //contactCheckBox2.Visible = false;
+                    //oppCheckBox2.Visible = false;
+                    //ticketCheckBox2.Visible = false;
+                    //oppUpdateCheckBox2.Visible = false;
+                    //completeActCheckBox2.Visible = false;
                     //promoteLeadCheckBox2.Visible = false;
                     reliabilityLabel2.Visible = false;
                     reliabilityValue2.Visible = false;
@@ -1055,15 +1099,15 @@ namespace BotExecutable
                     ticketsCreatedLabel3.Visible = false;
                     //leadsPromoted3.Visible = false;
                     //leadsPromotedLabel3.Visible = false;
-                    noteCheckBox3.Visible = false;
-                    activityCheckBox3.Visible = false;
-                    leadCheckBox3.Visible = false;
-                    accountCheckBox3.Visible = false;
-                    contactCheckBox3.Visible = false;
-                    oppCheckBox3.Visible = false;
-                    ticketCheckBox3.Visible = false;
-                    oppUpdateCheckBox3.Visible = false;
-                    completeActCheckBox3.Visible = false;
+                    //noteCheckBox3.Visible = false;
+                    //activityCheckBox3.Visible = false;
+                    //leadCheckBox3.Visible = false;
+                    //accountCheckBox3.Visible = false;
+                    //contactCheckBox3.Visible = false;
+                    //oppCheckBox3.Visible = false;
+                    //ticketCheckBox3.Visible = false;
+                    //oppUpdateCheckBox3.Visible = false;
+                    //completeActCheckBox3.Visible = false;
                     //promoteLeadCheckBox3.Visible = false;
                     reliabilityLabel3.Visible = false;
                     reliabilityValue3.Visible = false;
@@ -1108,15 +1152,15 @@ namespace BotExecutable
                     ticketsCreatedLabel4.Visible = false;
                     //leadsPromoted4.Visible = false;
                     //leadsPromotedLabel4.Visible = false;
-                    noteCheckBox4.Visible = false;
-                    activityCheckBox4.Visible = false;
-                    leadCheckBox4.Visible = false;
-                    accountCheckBox4.Visible = false;
-                    contactCheckBox4.Visible = false;
-                    oppCheckBox4.Visible = false;
-                    ticketCheckBox4.Visible = false;
-                    oppUpdateCheckBox4.Visible = false;
-                    completeActCheckBox4.Visible = false;
+                    //noteCheckBox4.Visible = false;
+                    //activityCheckBox4.Visible = false;
+                    //leadCheckBox4.Visible = false;
+                    //accountCheckBox4.Visible = false;
+                    //contactCheckBox4.Visible = false;
+                    //oppCheckBox4.Visible = false;
+                    //ticketCheckBox4.Visible = false;
+                    //oppUpdateCheckBox4.Visible = false;
+                    //completeActCheckBox4.Visible = false;
                     //promoteLeadCheckBox4.Visible = false;
                     reliabilityLabel4.Visible = false;
                     reliabilityValue4.Visible = false;
@@ -1169,15 +1213,15 @@ namespace BotExecutable
                     ticketsCreatedLabel5.Visible = false;
                     //leadsPromoted5.Visible = false;
                     //leadsPromotedLabel5.Visible = false;
-                    noteCheckBox5.Visible = false;
-                    activityCheckBox5.Visible = false;
-                    leadCheckBox5.Visible = false;
-                    accountCheckBox5.Visible = false;
-                    contactCheckBox5.Visible = false;
-                    oppCheckBox5.Visible = false;
-                    ticketCheckBox5.Visible = false;
-                    oppUpdateCheckBox5.Visible = false;
-                    completeActCheckBox5.Visible = false;
+                    //noteCheckBox5.Visible = false;
+                    //activityCheckBox5.Visible = false;
+                    //leadCheckBox5.Visible = false;
+                    //accountCheckBox5.Visible = false;
+                    //contactCheckBox5.Visible = false;
+                    //oppCheckBox5.Visible = false;
+                    //ticketCheckBox5.Visible = false;
+                    //oppUpdateCheckBox5.Visible = false;
+                    //completeActCheckBox5.Visible = false;
                     //promoteLeadCheckBox5.Visible = false;
                     reliabilityLabel5.Visible = false;
                     reliabilityValue5.Visible = false;
@@ -1228,15 +1272,15 @@ namespace BotExecutable
                     ticketsCreatedLabel.Visible = true;
                     //leadsPromoted.Visible = true;
                     //leadsPromotedLabel.Visible = true;
-                    noteCheckBox.Visible = true;
-                    activityCheckBox.Visible = true;
-                    leadCheckBox.Visible = true;
-                    accountCheckBox.Visible = true;
-                    contactCheckBox.Visible = true;
-                    oppCheckBox.Visible = true;
-                    ticketCheckBox.Visible = true;
-                    oppUpdateCheckBox.Visible = true;
-                    completeActCheckBox.Visible = true;
+                    //noteCheckBox.Visible = true;
+                    //activityCheckBox.Visible = true;
+                    //leadCheckBox.Visible = true;
+                    //accountCheckBox.Visible = true;
+                    //contactCheckBox.Visible = true;
+                    //oppCheckBox.Visible = true;
+                    //ticketCheckBox.Visible = true;
+                    //oppUpdateCheckBox.Visible = true;
+                    //completeActCheckBox.Visible = true;
                     //promoteLeadCheckBox.Visible = true;
                     reliabilityLabel.Visible = true;
                     reliabilityValue.Visible = true;
@@ -1297,15 +1341,15 @@ namespace BotExecutable
                     oppsUpdated2.Visible = true;
                     ticketsCreated2.Visible = true;
                     ticketsCreatedLabel2.Visible = true;
-                    noteCheckBox2.Visible = true;
-                    activityCheckBox2.Visible = true;
-                    leadCheckBox2.Visible = true;
-                    accountCheckBox2.Visible = true;
-                    contactCheckBox2.Visible = true;
-                    oppCheckBox2.Visible = true;
-                    ticketCheckBox2.Visible = true;
-                    oppUpdateCheckBox2.Visible = true;
-                    completeActCheckBox2.Visible = true;
+                    //noteCheckBox2.Visible = true;
+                    //activityCheckBox2.Visible = true;
+                    //leadCheckBox2.Visible = true;
+                    //accountCheckBox2.Visible = true;
+                    //contactCheckBox2.Visible = true;
+                    //oppCheckBox2.Visible = true;
+                    //ticketCheckBox2.Visible = true;
+                    //oppUpdateCheckBox2.Visible = true;
+                    //completeActCheckBox2.Visible = true;
                     //promoteLeadCheckBox2.Visible = true;
                     reliabilityLabel2.Visible = true;
                     reliabilityValue2.Visible = true;
@@ -1354,15 +1398,15 @@ namespace BotExecutable
                     ticketsCreatedLabel3.Visible = false;
                     //leadsPromoted3.Visible = false;
                     //leadsPromotedLabel3.Visible = false;
-                    noteCheckBox3.Visible = false;
-                    activityCheckBox3.Visible = false;
-                    leadCheckBox3.Visible = false;
-                    accountCheckBox3.Visible = false;
-                    contactCheckBox3.Visible = false;
-                    oppCheckBox3.Visible = false;
-                    ticketCheckBox3.Visible = false;
-                    oppUpdateCheckBox3.Visible = false;
-                    completeActCheckBox3.Visible = false;
+                    //noteCheckBox3.Visible = false;
+                    //activityCheckBox3.Visible = false;
+                    //leadCheckBox3.Visible = false;
+                    //accountCheckBox3.Visible = false;
+                    //contactCheckBox3.Visible = false;
+                    //oppCheckBox3.Visible = false;
+                    //ticketCheckBox3.Visible = false;
+                    //oppUpdateCheckBox3.Visible = false;
+                    //completeActCheckBox3.Visible = false;
                     //promoteLeadCheckBox3.Visible = false;
                     reliabilityLabel3.Visible = false;
                     reliabilityValue3.Visible = false;
@@ -1407,15 +1451,15 @@ namespace BotExecutable
                     ticketsCreatedLabel4.Visible = false;
                     //leadsPromoted4.Visible = false;
                     //leadsPromotedLabel4.Visible = false;
-                    noteCheckBox4.Visible = false;
-                    activityCheckBox4.Visible = false;
-                    leadCheckBox4.Visible = false;
-                    accountCheckBox4.Visible = false;
-                    contactCheckBox4.Visible = false;
-                    oppCheckBox4.Visible = false;
-                    ticketCheckBox4.Visible = false;
-                    oppUpdateCheckBox4.Visible = false;
-                    completeActCheckBox4.Visible = false;
+                    //noteCheckBox4.Visible = false;
+                    //activityCheckBox4.Visible = false;
+                    //leadCheckBox4.Visible = false;
+                    //accountCheckBox4.Visible = false;
+                    //contactCheckBox4.Visible = false;
+                    //oppCheckBox4.Visible = false;
+                    //ticketCheckBox4.Visible = false;
+                    //oppUpdateCheckBox4.Visible = false;
+                    //completeActCheckBox4.Visible = false;
                     //promoteLeadCheckBox4.Visible = false;
                     reliabilityLabel4.Visible = false;
                     reliabilityValue4.Visible = false;
@@ -1468,15 +1512,15 @@ namespace BotExecutable
                     ticketsCreatedLabel5.Visible = false;
                     //leadsPromoted5.Visible = false;
                     //leadsPromotedLabel5.Visible = false;
-                    noteCheckBox5.Visible = false;
-                    activityCheckBox5.Visible = false;
-                    leadCheckBox5.Visible = false;
-                    accountCheckBox5.Visible = false;
-                    contactCheckBox5.Visible = false;
-                    oppCheckBox5.Visible = false;
-                    ticketCheckBox5.Visible = false;
-                    oppUpdateCheckBox5.Visible = false;
-                    completeActCheckBox5.Visible = false;
+                    //noteCheckBox5.Visible = false;
+                    //activityCheckBox5.Visible = false;
+                    //leadCheckBox5.Visible = false;
+                    //accountCheckBox5.Visible = false;
+                    //contactCheckBox5.Visible = false;
+                    //oppCheckBox5.Visible = false;
+                    //ticketCheckBox5.Visible = false;
+                    //oppUpdateCheckBox5.Visible = false;
+                    //completeActCheckBox5.Visible = false;
                     //promoteLeadCheckBox5.Visible = false;
                     reliabilityLabel5.Visible = false;
                     reliabilityValue5.Visible = false;
@@ -1527,15 +1571,15 @@ namespace BotExecutable
                     ticketsCreatedLabel.Visible = true;
                     //leadsPromoted.Visible = true;
                     //leadsPromotedLabel.Visible = true;
-                    noteCheckBox.Visible = true;
-                    activityCheckBox.Visible = true;
-                    leadCheckBox.Visible = true;
-                    accountCheckBox.Visible = true;
-                    contactCheckBox.Visible = true;
-                    oppCheckBox.Visible = true;
-                    ticketCheckBox.Visible = true;
-                    oppUpdateCheckBox.Visible = true;
-                    completeActCheckBox.Visible = true;
+                    //noteCheckBox.Visible = true;
+                    //activityCheckBox.Visible = true;
+                    //leadCheckBox.Visible = true;
+                    //accountCheckBox.Visible = true;
+                    //contactCheckBox.Visible = true;
+                    //oppCheckBox.Visible = true;
+                    //ticketCheckBox.Visible = true;
+                    //oppUpdateCheckBox.Visible = true;
+                    //completeActCheckBox.Visible = true;
                     //promoteLeadCheckBox.Visible = true;
                     reliabilityLabel.Visible = true;
                     reliabilityValue.Visible = true;
@@ -1584,15 +1628,15 @@ namespace BotExecutable
                     ticketsCreatedLabel2.Visible = true;
                     //leadsPromoted2.Visible = true;
                     //leadsPromotedLabel2.Visible = true;
-                    noteCheckBox2.Visible = true;
-                    activityCheckBox2.Visible = true;
-                    leadCheckBox2.Visible = true;
-                    accountCheckBox2.Visible = true;
-                    contactCheckBox2.Visible = true;
-                    oppCheckBox2.Visible = true;
-                    ticketCheckBox2.Visible = true;
-                    oppUpdateCheckBox2.Visible = true;
-                    completeActCheckBox2.Visible = true;
+                    //noteCheckBox2.Visible = true;
+                    //activityCheckBox2.Visible = true;
+                    //leadCheckBox2.Visible = true;
+                    //accountCheckBox2.Visible = true;
+                    //contactCheckBox2.Visible = true;
+                    //oppCheckBox2.Visible = true;
+                    //ticketCheckBox2.Visible = true;
+                    //oppUpdateCheckBox2.Visible = true;
+                    //completeActCheckBox2.Visible = true;
                     //promoteLeadCheckBox2.Visible = true;
                     reliabilityLabel2.Visible = true;
                     reliabilityValue2.Visible = true;
@@ -1641,15 +1685,15 @@ namespace BotExecutable
                     ticketsCreatedLabel3.Visible = true;
                     //leadsPromoted3.Visible = true;
                     //leadsPromotedLabel3.Visible = true;
-                    noteCheckBox3.Visible = true;
-                    activityCheckBox3.Visible = true;
-                    leadCheckBox3.Visible = true;
-                    accountCheckBox3.Visible = true;
-                    contactCheckBox3.Visible = true;
-                    oppCheckBox3.Visible = true;
-                    ticketCheckBox3.Visible = true;
-                    oppUpdateCheckBox3.Visible = true;
-                    completeActCheckBox3.Visible = true;
+                    //noteCheckBox3.Visible = true;
+                    //activityCheckBox3.Visible = true;
+                    //leadCheckBox3.Visible = true;
+                    //accountCheckBox3.Visible = true;
+                    //contactCheckBox3.Visible = true;
+                    //oppCheckBox3.Visible = true;
+                    //ticketCheckBox3.Visible = true;
+                    //oppUpdateCheckBox3.Visible = true;
+                    //completeActCheckBox3.Visible = true;
                     //promoteLeadCheckBox3.Visible = true;
                     reliabilityLabel3.Visible = true;
                     reliabilityValue3.Visible = true;
@@ -1694,15 +1738,15 @@ namespace BotExecutable
                     ticketsCreatedLabel4.Visible = false;
                     //leadsPromoted4.Visible = false;
                     //leadsPromotedLabel4.Visible = false;
-                    noteCheckBox4.Visible = false;
-                    activityCheckBox4.Visible = false;
-                    leadCheckBox4.Visible = false;
-                    accountCheckBox4.Visible = false;
-                    contactCheckBox4.Visible = false;
-                    oppCheckBox4.Visible = false;
-                    ticketCheckBox4.Visible = false;
-                    oppUpdateCheckBox4.Visible = false;
-                    completeActCheckBox4.Visible = false;
+                    //noteCheckBox4.Visible = false;
+                    //activityCheckBox4.Visible = false;
+                    //leadCheckBox4.Visible = false;
+                    //accountCheckBox4.Visible = false;
+                    //contactCheckBox4.Visible = false;
+                    //oppCheckBox4.Visible = false;
+                    //ticketCheckBox4.Visible = false;
+                    //oppUpdateCheckBox4.Visible = false;
+                    //completeActCheckBox4.Visible = false;
                     //promoteLeadCheckBox4.Visible = false;
                     reliabilityLabel4.Visible = false;
                     reliabilityValue4.Visible = false;
@@ -1755,15 +1799,15 @@ namespace BotExecutable
                     ticketsCreatedLabel5.Visible = false;
                     //leadsPromoted5.Visible = false;
                     //leadsPromotedLabel5.Visible = false;
-                    noteCheckBox5.Visible = false;
-                    activityCheckBox5.Visible = false;
-                    leadCheckBox5.Visible = false;
-                    accountCheckBox5.Visible = false;
-                    contactCheckBox5.Visible = false;
-                    oppCheckBox5.Visible = false;
-                    ticketCheckBox5.Visible = false;
-                    oppUpdateCheckBox5.Visible = false;
-                    completeActCheckBox5.Visible = false;
+                    //noteCheckBox5.Visible = false;
+                    //activityCheckBox5.Visible = false;
+                    //leadCheckBox5.Visible = false;
+                    //accountCheckBox5.Visible = false;
+                    //contactCheckBox5.Visible = false;
+                    //oppCheckBox5.Visible = false;
+                    //ticketCheckBox5.Visible = false;
+                    //oppUpdateCheckBox5.Visible = false;
+                    //completeActCheckBox5.Visible = false;
                     //promoteLeadCheckBox5.Visible = false;
                     reliabilityLabel5.Visible = false;
                     reliabilityValue5.Visible = false;
@@ -1814,15 +1858,15 @@ namespace BotExecutable
                     ticketsCreatedLabel.Visible = true;
                     //leadsPromoted.Visible = true;
                     //leadsPromotedLabel.Visible = true;
-                    noteCheckBox.Visible = true;
-                    activityCheckBox.Visible = true;
-                    leadCheckBox.Visible = true;
-                    accountCheckBox.Visible = true;
-                    contactCheckBox.Visible = true;
-                    oppCheckBox.Visible = true;
-                    ticketCheckBox.Visible = true;
-                    oppUpdateCheckBox.Visible = true;
-                    completeActCheckBox.Visible = true;
+                    //noteCheckBox.Visible = true;
+                    //activityCheckBox.Visible = true;
+                    //leadCheckBox.Visible = true;
+                    //accountCheckBox.Visible = true;
+                    //contactCheckBox.Visible = true;
+                    //oppCheckBox.Visible = true;
+                    //ticketCheckBox.Visible = true;
+                    //oppUpdateCheckBox.Visible = true;
+                    //completeActCheckBox.Visible = true;
                     //promoteLeadCheckBox.Visible = true;
                     reliabilityLabel.Visible = true;
                     reliabilityValue.Visible = true;
@@ -1871,15 +1915,15 @@ namespace BotExecutable
                     ticketsCreatedLabel2.Visible = true;
                     //leadsPromoted2.Visible = true;
                     //leadsPromotedLabel2.Visible = true;
-                    noteCheckBox2.Visible = true;
-                    activityCheckBox2.Visible = true;
-                    leadCheckBox2.Visible = true;
-                    accountCheckBox2.Visible = true;
-                    contactCheckBox2.Visible = true;
-                    oppCheckBox2.Visible = true;
-                    ticketCheckBox2.Visible = true;
-                    oppUpdateCheckBox2.Visible = true;
-                    completeActCheckBox2.Visible = true;
+                    //noteCheckBox2.Visible = true;
+                    //activityCheckBox2.Visible = true;
+                    //leadCheckBox2.Visible = true;
+                    //accountCheckBox2.Visible = true;
+                    //contactCheckBox2.Visible = true;
+                    //oppCheckBox2.Visible = true;
+                    //ticketCheckBox2.Visible = true;
+                    //oppUpdateCheckBox2.Visible = true;
+                    //completeActCheckBox2.Visible = true;
                     //promoteLeadCheckBox2.Visible = true;
                     reliabilityLabel2.Visible = true;
                     reliabilityValue2.Visible = true;
@@ -1928,15 +1972,15 @@ namespace BotExecutable
                     ticketsCreatedLabel3.Visible = true;
                     //leadsPromoted3.Visible = true;
                     //leadsPromotedLabel3.Visible = true;
-                    noteCheckBox3.Visible = true;
-                    activityCheckBox3.Visible = true;
-                    leadCheckBox3.Visible = true;
-                    accountCheckBox3.Visible = true;
-                    contactCheckBox3.Visible = true;
-                    oppCheckBox3.Visible = true;
-                    ticketCheckBox3.Visible = true;
-                    oppUpdateCheckBox3.Visible = true;
-                    completeActCheckBox3.Visible = true;
+                    //noteCheckBox3.Visible = true;
+                    //activityCheckBox3.Visible = true;
+                    //leadCheckBox3.Visible = true;
+                    //accountCheckBox3.Visible = true;
+                    //contactCheckBox3.Visible = true;
+                    //oppCheckBox3.Visible = true;
+                    //ticketCheckBox3.Visible = true;
+                    //oppUpdateCheckBox3.Visible = true;
+                    //completeActCheckBox3.Visible = true;
                     //promoteLeadCheckBox3.Visible = true;
                     reliabilityLabel3.Visible = true;
                     reliabilityValue3.Visible = true;
@@ -1981,15 +2025,15 @@ namespace BotExecutable
                     ticketsCreatedLabel4.Visible = true;
                     //leadsPromoted4.Visible = true;
                     //leadsPromotedLabel4.Visible = true;
-                    noteCheckBox4.Visible = true;
-                    activityCheckBox4.Visible = true;
-                    leadCheckBox4.Visible = true;
-                    accountCheckBox4.Visible = true;
-                    contactCheckBox4.Visible = true;
-                    oppCheckBox4.Visible = true;
-                    ticketCheckBox4.Visible = true;
-                    oppUpdateCheckBox4.Visible = true;
-                    completeActCheckBox4.Visible = true;
+                    //noteCheckBox4.Visible = true;
+                    //activityCheckBox4.Visible = true;
+                    //leadCheckBox4.Visible = true;
+                    //accountCheckBox4.Visible = true;
+                    //contactCheckBox4.Visible = true;
+                    //oppCheckBox4.Visible = true;
+                    //ticketCheckBox4.Visible = true;
+                    //oppUpdateCheckBox4.Visible = true;
+                    //completeActCheckBox4.Visible = true;
                     //promoteLeadCheckBox4.Visible = true;
                     reliabilityLabel4.Visible = true;
                     reliabilityValue4.Visible = true;
@@ -2042,15 +2086,15 @@ namespace BotExecutable
                     ticketsCreatedLabel5.Visible = false;
                     //leadsPromoted5.Visible = false;
                     //leadsPromotedLabel5.Visible = false;
-                    noteCheckBox5.Visible = false;
-                    activityCheckBox5.Visible = false;
-                    leadCheckBox5.Visible = false;
-                    accountCheckBox5.Visible = false;
-                    contactCheckBox5.Visible = false;
-                    oppCheckBox5.Visible = false;
-                    ticketCheckBox5.Visible = false;
-                    oppUpdateCheckBox5.Visible = false;
-                    completeActCheckBox5.Visible = false;
+                    //noteCheckBox5.Visible = false;
+                    //activityCheckBox5.Visible = false;
+                    //leadCheckBox5.Visible = false;
+                    //accountCheckBox5.Visible = false;
+                    //contactCheckBox5.Visible = false;
+                    //oppCheckBox5.Visible = false;
+                    //ticketCheckBox5.Visible = false;
+                    //oppUpdateCheckBox5.Visible = false;
+                    //completeActCheckBox5.Visible = false;
                     //promoteLeadCheckBox5.Visible = false;
                     reliabilityLabel5.Visible = false;
                     reliabilityValue5.Visible = false;
@@ -2101,15 +2145,15 @@ namespace BotExecutable
                     ticketsCreatedLabel.Visible = true;
                     //leadsPromoted.Visible = true;
                     //leadsPromotedLabel.Visible = true;
-                    noteCheckBox.Visible = true;
-                    activityCheckBox.Visible = true;
-                    leadCheckBox.Visible = true;
-                    accountCheckBox.Visible = true;
-                    contactCheckBox.Visible = true;
-                    oppCheckBox.Visible = true;
-                    ticketCheckBox.Visible = true;
-                    oppUpdateCheckBox.Visible = true;
-                    completeActCheckBox.Visible = true;
+                    //noteCheckBox.Visible = true;
+                    //activityCheckBox.Visible = true;
+                    //leadCheckBox.Visible = true;
+                    //accountCheckBox.Visible = true;
+                    //contactCheckBox.Visible = true;
+                    //oppCheckBox.Visible = true;
+                    //ticketCheckBox.Visible = true;
+                    //oppUpdateCheckBox.Visible = true;
+                    //completeActCheckBox.Visible = true;
                     //promoteLeadCheckBox.Visible = true;
                     reliabilityLabel.Visible = true;
                     reliabilityValue.Visible = true;
@@ -2158,15 +2202,15 @@ namespace BotExecutable
                     ticketsCreatedLabel2.Visible = true;
                     //leadsPromoted2.Visible = true;
                     //leadsPromotedLabel2.Visible = true;
-                    noteCheckBox2.Visible = true;
-                    activityCheckBox2.Visible = true;
-                    leadCheckBox2.Visible = true;
-                    accountCheckBox2.Visible = true;
-                    contactCheckBox2.Visible = true;
-                    oppCheckBox2.Visible = true;
-                    ticketCheckBox2.Visible = true;
-                    oppUpdateCheckBox2.Visible = true;
-                    completeActCheckBox2.Visible = true;
+                    //noteCheckBox2.Visible = true;
+                    //activityCheckBox2.Visible = true;
+                    //leadCheckBox2.Visible = true;
+                    //accountCheckBox2.Visible = true;
+                    //contactCheckBox2.Visible = true;
+                    //oppCheckBox2.Visible = true;
+                    //ticketCheckBox2.Visible = true;
+                    //oppUpdateCheckBox2.Visible = true;
+                    //completeActCheckBox2.Visible = true;
                     //promoteLeadCheckBox2.Visible = true;
                     reliabilityLabel2.Visible = true;
                     reliabilityValue2.Visible = true;
@@ -2215,15 +2259,15 @@ namespace BotExecutable
                     ticketsCreatedLabel3.Visible = true;
                     //leadsPromoted3.Visible = true;
                     //leadsPromotedLabel3.Visible = true;
-                    noteCheckBox3.Visible = true;
-                    activityCheckBox3.Visible = true;
-                    leadCheckBox3.Visible = true;
-                    accountCheckBox3.Visible = true;
-                    contactCheckBox3.Visible = true;
-                    oppCheckBox3.Visible = true;
-                    ticketCheckBox3.Visible = true;
-                    oppUpdateCheckBox3.Visible = true;
-                    completeActCheckBox3.Visible = true;
+                    //noteCheckBox3.Visible = true;
+                    //activityCheckBox3.Visible = true;
+                    //leadCheckBox3.Visible = true;
+                    //accountCheckBox3.Visible = true;
+                    //contactCheckBox3.Visible = true;
+                    //oppCheckBox3.Visible = true;
+                    //ticketCheckBox3.Visible = true;
+                    //oppUpdateCheckBox3.Visible = true;
+                    //completeActCheckBox3.Visible = true;
                     //promoteLeadCheckBox3.Visible = true;
                     reliabilityLabel3.Visible = true;
                     reliabilityValue3.Visible = true;
@@ -2268,15 +2312,15 @@ namespace BotExecutable
                     ticketsCreatedLabel4.Visible = true;
                     //leadsPromoted4.Visible = true;
                     //leadsPromotedLabel4.Visible = true;
-                    noteCheckBox4.Visible = true;
-                    activityCheckBox4.Visible = true;
-                    leadCheckBox4.Visible = true;
-                    accountCheckBox4.Visible = true;
-                    contactCheckBox4.Visible = true;
-                    oppCheckBox4.Visible = true;
-                    ticketCheckBox4.Visible = true;
-                    oppUpdateCheckBox4.Visible = true;
-                    completeActCheckBox4.Visible = true;
+                    //noteCheckBox4.Visible = true;
+                    //activityCheckBox4.Visible = true;
+                    //leadCheckBox4.Visible = true;
+                    //accountCheckBox4.Visible = true;
+                    //contactCheckBox4.Visible = true;
+                    //oppCheckBox4.Visible = true;
+                    //ticketCheckBox4.Visible = true;
+                    //oppUpdateCheckBox4.Visible = true;
+                    //completeActCheckBox4.Visible = true;
                     //promoteLeadCheckBox4.Visible = true;
                     reliabilityLabel4.Visible = true;
                     reliabilityValue4.Visible = true;
@@ -2329,15 +2373,15 @@ namespace BotExecutable
                     ticketsCreatedLabel5.Visible = true;
                     //leadsPromoted5.Visible = true;
                     //leadsPromotedLabel5.Visible = true;
-                    noteCheckBox5.Visible = true;
-                    activityCheckBox5.Visible = true;
-                    leadCheckBox5.Visible = true;
-                    accountCheckBox5.Visible = true;
-                    contactCheckBox5.Visible = true;
-                    oppCheckBox5.Visible = true;
-                    ticketCheckBox5.Visible = true;
-                    oppUpdateCheckBox5.Visible = true;
-                    completeActCheckBox5.Visible = true;
+                    //noteCheckBox5.Visible = true;
+                    //activityCheckBox5.Visible = true;
+                    //leadCheckBox5.Visible = true;
+                    //accountCheckBox5.Visible = true;
+                    //contactCheckBox5.Visible = true;
+                    //oppCheckBox5.Visible = true;
+                    //ticketCheckBox5.Visible = true;
+                    //oppUpdateCheckBox5.Visible = true;
+                    //completeActCheckBox5.Visible = true;
                     //promoteLeadCheckBox5.Visible = true;
                     reliabilityLabel5.Visible = true;
                     reliabilityValue5.Visible = true;
@@ -2379,15 +2423,15 @@ namespace BotExecutable
                     reliabilityLabel.Visible = true;
                     reliabilityValue.Visible = true;
                     dataCreationTimerLabel.Visible = true;
-                    noteCheckBox.Visible = true;
-                    activityCheckBox.Visible = true;
-                    leadCheckBox.Visible = true;
-                    accountCheckBox.Visible = true;
-                    contactCheckBox.Visible = true;
-                    oppCheckBox.Visible = true;
-                    ticketCheckBox.Visible = true;
-                    oppUpdateCheckBox.Visible = true;
-                    completeActCheckBox.Visible = true;
+                    //noteCheckBox.Visible = true;
+                    //activityCheckBox.Visible = true;
+                    //leadCheckBox.Visible = true;
+                    //accountCheckBox.Visible = true;
+                    //contactCheckBox.Visible = true;
+                    //oppCheckBox.Visible = true;
+                    //ticketCheckBox.Visible = true;
+                    //oppUpdateCheckBox.Visible = true;
+                    //completeActCheckBox.Visible = true;
                     //promoteLeadCheckBox.Visible = true;
                     break;
 
@@ -2518,15 +2562,15 @@ namespace BotExecutable
                     reliabilityLabel.Visible = false;
                     reliabilityValue.Visible = false;
                     dataCreationTimerLabel.Visible = false;
-                    noteCheckBox.Visible = false;
-                    activityCheckBox.Visible = false;
-                    leadCheckBox.Visible = false;
-                    accountCheckBox.Visible = false;
-                    contactCheckBox.Visible = false;
-                    oppCheckBox.Visible = false;
-                    ticketCheckBox.Visible = false;
-                    oppUpdateCheckBox.Visible = false;
-                    completeActCheckBox.Visible = false;
+                    //noteCheckBox.Visible = false;
+                    //activityCheckBox.Visible = false;
+                    //leadCheckBox.Visible = false;
+                    //accountCheckBox.Visible = false;
+                    //contactCheckBox.Visible = false;
+                    //oppCheckBox.Visible = false;
+                    //ticketCheckBox.Visible = false;
+                    //oppUpdateCheckBox.Visible = false;
+                    //completeActCheckBox.Visible = false;
                     //promoteLeadCheckBox.Visible = false;
                     break;
                 case 2:
@@ -2551,15 +2595,15 @@ namespace BotExecutable
                     reliabilityLabel.Visible = false;
                     reliabilityValue.Visible = false;
                     dataCreationTimerLabel.Visible = false;
-                    noteCheckBox.Visible = false;
-                    activityCheckBox.Visible = false;
-                    leadCheckBox.Visible = false;
-                    accountCheckBox.Visible = false;
-                    contactCheckBox.Visible = false;
-                    oppCheckBox.Visible = false;
-                    ticketCheckBox.Visible = false;
-                    oppUpdateCheckBox.Visible = false;
-                    completeActCheckBox.Visible = false;
+                    //noteCheckBox.Visible = false;
+                    //activityCheckBox.Visible = false;
+                    //leadCheckBox.Visible = false;
+                    //accountCheckBox.Visible = false;
+                    //contactCheckBox.Visible = false;
+                    //oppCheckBox.Visible = false;
+                    //ticketCheckBox.Visible = false;
+                    //oppUpdateCheckBox.Visible = false;
+                    //completeActCheckBox.Visible = false;
                     //promoteLeadCheckBox.Visible = false;
                     break;
             }
@@ -2590,15 +2634,15 @@ namespace BotExecutable
                     reliabilityLabel2.Visible = true;
                     reliabilityValue2.Visible = true;
                     dataCreationTimerLabel2.Visible = true;
-                    noteCheckBox2.Visible = true;
-                    activityCheckBox2.Visible = true;
-                    leadCheckBox2.Visible = true;
-                    accountCheckBox2.Visible = true;
-                    contactCheckBox2.Visible = true;
-                    oppCheckBox2.Visible = true;
-                    ticketCheckBox2.Visible = true;
-                    oppUpdateCheckBox2.Visible = true;
-                    completeActCheckBox2.Visible = true;
+                    //noteCheckBox2.Visible = true;
+                    //activityCheckBox2.Visible = true;
+                    //leadCheckBox2.Visible = true;
+                    //accountCheckBox2.Visible = true;
+                    //contactCheckBox2.Visible = true;
+                    //oppCheckBox2.Visible = true;
+                    //ticketCheckBox2.Visible = true;
+                    //oppUpdateCheckBox2.Visible = true;
+                    //completeActCheckBox2.Visible = true;
                     //promoteLeadCheckBox2.Visible = true;
                     break;
                     /*
@@ -2720,15 +2764,15 @@ namespace BotExecutable
                     reliabilityLabel2.Visible = false;
                     reliabilityValue2.Visible = false;
                     dataCreationTimerLabel2.Visible = false;
-                    noteCheckBox2.Visible = false;
-                    activityCheckBox2.Visible = false;
-                    leadCheckBox2.Visible = false;
-                    accountCheckBox2.Visible = false;
-                    contactCheckBox2.Visible = false;
-                    oppCheckBox2.Visible = false;
-                    ticketCheckBox2.Visible = false;
-                    oppUpdateCheckBox2.Visible = false;
-                    completeActCheckBox2.Visible = false;
+                    //noteCheckBox2.Visible = false;
+                    //activityCheckBox2.Visible = false;
+                    //leadCheckBox2.Visible = false;
+                    //accountCheckBox2.Visible = false;
+                    //contactCheckBox2.Visible = false;
+                    //oppCheckBox2.Visible = false;
+                    //ticketCheckBox2.Visible = false;
+                    //oppUpdateCheckBox2.Visible = false;
+                    //completeActCheckBox2.Visible = false;
                     //promoteLeadCheckBox2.Visible = false;
                     break;
                 case 2:
@@ -2753,15 +2797,15 @@ namespace BotExecutable
                     reliabilityLabel2.Visible = false;
                     reliabilityValue2.Visible = false;
                     dataCreationTimerLabel2.Visible = false;
-                    noteCheckBox2.Visible = false;
-                    activityCheckBox2.Visible = false;
-                    leadCheckBox2.Visible = false;
-                    accountCheckBox2.Visible = false;
-                    contactCheckBox2.Visible = false;
-                    oppCheckBox2.Visible = false;
-                    ticketCheckBox2.Visible = false;
-                    oppUpdateCheckBox2.Visible = false;
-                    completeActCheckBox2.Visible = false;
+                    //noteCheckBox2.Visible = false;
+                    //activityCheckBox2.Visible = false;
+                    //leadCheckBox2.Visible = false;
+                    //accountCheckBox2.Visible = false;
+                    //contactCheckBox2.Visible = false;
+                    //oppCheckBox2.Visible = false;
+                    //ticketCheckBox2.Visible = false;
+                    //oppUpdateCheckBox2.Visible = false;
+                    //completeActCheckBox2.Visible = false;
                     //promoteLeadCheckBox2.Visible = false;
                     break;
             }
@@ -2792,15 +2836,15 @@ namespace BotExecutable
                     reliabilityLabel3.Visible = true;
                     reliabilityValue3.Visible = true;
                     dataCreationTimerLabel3.Visible = true;
-                    noteCheckBox3.Visible = true;
-                    activityCheckBox3.Visible = true;
-                    leadCheckBox3.Visible = true;
-                    accountCheckBox3.Visible = true;
-                    contactCheckBox3.Visible = true;
-                    oppCheckBox3.Visible = true;
-                    ticketCheckBox3.Visible = true;
-                    oppUpdateCheckBox3.Visible = true;
-                    completeActCheckBox3.Visible = true;
+                    //noteCheckBox3.Visible = true;
+                    //activityCheckBox3.Visible = true;
+                    //leadCheckBox3.Visible = true;
+                    //accountCheckBox3.Visible = true;
+                    //contactCheckBox3.Visible = true;
+                    //oppCheckBox3.Visible = true;
+                    //ticketCheckBox3.Visible = true;
+                    //oppUpdateCheckBox3.Visible = true;
+                    //completeActCheckBox3.Visible = true;
                     //promoteLeadCheckBox3.Visible = true;
                     break;
                     /*
@@ -2922,15 +2966,15 @@ namespace BotExecutable
                     reliabilityLabel3.Visible = false;
                     reliabilityValue3.Visible = false;
                     dataCreationTimerLabel3.Visible = false;
-                    noteCheckBox3.Visible = false;
-                    activityCheckBox3.Visible = false;
-                    leadCheckBox3.Visible = false;
-                    accountCheckBox3.Visible = false;
-                    contactCheckBox3.Visible = false;
-                    oppCheckBox3.Visible = false;
-                    ticketCheckBox3.Visible = false;
-                    oppUpdateCheckBox3.Visible = false;
-                    completeActCheckBox3.Visible = false;
+                    //noteCheckBox3.Visible = false;
+                    //activityCheckBox3.Visible = false;
+                    //leadCheckBox3.Visible = false;
+                    //accountCheckBox3.Visible = false;
+                    //contactCheckBox3.Visible = false;
+                    //oppCheckBox3.Visible = false;
+                    //ticketCheckBox3.Visible = false;
+                    //oppUpdateCheckBox3.Visible = false;
+                    //completeActCheckBox3.Visible = false;
                     //promoteLeadCheckBox3.Visible = false;
                     break;
                 case 2:
@@ -2955,15 +2999,15 @@ namespace BotExecutable
                     reliabilityLabel3.Visible = false;
                     reliabilityValue3.Visible = false;
                     dataCreationTimerLabel3.Visible = false;
-                    noteCheckBox3.Visible = false;
-                    activityCheckBox3.Visible = false;
-                    leadCheckBox3.Visible = false;
-                    accountCheckBox3.Visible = false;
-                    contactCheckBox3.Visible = false;
-                    oppCheckBox3.Visible = false;
-                    ticketCheckBox3.Visible = false;
-                    oppUpdateCheckBox3.Visible = false;
-                    completeActCheckBox3.Visible = false;
+                    //noteCheckBox3.Visible = false;
+                    //activityCheckBox3.Visible = false;
+                    //leadCheckBox3.Visible = false;
+                    //accountCheckBox3.Visible = false;
+                    //contactCheckBox3.Visible = false;
+                    //oppCheckBox3.Visible = false;
+                    //ticketCheckBox3.Visible = false;
+                    //oppUpdateCheckBox3.Visible = false;
+                    //completeActCheckBox3.Visible = false;
                     //promoteLeadCheckBox3.Visible = false;
                     break;
             }
@@ -2995,14 +3039,14 @@ namespace BotExecutable
                     reliabilityValue4.Visible = true;
                     dataCreationTimerLabel4.Visible = true;
                     noteCheckBox4.Visible = true;
-                    activityCheckBox4.Visible = true;
-                    leadCheckBox4.Visible = true;
-                    accountCheckBox4.Visible = true;
-                    contactCheckBox4.Visible = true;
-                    oppCheckBox4.Visible = true;
-                    ticketCheckBox4.Visible = true;
-                    oppUpdateCheckBox4.Visible = true;
-                    completeActCheckBox4.Visible = true;
+                    //activityCheckBox4.Visible = true;
+                    //leadCheckBox4.Visible = true;
+                    //accountCheckBox4.Visible = true;
+                    //contactCheckBox4.Visible = true;
+                    //oppCheckBox4.Visible = true;
+                    //ticketCheckBox4.Visible = true;
+                    //oppUpdateCheckBox4.Visible = true;
+                    //completeActCheckBox4.Visible = true;
                     //promoteLeadCheckBox4.Visible = true;
                     break;
                     /*
@@ -3124,15 +3168,15 @@ namespace BotExecutable
                     reliabilityLabel4.Visible = false;
                     reliabilityValue4.Visible = false;
                     dataCreationTimerLabel4.Visible = false;
-                    noteCheckBox4.Visible = false;
-                    activityCheckBox4.Visible = false;
-                    leadCheckBox4.Visible = false;
-                    accountCheckBox4.Visible = false;
-                    contactCheckBox4.Visible = false;
-                    oppCheckBox4.Visible = false;
-                    ticketCheckBox4.Visible = false;
-                    oppUpdateCheckBox4.Visible = false;
-                    completeActCheckBox4.Visible = false;
+                    //noteCheckBox4.Visible = false;
+                    //activityCheckBox4.Visible = false;
+                    //leadCheckBox4.Visible = false;
+                    //accountCheckBox4.Visible = false;
+                    //contactCheckBox4.Visible = false;
+                    //oppCheckBox4.Visible = false;
+                    //ticketCheckBox4.Visible = false;
+                    //oppUpdateCheckBox4.Visible = false;
+                    //completeActCheckBox4.Visible = false;
                     //promoteLeadCheckBox4.Visible = false;
                     break;
                 case 2:
@@ -3157,15 +3201,15 @@ namespace BotExecutable
                     reliabilityLabel4.Visible = false;
                     reliabilityValue4.Visible = false;
                     dataCreationTimerLabel4.Visible = false;
-                    noteCheckBox4.Visible = false;
-                    activityCheckBox4.Visible = false;
-                    leadCheckBox4.Visible = false;
-                    accountCheckBox4.Visible = false;
-                    contactCheckBox4.Visible = false;
-                    oppCheckBox4.Visible = false;
-                    ticketCheckBox4.Visible = false;
-                    oppUpdateCheckBox4.Visible = false;
-                    completeActCheckBox4.Visible = false;
+                    //noteCheckBox4.Visible = false;
+                    //activityCheckBox4.Visible = false;
+                    //leadCheckBox4.Visible = false;
+                    //accountCheckBox4.Visible = false;
+                    //contactCheckBox4.Visible = false;
+                    //oppCheckBox4.Visible = false;
+                    //ticketCheckBox4.Visible = false;
+                    //oppUpdateCheckBox4.Visible = false;
+                    //completeActCheckBox4.Visible = false;
                     //promoteLeadCheckBox4.Visible = false;
                     break;
             }
@@ -3196,15 +3240,15 @@ namespace BotExecutable
                     reliabilityLabel5.Visible = true;
                     reliabilityValue5.Visible = true;
                     dataCreationTimerLabel5.Visible = true;
-                    noteCheckBox5.Visible = true;
-                    activityCheckBox5.Visible = true;
-                    leadCheckBox5.Visible = true;
-                    accountCheckBox5.Visible = true;
-                    contactCheckBox5.Visible = true;
-                    oppCheckBox5.Visible = true;
-                    ticketCheckBox5.Visible = true;
-                    oppUpdateCheckBox5.Visible = true;
-                    completeActCheckBox5.Visible = true;
+                    //noteCheckBox5.Visible = true;
+                    //activityCheckBox5.Visible = true;
+                    //leadCheckBox5.Visible = true;
+                    //accountCheckBox5.Visible = true;
+                    //contactCheckBox5.Visible = true;
+                    //oppCheckBox5.Visible = true;
+                    //ticketCheckBox5.Visible = true;
+                    //oppUpdateCheckBox5.Visible = true;
+                    //completeActCheckBox5.Visible = true;
                     //promoteLeadCheckBox5.Visible = true;
                     break;
                     /*
@@ -3326,15 +3370,15 @@ namespace BotExecutable
                     reliabilityLabel5.Visible = false;
                     reliabilityValue5.Visible = false;
                     dataCreationTimerLabel5.Visible = false;
-                    noteCheckBox5.Visible = false;
-                    activityCheckBox5.Visible = false;
-                    leadCheckBox5.Visible = false;
-                    accountCheckBox5.Visible = false;
-                    contactCheckBox5.Visible = false;
-                    oppCheckBox5.Visible = false;
-                    ticketCheckBox5.Visible = false;
-                    oppUpdateCheckBox5.Visible = false;
-                    completeActCheckBox5.Visible = false;
+                    //noteCheckBox5.Visible = false;
+                    //activityCheckBox5.Visible = false;
+                    //leadCheckBox5.Visible = false;
+                    //accountCheckBox5.Visible = false;
+                    //contactCheckBox5.Visible = false;
+                    //oppCheckBox5.Visible = false;
+                    //ticketCheckBox5.Visible = false;
+                    //oppUpdateCheckBox5.Visible = false;
+                    //completeActCheckBox5.Visible = false;
                     //promoteLeadCheckBox5.Visible = false;
                     break;
                 case 2:
@@ -3359,23 +3403,24 @@ namespace BotExecutable
                     reliabilityLabel5.Visible = false;
                     reliabilityValue5.Visible = false;
                     dataCreationTimerLabel5.Visible = false;
-                    noteCheckBox5.Visible = false;
-                    activityCheckBox5.Visible = false;
-                    leadCheckBox5.Visible = false;
-                    accountCheckBox5.Visible = false;
-                    contactCheckBox5.Visible = false;
-                    oppCheckBox5.Visible = false;
-                    ticketCheckBox5.Visible = false;
-                    oppUpdateCheckBox5.Visible = false;
-                    completeActCheckBox5.Visible = false;
+                    //noteCheckBox5.Visible = false;
+                    //activityCheckBox5.Visible = false;
+                    //leadCheckBox5.Visible = false;
+                    //accountCheckBox5.Visible = false;
+                    //contactCheckBox5.Visible = false;
+                    //oppCheckBox5.Visible = false;
+                    //ticketCheckBox5.Visible = false;
+                    //oppUpdateCheckBox5.Visible = false;
+                    //completeActCheckBox5.Visible = false;
                     //promoteLeadCheckBox5.Visible = false;
                     break;
             }
         }
 
+        
         // Currently unused
         private void chooseDoc1_Click(object sender, EventArgs e)
-        {
+        {/*
             string client = serverAddress.Text;
             userLabel.Text = "User: " + userIDBox.Text;
             robot = new Bot(client, shiftAM.Text, shiftPM.Text, userIDBox.Text, passwordBox.Text, progressLabel, activitiesCreated, notesCreated, activitiesCompleted, leadsCreated, accountsCreated, contactsCreated, oppsCreated, ticketsCreated, oppsUpdated, leadsPromoted, role, activityCompleteAmount.Value, roleSelector, noteCheckBox.Checked, activityCheckBox.Checked, leadCheckBox.Checked, accountCheckBox.Checked, contactCheckBox.Checked, oppCheckBox.Checked, ticketCheckBox.Checked, oppUpdateCheckBox.Checked, completeActCheckBox.Checked, promoteLeadCheckBox.Checked, reliabilityValue.Value, creationUpperBound.Text);
@@ -3383,7 +3428,7 @@ namespace BotExecutable
             if (role.Text == "From GoogleDoc")
                 robot.runFromGoogleSpreadSheet();
             if (role.Text == "From Excel")
-                robot.runFromExcel();
-        }
+                robot.runFromExcel(); */
+        } 
     }
 }

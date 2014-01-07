@@ -750,7 +750,7 @@
             this.dataRefreshButton.Text = "Refresh";
             this.dataRefreshButton.UseVisualStyleBackColor = true;
             this.dataRefreshButton.Visible = false;
-            this.dataRefreshButton.Click += new System.EventHandler(this.dataRefreshButton_Click);
+            //this.dataRefreshButton.Click += new System.EventHandler(this.dataRefreshButton_Click);
             // 
             // notesCreated
             // 
