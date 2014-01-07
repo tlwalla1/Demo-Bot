@@ -10,18 +10,11 @@ using System.Threading.Tasks;
 //Resources 9 and 10 are used for the task of creating the progress bar... nothing else.
 using System.Drawing;
 using System.Windows.Forms;
-using Sage.Platform.Configuration;
-using Sage.Platform.Data;
 using Sage.SData.Client.Atom;
 using Sage.SData.Client.Core;
 using Sage.SData.Client.Extensions;
 using Sage.SData.Client.Framework;
 using Sage.SData.Client.Metadata;
-using Sage.SalesLogix;
-using Sage.SalesLogix.Services;
-using Sage.SalesLogix.Web.SData;
-using ApplicationConetxt = Sage.Platform.Application.ApplicationContext;
-// Allows for communication with Google documents (ie. Google Spreadsheets)
 using Google.GData.Client;
 using Google.GData.Spreadsheets;
 // Allows for communication with Excel
@@ -53,6 +46,9 @@ namespace Demo_Bot
         System.Windows.Forms.Label ticketCreated;
         System.Windows.Forms.Label oppUpdated;
         System.Windows.Forms.Label leadPromoted;
+        SDataPayload activityPayload;
+        SDataPayload contactPayload;
+        SDataPayload actPayload;
         ComboBox roleSelector;
         bool activityCheckBox, noteCheckBox, completeActivityBox, leadCheckBox, accountCheckBox, contactCheckBox, oppCheckBox, ticketCheckBox, oppUpdateCheckBox, leadPromoteCheckBox;
         private bool stopCommand = false;
@@ -65,11 +61,14 @@ namespace Demo_Bot
         DateTime startWork, endWork;
         string language = "English";
         string fileName = "";
+        int dirty;
 
         public Bot(string address, string startWorking, string endWorking, string userID, string password, System.Windows.Forms.Label progressLab, System.Windows.Forms.Label activitiesCreate, System.Windows.Forms.Label notesCreate, System.Windows.Forms.Label activitiesComplete, System.Windows.Forms.Label leadCreate, System.Windows.Forms.Label accountCreate, System.Windows.Forms.Label contactCreate, System.Windows.Forms.Label oppCreate, System.Windows.Forms.Label ticketCreate, System.Windows.Forms.Label oppUpdate, System.Windows.Forms.Label leadPromote, System.Windows.Forms.Label role, decimal activityCompleteAm, ComboBox roleSelect, bool noteCheck, bool activityCheck, bool leadCheck, bool accountCheck, bool contactCheck, bool oppCheck, bool ticketCheck, bool oppUpdateCheck, bool actCompleteCheck, bool leadPromoteCheck, decimal reliabilityValue, string creationUpper)
         {
-            service = new SDataService("https://" + address + "/sdata/slx/system/-/") { UserName = userID, Password = password };
-            dynamic = new SDataService("https://" + address + "/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
+            service = new SDataService(address + "/sdata/slx/system/-/") { UserName = userID, Password = password };
+            dynamic = new SDataService(address + "/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
+            //service = new SDataService("http://localhost/sdata/slx/system/-/") { UserName = userID, Password = password };
+            //dynamic = new SDataService("http://localhost/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
             UserID = userID;
             Password = password;
             firstRun = true;
@@ -108,6 +107,7 @@ namespace Demo_Bot
             accountsCount = 0;
             contactsCount = 0;
             leadsPromotedCount = 0;
+            dirty = 0;
             if (creationUpper != "")
                 upperBoundMonth = Convert.ToInt32(creationUpper);
             else
@@ -127,13 +127,33 @@ namespace Demo_Bot
             if (UserID == "China")
                 language = "Chinese";
         }
-        
+
+        public Bot(string userID, string password, int reliable)
+        {
+            service = new SDataService("https://slx81.saleslogixcloud.com/sdata/slx/system/-/") { UserName = userID, Password = password };
+            dynamic = new SDataService("https://slx81.saleslogixcloud.com/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
+            startWork = Convert.ToDateTime("8:00 AM");
+            endWork = Convert.ToDateTime("5:00 PM");
+            UserID = userID;
+            Password = password;
+            firstRun = true;
+            activityCompleteAmount = 1;
+            reliability = reliable;
+            dirty = 0;
+            upperBoundMonth = 2;
+            //writer = new StreamWriter(@"C:\Swiftpage\" + UserID + DateTime.Now.Month + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute + ".txt");
+            fileName = @"C:\Swiftpage\" + UserID + DateTime.Now.Month + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute + ".txt";
+            // Change which user creates data in Chinese (Simplified) by adding '|| UserID == "user"' after current value, or merely replace 'China' with the desired user.
+            if (UserID == "China")
+                language = "Chinese";
+        }
+
         // Example site to view the templates for the different entries.
         // https://trinity.sagesaleslogixcloud.com/sdata/slx/dynamic/-/history/$template
 
         #region BotFunctions
         public virtual void Run()
-        {
+        { 
             bool ok = false;
             SDataUri Uri = new SDataUri(service.Url.ToString());
 
@@ -143,11 +163,30 @@ namespace Demo_Bot
                 try
                 {
                     // Simulates the Bot as only functioning during some typical work schedule. This schedule excludes any work off due to holidays and weekends...
-                    if (DateTime.Compare(DateTime.Now.ToUniversalTime(), startWork.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), endWork.ToUniversalTime()) <= 0)
+                    if ((DateTime.Now.Hour >= startWork.Hour) && (DateTime.Now.Hour <= endWork.Hour) && (int)DateTime.Now.DayOfWeek >=1 && (int)DateTime.Now.DayOfWeek <= 5)
                     {
+                        if (DateTime.Now.Hour == startWork.Hour)
+                        {
+                            if (DateTime.Now.Minute <= startWork.Minute)
+                                return;
+                        }
+                        if (DateTime.Now.Hour == endWork.Hour)
+                        {
+                            if (DateTime.Now.Hour >= endWork.Minute)
+                                return;
+                        }
                         // Checks to see if the bot was first commanded to run, if so demonstrates that it can connect to the server.
                         if (firstRun)
                         {
+                            try
+                            {
+                                Log("Logging at: " + DateTime.Now + "\n================================================================\n", fileName);
+                            }
+                            catch (Exception e)
+                            {
+                                System.IO.Directory.CreateDirectory(@"c:\Swiftpage");
+                                Log("Logging at: " + DateTime.Now + "\n================================================================\n", fileName);
+                            }
                             SetActivitiesCreated("0");
                             SetNotesCreated("0");
                             SetCompletedActivities("0");
@@ -158,10 +197,9 @@ namespace Demo_Bot
                             SetOppsUpdated("0");
                             SetTicketsCreated("0");
                             SetText("Progress:");
-                            role = "General";//getRole();
-                            SetRole(role);
+                            //role = "General";//getRole();
+                            //SetRole(role);
                             SetText("Connecting to server...");
-                            Log("Logging at: " + DateTime.Now + "\n================================================================\n", fileName);
                             SDataResponse response = request.GetResponse();
                             ok = (response.StatusCode == HttpStatusCode.OK);
                             if (ok == true)
@@ -177,8 +215,10 @@ namespace Demo_Bot
                                 this.stop();
                             }
                             firstRun = false;
+                            roleSetter(UserID);
                             // bool value runningHelper needed to clarify which UI label to change.
                             //runningHelper = false;
+                            /*
                             switch (role)
                             {
                                 case "General":
@@ -189,11 +229,12 @@ namespace Demo_Bot
                                     runGeneral();
                                     SetText("General role ran");
                                     break;
-                            }
+                            } */
                         }
                         else
                         {
                             //runningHelper = false;
+                            /*
                             switch (role)
                             {
                                 case "General":
@@ -205,6 +246,9 @@ namespace Demo_Bot
                                     SetText("General role ran...");
                                     break;
                             }
+                             */
+                            roleSetter(UserID);
+                            SetText("Done");
                             SetText("Waiting...");
                         }
                     }
@@ -404,122 +448,252 @@ namespace Demo_Bot
 
         // Below are the roles of the bot
         #region Roles
-        /*
-        private void runDataCreator()
+        // Go here to add names for which role each name will play.
+        private void roleSetter(string username)
         {
-            
-            double value = 4 * rand.NextDouble();
-            if (value < 1.5)
-                return;
-            if (value < 2.5)
+            switch (username.ToLower())
             {
-                SetText("Making activity");
-                makeActivity();
-                SetText("Activity created");
-                return;
-            }
-            if (value < 3.5)
-            {
-                SetText("Making note");
-                makeNote();
-                SetText("Note created");
-                return;
-            }
-            if (value < 4)
-            {
-                SetText("Making activity");
-                makeActivity();
-                SetText("Activity created");
-                SetText("Making note");
-                makeNote();
-                SetText("Note created");
-                return;
+                    // Sales
+                case "lee": case "derek": case "hans": case "manuel": case "cathy": case "dan": case "ed": case "john": case "lou":
+                case "linda": case "georgine": case "kim": case "rajeev":
+                    SetRole("Sales Rep");
+                    SetText("Running");
+                    runSalesRep();
+                    break;
+                    // Sales Management
+                case "pam": case "loup": case "ken": case "jean":
+                    SetRole("Sales Manager");
+                    runSalesManager();
+                    break;
+                    // Support
+                case "joan": case "robert": case "jay":
+                    SetRole("Support Rep");
+                    SetText("Running");
+                    runSupportRep();
+                    break;
+                    // Support Management
+                case "samantha":
+                    SetRole("Support Manager");
+                    SetText("Running");
+                    runSupportManager();
+                    break;
+                    // Marketing
+                case "larry":
+                    SetRole("Marketing Rep");
+                    SetText("Running");
+                    runMarketingRep();
+                    break;
+                    // Marketing Management
+                case "brian":
+                    SetRole("Marketing Manager");
+                    SetText("Running");
+                    runMarketingManager();
+                    break;
+                case "tom":
+                    SetRole("Lead Qual");
+                    SetText("Running");
+                    //makeAccountWithName("TestAccount2");
+                    leadQual();
+                    break;
+                case "barb": case "lois":
+                    SetRole("Lead Gen");
+                    SetText("Running");
+                    leadGen();
+                    break;
+                default:
+                    runGeneral();
+                    break;
             }
         }
 
-        private bool runTicketMaker()
+        private void runSalesRep()
         {
-            int choice = rand.Next(0, 100);
-            if (choice < 10)
-            {
-                makeTicket();
-                return true;
-            }
-            else
-                return false;
-        }
+            Random rand = new Random();
+            double tempReliability = reliability / 100;
+            double reliable = rand.NextDouble();
+            int choice = rand.Next(7);
 
-        private void runHelper()
-        {
-            runningHelper = true;
-            bool didRun = false;
-            SetText("Trying making a ticket");
-            didRun = runTicketMaker();
-            if (didRun)
-                SetText("Ticket created");
-            else
-                SetText("Did not create ticket");
-            SetText("Trying making a lead");
-            didRun = runLeadGenerator();
-            if (didRun)
-                SetText("Lead created");
-            else
-                SetText("Did not create lead");
-            SetText("Trying making an opportunity");
-            //didRun = runOpportunityGenerator();
-            if (didRun)
-                SetText("Opportunity created");
-            else
+            //int choice = 1;
+
+            if (reliable < tempReliability)
             {
-                SetText("Did not create opportunity");
-                int temp = 34;//rand.Next(0,100);
-                if (temp < 35)
+                switch (choice)
                 {
-                    SetText("Updating opportunity");
-                    updateOpportunity();
-                    SetText("Opportunity updated");
+                    case 1:
+                        makeNote();
+                        break;
+                    case 2:
+                        makeActivity();
+                        break;
+                    case 3:
+                        makeOpportunity();
+                        break;
+                    case 4:
+                        completeActivity();
+                        break;
+                    case 5:
+                        updateOpportunity();
+                        break;
+                    case 6:
+                        makeNote();
+                        completeActivity();
+                        break;
+
+                        // Won't go to case 8 until changed above...
+                    case 8:
+                        promoteLead();
+                        break;
                 }
             }
         }
 
-        private bool runLeadGenerator()
+        private void runSalesManager()
         {
-            makeContact();
-            promoteLead();
-            return true;
-            int choice = rand.Next(0, 100);
-            if (choice < 10)
+            double tempReliability = reliability / 100;
+            double reliable = rand.NextDouble();
+            int choice = rand.Next(1, 5);
+
+            if (reliable < tempReliability)
             {
-                makeLead();
-                return true;
+                switch (choice)
+                {
+                    case 1:
+                        makeNote();
+                        break;
+                    case 2:
+                        makeActivity();
+                        break;
+                    case 3:
+                        makeOpportunity();
+                        break;
+                    case 4:
+                        updateOpportunity();
+                        break;
+                    case 5:
+                        completeActivity();
+                        break;
+                    case 6:
+                        makeNote();
+                        completeActivity();
+                        break;
+                }
             }
-            else
-                return false; 
+
         }
 
-        private bool runOpportunityGenerator()
+        private void runSupportRep()
         {
-            //makeAccount();
-            //deleteContact();
-            //deleteActivity();
-            //deleteAccount();
-            deleteNote();
-            deleteTicket();
-            deleteLead();
-            deleteOpportunity();
-            return true;
-            
-            int choice = rand.Next(0, 100);
-            if (choice < 10)
+            double tempReliability = reliability / 100;
+            double reliable = rand.NextDouble();
+            int choice = rand.Next(1, 3);
+
+            if (reliable < tempReliability)
             {
-                makeOpportunity();
-                return true;
+                switch (choice)
+                {
+                    case 1:
+                        makeNote();
+                        break;
+                    case 2:
+                        makeActivity();
+                        break;
+                    case 3:
+                        makeTicket();
+                        break;
+                    // Won't go beyond case 3 until changed above...
+                    case 4:
+                        makeTicketActivity();
+                        break;
+                    case 5:
+                        completeTicketActivity();
+                        break;
+                    case 6:
+                        makeNote();
+                        completeTicketActivity();
+                        break;
+                }
             }
-            else
-                return false; 
-            
         }
-    */
+
+        private void runSupportManager()
+        {
+            double tempReliability = reliability / 100;
+            double reliable = rand.NextDouble();
+            int choice = rand.Next(1, 3);
+
+            if (reliable < tempReliability)
+            {
+                switch (choice)
+                {
+                    case 1:
+                        makeNote();
+                        break;
+                    case 2:
+                        makeActivity();
+                        break;
+                    case 3:
+                        makeTicket();
+                        break;
+                    // Won't go beyond case 3 until changed above...
+                    case 4:
+                        makeTicketActivity();
+                        break;
+                }
+            }
+        }
+
+        private void runMarketingRep()
+        {
+            double tempReliability = reliability / 100;
+            double reliable = rand.NextDouble();
+            int choice = rand.Next(1, 4);
+
+            if (reliable < tempReliability)
+            {
+                switch (choice)
+                {
+                    case 1:
+                        makeNote();
+                        break;
+                    case 2:
+                        makeActivity();
+                        break;
+                    case 3:
+                        makeCampaign();
+                        break;
+                    case 4:
+                        updateCampaign();
+                        break;
+                }
+            }
+        }
+
+        private void runMarketingManager()
+        {
+            double tempReliability = reliability / 100;
+            double reliable = rand.NextDouble();
+            int choice = rand.Next(1, 4);
+
+            if (reliable < tempReliability)
+            {
+                switch (choice)
+                {
+                    case 1:
+                        makeNote();
+                        break;
+                    case 2:
+                        makeActivity();
+                        break;
+                    case 3:
+                        makeCampaign();
+                        break;
+                    case 4:
+                        updateCampaign();
+                        break;
+                }
+            }
+        }
+
         private void runGeneral()
         {
             double tempReliability = reliability / 100;
@@ -533,7 +707,7 @@ namespace Demo_Bot
 
             reliable = rand.NextDouble();
             if (leadCheckBox == true && reliable < tempReliability)
-                makeLead();
+                promoteLead();//makeLead();
 
             reliable = rand.NextDouble();
             if (accountCheckBox == true && reliable < tempReliability)
@@ -545,7 +719,7 @@ namespace Demo_Bot
 
             reliable = rand.NextDouble();
             if (oppCheckBox == true && reliable < tempReliability)
-                makeOpportunity();
+                updateCampaign();//makeCampaign();//makeOpportunity();
 
             reliable = rand.NextDouble();
             if (completeActivityBox == true && reliable < tempReliability)
@@ -561,101 +735,187 @@ namespace Demo_Bot
 
             reliable = rand.NextDouble();
             if (ticketCheckBox == true && reliable < tempReliability)
-                makeTicket();
-
-
-            /*
-            // Previously used when was implementing 'Roles'
-            double value = 8 * rand.NextDouble();
-            if (value < 3.5)
-                return;
-            if (value < 4.75)
-            {
-                SetText("Making activity");
-                makeActivity();
-                SetText("Activity created");
-                return;
-            }
-            if (value < 6)
-            {
-                SetText("Making note");
-                makeNote();
-                SetText("Note created");
-                return;
-            }
-            if (value < 7.25)
-            {
-                SetText("Completing previous activities");
-                completeActivity();
-                SetText("Previous activities completed");
-                return;
-            }
-            if (value < 7.75)
-            {
-                SetText("Making activity");
-                makeActivity();
-                SetText("Activity created");
-                SetText("Making note");
-                makeNote();
-                SetText("Note created");
-                return;
-            }
-            if (value < 8.25)
-            {
-                SetText("Making activity");
-                makeActivity();
-                SetText("Activity created");
-                SetText("Completing previous activities");
-                completeActivity();
-                SetText("Previous activities completed");
-                return;
-            }
-            if (value < 8.75)
-            {
-                SetText("Making note");
-                makeNote();
-                SetText("Note created");
-                SetText("Completing previous activities");
-                completeActivity();
-                SetText("Previous activities completed");
-                return;
-            }
-            if (value < 9)
-            {
-                SetText("Making activity");
-                makeActivity();
-                SetText("Activity created");
-                SetText("Making note");
-                makeNote();
-                SetText("Note created");
-                SetText("Completing previous activities");
-                completeActivity();
-                SetText("Previous activities completed");
-                return;
-            }
-            */
+                updateTicket();//makeTicket();
         }
 
-        public string roleSetter()
+        private void fieldRep()
         {
-            string role = "";
-            
-            double value = 4 * rand.NextDouble();
-            if (value >= 3)
-                role = "Data Creator";
-            else
+            // Run update opportunity. Also include random event to create activity and complete it, such as phone call, and ability to do notes.
+            int choice = rand.Next(4);
+            SDataPayload activityPayload = null;
+            switch (choice)
             {
-                if (value >= 2)
-                    role = "Helper";
-                else
-                {
-                    if (value >= 1)
-                        role = "Lead Generator";
-                    else
-                        role = "General";
-                }
+                case 0:
+                    updateOpportunity();
+                    break;
+                case 1:
+                    makeActivity();
+                    break;
+                case 2:
+                    makeActivity();
+                    makeNote();
+                    break;
+                case 3:
+                    completeActivity();
+                    makeNote();
+                    break;
+                default:
+                    completeActivity();
+                    makeNote();
+                    break;
             }
-            return role;
+        }
+
+        private void leadQual()
+        {
+            // Runs update lead. Include random chance to write note about current stage
+            switch (dirty)
+            {
+                case 0:
+                    SDataPayload leadPayload = null;
+                    do
+                    {
+                         leadPayload = fetchLead().GetSDataPayload();
+                    } while (leadPayload.Values["Company"]== null);
+                    int choice = rand.Next(1, 3);
+                    switch (choice)
+                    {
+                        case 1:
+                            makeNoteLead("Lead",leadPayload, "Follow-Up");
+                            dirty = 0;
+                            break;
+                        case 2:
+                            string action = "";
+                            int pick = rand.Next(1,3);
+                            if (pick == 1)
+                                action = "Appointment";
+                            if (pick == 2)
+                                action = "PhoneCall";
+                            activityPayload = makeActivityLead("Lead",leadPayload, action);
+                            dirty = 1;
+                            break;
+                        case 3:
+                            activityPayload = makeActivityLead("Lead",leadPayload, "ColdCall");
+                            dirty = 1;
+                            break;
+                        default:
+                            makeNoteLead("Lead",leadPayload, "Follow-Up");
+                            dirty = 0;
+                            break;
+                    }
+                    break;
+                case 1:
+                    int choice2 = rand.Next(1, 3);
+                    switch (choice2)
+                    {
+                        case 1:
+                            completeSpecificActivity(activityPayload);
+                            dirty = 2;
+                            break;
+                        case 2:
+                            completeSpecificActivity(activityPayload);
+                            string action = "";
+                            if (string.Compare((string)activityPayload.Values["Type"], "atAppointment") == 0)
+                                action = "Appointment";
+                            if (string.Compare((string)activityPayload.Values["Type"], "atPhoneCall") == 0)
+                                action = "PhoneCall";
+                            makeNoteLead("Activity",activityPayload, action);
+                            dirty = 2;
+                            break;
+                        case 3:
+                            completeSpecificActivity(activityPayload);
+                            makeNoteLead("Activity",activityPayload, "NewActivity");
+                            dirty = 0;
+                            break;
+                        default:
+                            completeSpecificActivity(activityPayload);
+                            string action2 = "";
+                            if (string.Compare((string)activityPayload.Values["Type"], "atAppointment") == 0)
+                                action = "Appointment";
+                            if (string.Compare((string)activityPayload.Values["Type"], "atPhoneCall") == 0)
+                                action = "PhoneCall";
+                            makeNoteLead("Activity",activityPayload, action2);
+                            dirty = 2;
+                            break;
+                        }
+                         break;
+                case 2:
+                    // Convert lead to contact
+                         var leadId = activityPayload.Values["LeadId"];
+                        // Get the lead payload then call makeContactWithName(leadPayload)
+                         SDataPayload conversionPayload = null;
+                         try
+                         {
+                             SDataResourceCollectionRequest leads = new SDataResourceCollectionRequest(dynamic)
+                             {
+                                 ResourceKind = "leads"
+                             };
+
+                             var feed2 = leads.Read();
+                             int count = feed2.Entries.Count();
+                             if (count != 0)
+                             {
+                                 int i = rand.Next(count);
+                                 conversionPayload = feed2.Entries.ElementAt(i).GetSDataPayload();
+                             }
+                         }
+                         catch (Exception e)
+                         {
+                             Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                             //SetText("Connection to server lost... Please check your connection");
+                             //this.stop();
+                         }
+                         contactPayload = makeContactWithName(conversionPayload);
+                    // Delete the current lead
+                         deleteSpecificLead(conversionPayload);
+                         dirty = 3;
+                         break;
+                case 3:
+                    //Schedule a follow-up and make a note or just create an opportunity
+                         int random = rand.Next(2);
+                         if (random == 0)
+                         {
+                             makeActivityLead("Contact", contactPayload, "Follow-Up");
+                             dirty = 4;
+                         }
+                         if (random == 1)
+                         {
+                             makeActivityLead("Contact", contactPayload, "Follow-Up");
+                             makeNoteLead("Contact", contactPayload, "Follow-Up");
+                             dirty = 4;
+                         }
+                         break;
+                case 4:
+                         makeOpportunityFor(actPayload);
+                         dirty = 0;
+                         break;
+             }
+
+        }
+
+        private void leadGen()
+        {
+            // Runs the makelead. Creates the first activity for the lead.
+            SDataPayload leadPayload = null;
+            if (dirty == 0)
+            {
+                leadPayload = makeLead();
+                dirty = 1;
+            }
+            if (dirty == 1 && leadPayload != null)
+            {
+                makeActivityLead("Lead",leadPayload, "Follow-Up");
+                dirty = 0;
+            }
+            if (leadPayload == null)
+            {
+                dirty = 0;
+            }
+        }
+
+        private void marketingRep()
+        {
+
         }
         #endregion
 
@@ -796,7 +1056,7 @@ namespace Demo_Bot
             }
             catch (Exception e)
             {
-                Log(e.ToString(),fileName);;
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
 
         }
@@ -818,7 +1078,7 @@ namespace Demo_Bot
                 };
                 var rawr = getAccount.Read();
                 SDataPayload accountPayload = rawr.GetSDataPayload();
-                string notes = randomNoteGenerator(category, accountPayload, description);
+                string notes = randomNoteGenerator(category, accountPayload.Values["AccountName"].ToString(), description);
 
                 int accId = rand.Next(2000);
 
@@ -872,7 +1132,7 @@ namespace Demo_Bot
             }
             catch (Exception e)
             {
-                Log(e.ToString(),fileName);;
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
         }
 
@@ -987,7 +1247,7 @@ namespace Demo_Bot
             }
             catch (Exception e)
             {
-                Log(e.ToString(),fileName);;
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
                 
         }
@@ -1015,7 +1275,7 @@ namespace Demo_Bot
                 };
                 var rawr = getAccount.Read();
                 SDataPayload accountPayload = rawr.GetSDataPayload();
-                string notes = randomNoteGenerator(temp, accountPayload, description);
+                string notes = randomNoteGenerator(temp, accountPayload.Values["AccountName"].ToString(), description);
                 DateTime alarm = startTime.AddMinutes(-15);
                 DateTime duration;
 
@@ -1057,7 +1317,7 @@ namespace Demo_Bot
             }
             catch (Exception e)
             {
-                Log(e.ToString(),fileName);;
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
         }
 
@@ -1380,7 +1640,7 @@ namespace Demo_Bot
             }
             catch (Exception e)
             {
-                Log(e.ToString(),fileName);;
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
 
             tempEntry.SetSDataPayload(payload);
@@ -1489,7 +1749,7 @@ namespace Demo_Bot
                             }
                             catch (Exception e)
                             {
-                                Log(e.ToString(),fileName);;
+                                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
                             }
                         }
                     }
@@ -1749,7 +2009,7 @@ namespace Demo_Bot
                 Debug.WriteLine("Deleted: " + name);
             }
             catch (Exception e) {
-                Log(e.ToString(),fileName);; 
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName); 
             }
         }
 
@@ -1777,7 +2037,40 @@ namespace Demo_Bot
                 Debug.WriteLine("Deleted: " + accountName);
             }
             catch (Exception e) {
-                Log(e.ToString(),fileName); 
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName); 
+            }
+        }
+
+        // Functional
+        public void deleteSpecificAccount(SDataPayload accountPayload)
+        {
+            Guid guid = Guid.NewGuid();
+            float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+            SDataTemplateResourceRequest accountTemplate = new SDataTemplateResourceRequest(dynamic)
+            {
+                ResourceKind = "accounts"
+            };
+            var entry = accountTemplate.Read();
+            entry.SetSDataPayload(accountPayload);
+            var accountName = accountPayload.Values["AccountName"];
+            
+
+            SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
+            {
+                ResourceKind = "accounts",
+                Entry = entry
+            };
+            try
+            {
+                request.Delete();
+                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Delete | Account | " + accountName + " | " + timed, fileName);
+                Debug.WriteLine("Deleted: " + accountName);
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
         }
 
@@ -1806,7 +2099,7 @@ namespace Demo_Bot
                 Debug.WriteLine("Deleted: " + activity + " " + startDate);
             }
             catch (Exception e) { 
-                Log(e.ToString(),fileName);
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
         }
 
@@ -1834,7 +2127,7 @@ namespace Demo_Bot
                 Debug.WriteLine("Deleted: " + note);
             }
             catch (Exception e) { 
-                Log(e.ToString(),fileName); 
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName); 
             }
         }
 
@@ -1862,7 +2155,38 @@ namespace Demo_Bot
                 Debug.WriteLine("Deleted: " + lead);
             }
             catch (Exception e) { 
-                Log(e.ToString(),fileName);
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+            }
+        }
+
+        public void deleteSpecificLead(SDataPayload leadPayload)
+        {
+            Guid guid = Guid.NewGuid();
+            float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+            SDataTemplateResourceRequest leadTemplate = new SDataTemplateResourceRequest(dynamic)
+            {
+                ResourceKind = "leads"
+            };
+            var entry = leadTemplate.Read();
+            entry.SetSDataPayload(leadPayload);
+            var lead = leadPayload.Values["LeadFullName"];
+
+            SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
+            {
+                ResourceKind = "leads",
+                Entry = entry
+            };
+            try
+            {
+                request.Delete();
+                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Delete | Lead | " + lead + " | " + timed, fileName);
+                Debug.WriteLine("Deleted: " + lead);
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
         }
 
@@ -1890,7 +2214,7 @@ namespace Demo_Bot
                 Debug.WriteLine("Deleted: " + opportunity);
             }
             catch (Exception e) { 
-                Log(e.ToString(),fileName);
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
         }
 
@@ -1918,7 +2242,7 @@ namespace Demo_Bot
                 Debug.WriteLine("Deleted: " + ticket);
             }
             catch (Exception e) { 
-                Log(e.ToString(),fileName);
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
         }
 
@@ -1929,6 +2253,7 @@ namespace Demo_Bot
         // Functions that create entries into the database.
         public void makeNote()
         {
+            Guid guid = Guid.NewGuid();
             try
             {
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
@@ -1939,22 +2264,29 @@ namespace Demo_Bot
                 string description = localize(language, "Description Generator", null, category, null, true);
                 SDataPayload accountPayload = null;
                 int i = 0;
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 do
                 {
                     accountPayload = fetchAccount();
                     i++;
                 } while (accountPayload == null && i < 50);
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Account |  | " + tempTime, fileName);
+
 
                 if (i == 50)
                     return;
 
                 string notes = localize(language, "Note Generator", accountPayload, category, description, true);
-                
-                int accId = rand.Next(2000);
 
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataTemplateResourceRequest noteHistoryTemplate = new SDataTemplateResourceRequest(dynamic);
                 noteHistoryTemplate.ResourceKind = "history";
                 Sage.SData.Client.Atom.AtomEntry tempEntry = noteHistoryTemplate.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | History Template |  | " + tempTime, fileName);
 
                 SDataPayload payload = tempEntry.GetSDataPayload();
                 payload.Values["Type"] = type;
@@ -1968,20 +2300,20 @@ namespace Demo_Bot
                 // Checks if there is an associated contact with the account.
                 if (accountPayload.Values["Contacts"] != null)
                 {
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                     SDataResourceCollectionRequest contact = new SDataResourceCollectionRequest(dynamic)
                     {
                         ResourceKind = "contacts",
                         QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
                     };
                     var feed = contact.Read();
+                    tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    tempTime = (tempAfter - tempPre) / 1000;
+                    Log(DateTime.Now + " | " + guid + " | Get | Contact |  | " + tempTime, fileName);
                     SDataPayload contactPayload = null;
                     if (feed.Entries.Count() != 0)
                     {
-                        foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
-                        {
-                            contactPayload = entry.GetSDataPayload();
-                            break;
-                        }
+                        contactPayload = feed.Entries.ElementAt(0).GetSDataPayload();
                         payload.Values["ContactName"] = contactPayload.Values["Name"];
                         payload.Values["ContactId"] = contactPayload.Key;
                     }
@@ -1990,20 +2322,20 @@ namespace Demo_Bot
                 // Checks if there is an associated opportunity with the account, similar to how the contact was found.
                 if (accountPayload.Values["Opportunities"] != null)
                 {
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                     SDataResourceCollectionRequest opp = new SDataResourceCollectionRequest(dynamic)
                     {
                         ResourceKind = "opportunities",
                         QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
                     };
                     var feed = opp.Read();
+                    tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    tempTime = (tempAfter - tempPre) / 1000;
+                    Log(DateTime.Now + " | " + guid + " | Get | Opportunity |  | " + tempTime, fileName);
                     SDataPayload oppPayload = null;
                     if (feed.Entries.Count() != 0)
                     {
-                        foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
-                        {
-                            oppPayload = entry.GetSDataPayload();
-                            break;
-                        }
+                        oppPayload = feed.Entries.ElementAt(0).GetSDataPayload();
                         payload.Values["OpportunityName"] = oppPayload.Values["Description"];
                         payload.Values["OpportunityId"] = oppPayload.Key;
                     }
@@ -2012,20 +2344,20 @@ namespace Demo_Bot
                 // Checks if there is an associated ticket with the account, similar to how the contact was found.
                 if (accountPayload.Values["Tickets"] != null)
                 {
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                     SDataResourceCollectionRequest tick = new SDataResourceCollectionRequest(dynamic)
                     {
                         ResourceKind = "tickets",
                         QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
                     };
                     var feed = tick.Read();
+                    tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    tempTime = (tempAfter - tempPre) / 1000;
+                    Log(DateTime.Now + " | " + guid + " | Get | Opportunity |  | " + tempTime, fileName);
                     SDataPayload ticketPayload = null;
                     if (feed.Entries.Count() != 0)
                     {
-                        foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
-                        {
-                            ticketPayload = entry.GetSDataPayload();
-                            break;
-                        }
+                        ticketPayload = feed.Entries.ElementAt(0).GetSDataPayload();
                         payload.Values["TicketNumber"] = ticketPayload.Values["TicketNumber"];
                         payload.Values["TicketId"] = ticketPayload.Key;
                     }
@@ -2038,17 +2370,20 @@ namespace Demo_Bot
                     ResourceKind = "history",
                     Entry = tempEntry
                 };
-
-                request.Create();
+                float requestPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var response = request.Create();
+                SDataPayload responsePayload = response.GetSDataPayload();
                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float timed = (after - previous) / 1000;
+                float requestTime = (after - requestPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Note | " + payload.Values["Description"] + " | " + requestTime, fileName);
+                Log(DateTime.Now + " | " + guid + " | Total | Note | " + payload.Values["Description"] + " | " + timed, fileName);
                 notesCount++;
                 SetNotesCreated(notesCount.ToString());
-                Log(DateTime.Now + " - Created Note: " + payload.Values["Description"] + " - " + timed + " seconds", fileName);
             }
             catch (Exception e)
             {
-                Log(e.ToString(),fileName);;
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
 
         }
@@ -2058,26 +2393,33 @@ namespace Demo_Bot
         {
             try
             {
+                Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 // Initializing the variables used to populate the payload. Each variable gets a value using a random value generator as defined below the creation functions.
                 string type = "atNote";
                 string category = "Note";
                 string description = localize(language, "Description Generator", null, category, null, true);
                 SDataPayload key = (SDataPayload)opportunityPayload.Values["Account"];
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataSingleResourceRequest getAccount = new SDataSingleResourceRequest(dynamic)
                 {
                     ResourceKind = "accounts",
                     ResourceSelector = "'" + key.Key + "'"
                 };
                 var rawr = getAccount.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Account |  | " + tempTime, fileName);
                 SDataPayload accountPayload = rawr.GetSDataPayload();
                 string notes = localize(language, "Note Generator", accountPayload, category, description, true);
 
-                int accId = rand.Next(2000);
-
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataTemplateResourceRequest noteHistoryTemplate = new SDataTemplateResourceRequest(dynamic);
                 noteHistoryTemplate.ResourceKind = "history";
                 Sage.SData.Client.Atom.AtomEntry tempEntry = noteHistoryTemplate.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | History Template |  | " + tempTime, fileName);
 
                 SDataPayload payload = tempEntry.GetSDataPayload();
                 payload.Values["OpportunityName"] = opportunityPayload.Values["Description"];
@@ -2093,11 +2435,15 @@ namespace Demo_Bot
                 payload.Values["CompletedDate"] = DateTime.Now.ToUniversalTime();
                 if (accountPayload.Values["Contacts"] != null)
                 {
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                     SDataResourceCollectionRequest contact = new SDataResourceCollectionRequest(dynamic)
                     {
                         ResourceKind = "contacts",
                         QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
                     };
+                    tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    tempTime = (tempAfter - tempPre) / 1000;
+                    Log(DateTime.Now + " | " + guid + " | Get | Contact |  | " + tempTime, fileName);
                     var feed = contact.Read();
                     SDataPayload contactPayload = null;
                     if (feed.Entries.Count() != 0)
@@ -2117,17 +2463,92 @@ namespace Demo_Bot
                     ResourceKind = "history",
                     Entry = tempEntry
                 };
-
+                float requestPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 request.Create();
                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float requestTime = (after - previous) / 1000;
                 float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Note |  | " + requestTime, fileName);
+                Log(DateTime.Now + " | " + guid + " | Total | Note | " + payload.Values["Description"] + " | " + timed, fileName);
                 notesCount++;
                 SetNotesCreated(notesCount.ToString());
-                Log(DateTime.Now + " - Created Note: " + payload.Values["Description"] + " - " + timed + " seconds", fileName);
+                
             }
             catch (Exception e)
             {
-                Log(e.ToString(),fileName);;
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+            }
+        }
+
+        public void makeNoteLead(string value, SDataPayload leadPayload, string action)
+        { // Value is either Lead or Contact
+            // Make a note about the lead after making the lead
+            try
+            {
+                Guid guid = Guid.NewGuid();
+                float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                // Initializing the variables used to populate the payload. Each variable gets a value using a random value generator as defined below the creation functions.
+                string type = "atNote";
+                string category = "Note";
+                string description = localize(language, "Description Generator", null, category, null, true);
+                string notes = randomNoteforLeadGenerator(value,leadPayload, action);
+
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                SDataTemplateResourceRequest noteHistoryTemplate = new SDataTemplateResourceRequest(dynamic);
+                noteHistoryTemplate.ResourceKind = "history";
+                Sage.SData.Client.Atom.AtomEntry tempEntry = noteHistoryTemplate.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | History Template |  | " + tempTime, fileName);
+
+                SDataPayload payload = tempEntry.GetSDataPayload();
+                payload.Values["Type"] = type;
+                payload.Values["Category"] = category;
+                payload.Values["Description"] = description;
+                payload.Values["Notes"] = notes;
+                payload.Values["LongNotes"] = notes;
+                payload.Values["StartDate"] = DateTimeOffset.Now.ToUniversalTime();
+                payload.Values["CompletedDate"] = DateTime.Now.ToUniversalTime();
+                if (string.Compare("Lead", value) == 0)
+                {
+                    payload.Values["AccountName"] = leadPayload.Values["Company"];
+                    payload.Values["LeadName"] = leadPayload.Values["FirstName"] + " " + leadPayload.Values["LastName"];
+                    payload.Values["LeadId"] = leadPayload.Key;
+                }
+                if (string.Compare("Activity", value) == 0)
+                {
+                    payload.Values["AccountName"] = leadPayload.Values["AccountName"];
+                    payload.Values["AccountId"] = leadPayload.Values["AccountId"];
+                    payload.Values["LeadName"] = leadPayload.Values["LeadName"];
+                    payload.Values["LeadId"] = leadPayload.Values["LeadId"];
+                }
+                if (string.Compare("Contact", value) == 0)
+                {
+                    SDataPayload temp = (SDataPayload)leadPayload.Values["Account"];
+                    payload.Values["AccountName"] = leadPayload.Values["AccountName"];
+                    payload.Values["AccountId"] = temp.Key;
+                    payload.Values["ContactName"] = leadPayload.Values["Name"];
+                    payload.Values["ContactId"] = leadPayload.Key;
+                }
+
+                SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
+                {
+                    ResourceKind = "history",
+                    Entry = tempEntry
+                };
+                float requestPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                request.Create();
+                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float requestTime = (after - previous) / 1000;
+                float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Note |  | " + requestTime, fileName);
+                notesCount++;
+                SetNotesCreated(notesCount.ToString());
+                Log(DateTime.Now + " | " + guid + " | Total | Note | " + payload.Values["Description"] + " | " + timed, fileName);
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
         }
                 
@@ -2136,6 +2557,7 @@ namespace Demo_Bot
         {
             try
             {
+                Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 // Initializing the variables used to populate the payload. Each variable gets a value using a random value
                 // generator as defined below the creation functions.
@@ -2148,76 +2570,89 @@ namespace Demo_Bot
                 string priority = localize(language, "Priority Generator", null, null, null, true);
                 SDataPayload accountPayload = null;
                 int i = 0;
+
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 do
                 {
                     accountPayload = fetchAccount();
                     i++;
                 } while (accountPayload == null && i < 50);
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Account |  | " + tempTime, fileName);
 
                 if (i == 50)
                     return;
 
-                string notes = randomNoteGenerator(temp, accountPayload, description);
+                string notes = randomNoteGenerator(temp, accountPayload.Values["AccountName"].ToString(), description);
                 DateTime alarm = startTime.AddMinutes(-15);
 
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataTemplateResourceRequest activityTemplate = new SDataTemplateResourceRequest(service);
                 activityTemplate.ResourceKind = "activities";
                 Sage.SData.Client.Atom.AtomEntry tempEntry = activityTemplate.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Activity Template |  | " + tempTime, fileName);
 
                 SDataPayload payload = tempEntry.GetSDataPayload();
 
                 payload.Values["Type"] = type;
                 payload.Values["Category"] = category;
-                // Get the program to query the server for the contact name, account name, and retrieve the respective ids for each.
-                payload.Values["AccountName"] = accountPayload.Values["AccountName"];
-                payload.Values["AccountId"] = accountPayload.Key;
-                // Checks to make sure there is a contact associated with the account, and if so calls a request to get the payload
-                // associated to that contact; then filling in payload.Values
-                if (accountPayload.Values["Contacts"] != null)
-                {
-                    SDataResourceCollectionRequest contact = new SDataResourceCollectionRequest(dynamic)
-                    {
-                        ResourceKind = "contacts",
-                        QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
-                    };
-                    var feed = contact.Read();
-                    SDataPayload contactPayload = null;
-                    if (feed.Entries.Count() != 0)
-                    {
-                        foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
-                        {
-                            contactPayload = entry.GetSDataPayload();
-                            break;
-                        }
-                        payload.Values["ContactName"] = contactPayload.Values["Name"];
-                        payload.Values["ContactId"] = contactPayload.Key;
-                    }
-                }
+                
+                
 
                 if (temp != "Personal")
                 {
+                    // Get the program to query the server for the contact name, account name, and retrieve the respective ids for each.
+                    payload.Values["AccountName"] = accountPayload.Values["AccountName"];
+                    payload.Values["AccountId"] = accountPayload.Key;
+                    // Checks to make sure there is a contact associated with the account, and if so calls a request to get the payload
+                    // associated to that contact; then filling in payload.Values
+                    if (accountPayload.Values["Contacts"] != null)
+                    {
+                        tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                        SDataResourceCollectionRequest contact = new SDataResourceCollectionRequest(dynamic)
+                        {
+                            ResourceKind = "contacts",
+                            QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
+                        };
+                        var feed = contact.Read();
+                        tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                        tempTime = (tempAfter - tempPre) / 1000;
+                        Log(DateTime.Now + " | " + guid + " | Get | Contact |  | " + tempTime, fileName);
+                        SDataPayload contactPayload = null;
+                        if (feed.Entries.Count() != 0)
+                        {
+                            contactPayload = feed.Entries.ElementAt(0).GetSDataPayload();
+                            payload.Values["ContactName"] = contactPayload.Values["Name"];
+                            payload.Values["ContactId"] = contactPayload.Key;
+                        }
+                    }
+
                     // Checks if there is an associated opportunity with the account, similar to how the contact was found.
                     if (accountPayload.Values["Opportunities"] != null)
                     {
+                        tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                         SDataResourceCollectionRequest opp = new SDataResourceCollectionRequest(dynamic)
                         {
                             ResourceKind = "opportunities",
                             QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
                         };
-                        var feed = opp.Read();
+                        var feed2 = opp.Read();
+                        tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                        tempTime = (tempAfter - tempPre) / 1000;
+                        Log(DateTime.Now + " | " + guid + " | Get | Opportunity |  | " + tempTime, fileName);
                         SDataPayload oppPayload = null;
-                        if (feed.Entries.Count() != 0)
+                        if (feed2.Entries.Count() != 0)
                         {
-                            foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
-                            {
-                                oppPayload = entry.GetSDataPayload();
-                                break;
-                            }
+                            oppPayload = feed2.Entries.ElementAt(0).GetSDataPayload();
                             payload.Values["OpportunityName"] = oppPayload.Values["Description"];
                             payload.Values["OpportunityId"] = oppPayload.Key;
                         }
                     }
-
+                    
+                    /*
                     // Checks if there is an associated ticket with the account, similar to how the contact was found.
                     if (accountPayload.Values["Tickets"] != null)
                     {
@@ -2239,14 +2674,17 @@ namespace Demo_Bot
                             payload.Values["TicketId"] = ticketPayload.Key;
                         }
                     }
+                     * */
+
+                    payload.Values["Location"] = location;
+                    payload.Values["Priority"] = priority;
+                    payload.Values["LongNotes"] = notes;
+                    payload.Values["Notes"] = notes;
+                    payload.Values["AlarmTime"] = alarm;
                 }
                 payload.Values["Description"] = description;
                 payload.Values["StartDate"] = startTime;
-                payload.Values["Location"] = location;
-                payload.Values["Priority"] = priority;
-                payload.Values["LongNotes"] = notes;
-                payload.Values["Notes"] = notes;
-                payload.Values["AlarmTime"] = alarm;
+                
 
                 tempEntry.SetSDataPayload(payload);
 
@@ -2257,18 +2695,85 @@ namespace Demo_Bot
                 };
 
                 //Creating the entry...
+                float requestPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 request.Create();
                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float requestTime = (after - requestPre) / 1000;
                 float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Activity | " + payload.Values["Description"] + " | " + requestTime, fileName);
                 activitiesCount++;
                 SetActivitiesCreated(activitiesCount.ToString());
-                Log(DateTime.Now + " - Created Activity: " + payload.Values["Type"] + " - " + timed + " seconds", fileName);
+                Log(DateTime.Now + " | " + guid + " | Total | Activity | " + payload.Values["Description"] + " | " + timed, fileName);
             }
             catch (Exception e)
             {
-                Log(e.ToString(),fileName);;
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
    
+        }
+
+        // Test Functionality... in development
+        public void makeTicketActivity()
+        {
+            try
+            {
+                Guid guid = Guid.NewGuid();
+                float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+
+                // Get the ticket payload, item payload, and rate payload
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                SDataPayload ticketPayload = fetchTicket();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Ticket |  | " + tempTime, fileName);
+                SDataPayload ratePayload = fetchTicketActivityRate();
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempPre - tempAfter) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | TicketActivityRate |  | " + tempTime, fileName);
+                SDataPayload itemPayload = fetchTicketActivityItem();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | TicketActivityItem |  | " + tempTime, fileName);
+
+                // Add activity to the ticket 
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                SDataTemplateResourceRequest ticketActivityTemplate = new SDataTemplateResourceRequest(dynamic);
+                ticketActivityTemplate.ResourceKind = "ticketActivities";
+                Sage.SData.Client.Atom.AtomEntry tempEntry = ticketActivityTemplate.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | TicketActivityItem |  | " + tempTime, fileName);
+                SDataPayload payload = tempEntry.GetSDataPayload();
+
+                //payload.Values["ActivityTypeCode"] = ratePayload.Values["RateTypeCode"];
+                payload.Values["Ticket"] = ticketPayload.Key;
+                payload.Values["CreateDate"] = DateTime.Now;
+                payload.Values["DateDue"] = DateTime.Now.AddDays(rand.Next(1, 100));
+                //payload.Values["RateTypeDescription"] = ratePayload.Key;
+                //payload.Values["Items"] = itemPayload.Key;
+                payload.Values["ActivityDescription"] = "Tech problems impeding work";
+
+                tempEntry.SetSDataPayload(payload);
+
+                // Maybe AddTicketActivity service request
+                SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
+                {
+                    ResourceKind = "ticketActivities",
+                    Entry = tempEntry
+                };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var response = request.Create();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | TicketActivity |  | " + tempTime, fileName);
+                Log(DateTime.Now + " | " + guid + " | Total | TicketActivity | " + payload.Values["ActivityDescription"] + " | " + timed, fileName);
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+            }
         }
 
         // Functional
@@ -2276,6 +2781,7 @@ namespace Demo_Bot
         {
             try
             {
+                Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 // Initializing the variables used to populate the payload. Each variable gets a value using a random value generator as defined below the creation functions.
                 string temp = localize(language, "Type Generator", null, null, null, true);
@@ -2286,20 +2792,28 @@ namespace Demo_Bot
                 DateTime startTime = randomDateGenerator();
                 string priority = localize(language, "Priority Generator", null, null, null, true);
                 SDataPayload key = (SDataPayload)opportunityPayload.Values["Account"];
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataSingleResourceRequest getAccount = new SDataSingleResourceRequest(dynamic)
                 {
                     ResourceKind = "accounts",
                     ResourceSelector = "'" + key.Key + "'"
                 };
                 var rawr = getAccount.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Account |  | " + tempTime, fileName);
                 SDataPayload accountPayload = rawr.GetSDataPayload();
-                string notes = randomNoteGenerator(temp, accountPayload, description);
+                string notes = randomNoteGenerator(temp, accountPayload.Values["AccountName"].ToString(), description);
                 DateTime alarm = startTime.AddMinutes(-15);
                 DateTime duration;
 
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataTemplateResourceRequest activityTemplate = new SDataTemplateResourceRequest(service);
                 activityTemplate.ResourceKind = "activities";
                 Sage.SData.Client.Atom.AtomEntry tempEntry = activityTemplate.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Activity Template |  | " + tempTime, fileName);
 
                 SDataPayload payload = tempEntry.GetSDataPayload();
 
@@ -2327,19 +2841,112 @@ namespace Demo_Bot
                     ResourceKind = "activities",
                     Entry = tempEntry
                 };
-
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 //Creating the entry...
                 request.Create();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Activity |  | " + tempTime, fileName);
+                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Total | Activity | " + payload.Values["Type"] + " | " + timed, fileName);
+                activitiesCount++;
+                SetActivitiesCreated(activitiesCount.ToString());
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+            }
+        }
+
+        public SDataPayload makeActivityLead(string value, SDataPayload thePayload, string action)
+        {
+            SDataPayload activityPayload = null;
+            // Make an activity about the lead after making the lead
+            try
+            {
+                Guid guid = Guid.NewGuid();
+                float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                // Initializing the variables used to populate the payload. Each variable gets a value using a random value generator as defined below the creation functions.
+                string temp;
+                if (action != "Follow-Up")
+                {
+                    temp = leadTypeGenerator();
+                }
+                else
+                {
+                    temp = "PhoneCall";
+                }
+                string category = leadCategoryGenerator(action);
+                string description = leadDescriptionGenerator(action);
+                string type = "at" + temp;
+                string location = localize(language, "Location Generator", null, temp, null, true);
+                DateTime startTime = randomDateGenerator();
+                string priority = localize(language, "Priority Generator", null, null, null, true);
+                string notes = randomNoteforLeadGenerator(value, thePayload, action);
+                DateTime alarm = startTime.AddMinutes(-15);
+                DateTime duration;
+
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                SDataTemplateResourceRequest activityTemplate = new SDataTemplateResourceRequest(service);
+                activityTemplate.ResourceKind = "activities";
+                Sage.SData.Client.Atom.AtomEntry tempEntry = activityTemplate.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Activity Template |  | " + tempTime, fileName);
+
+                SDataPayload payload = tempEntry.GetSDataPayload();
+
+                payload.Values["Type"] = type;
+                payload.Values["Category"] = category;
+                // Get the program to query the server for the contact name, account name, and retrieve the respective ids for each.
+                payload.Values["Description"] = description;
+                //payload.Values["Duration"] = "15 minutes";
+                payload.Values["StartDate"] = startTime;
+                payload.Values["Location"] = location;
+                payload.Values["Priority"] = priority;
+                payload.Values["LongNotes"] = notes;
+                payload.Values["Notes"] = notes;
+                payload.Values["AlarmTime"] = alarm;
+                if (string.Compare(value, "Lead") == 0)
+                {
+                    payload.Values["LeadName"] = thePayload.Values["FirstName"] + " " + thePayload.Values["LastName"];
+                    payload.Values["LeadId"] = thePayload.Key;
+                    payload.Values["AccountName"] = thePayload.Values["Company"];
+                }
+                if (string.Compare(value, "Contact") == 0)
+                {
+                    payload.Values["ContactName"] = thePayload.Values["Name"];
+                    payload.Values["ContactId"] = thePayload.Key;
+                    payload.Values["AccountName"] = thePayload.Values["AccountName"];
+                }
+
+
+                tempEntry.SetSDataPayload(payload);
+
+                SDataSingleResourceRequest request = new SDataSingleResourceRequest(service)
+                {
+                    ResourceKind = "activities",
+                    Entry = tempEntry
+                };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                //Creating the entry...
+                var response = request.Create();
+                activityPayload = response.GetSDataPayload();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Activity |  | " + tempTime, fileName);
                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float timed = (after - previous) / 1000;
                 activitiesCount++;
                 SetActivitiesCreated(activitiesCount.ToString());
-                Log(DateTime.Now + " - Created Activity: " + payload.Values["Type"] +  " - " + timed + " seconds", fileName);
+                Log(DateTime.Now + " | " + guid + " | Total | Activity | " + payload.Values["Type"] + " | " + tempTime, fileName);
             }
             catch (Exception e)
             {
-                Log(e.ToString(),fileName);;
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
+            return activityPayload;
         }
 
         // Functional
@@ -2347,10 +2954,15 @@ namespace Demo_Bot
         {
             try
             {
+                Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataTemplateResourceRequest accountTemplate = new SDataTemplateResourceRequest(dynamic);
                 accountTemplate.ResourceKind = "accounts";
                 Sage.SData.Client.Atom.AtomEntry tempEntry = accountTemplate.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Account Template |  | " + tempTime, fileName);
                 SDataPayload payload = tempEntry.GetSDataPayload();
                 bool checker = false;
                 string accountName = "";
@@ -2360,26 +2972,30 @@ namespace Demo_Bot
                     accountName = localize(language, "Fake Company Name", null, null, null, true);
                     try
                     {
+                        tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                         SDataResourceCollectionRequest check = new SDataResourceCollectionRequest(dynamic)
                         {
                             ResourceKind = "accounts",
                             QueryValues = { { "where", "AccountNameUpper eq '" + accountName.ToUpper() + "'" } }
                         };
                         var feed = check.Read();
+                        tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                        tempTime = (tempAfter - tempPre) / 1000;
+                        Log(DateTime.Now + " | " + guid + " | Check | AccountName |  | " + tempTime, fileName);
                         if (feed.Entries.Count() == 0)
                             checker = false;
                         else
                             checker = true;
                     }
                     catch (Exception e) { 
-                        Log(e.ToString(),fileName);
+                        Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
                     }
                 } while (checker == true);
 
                 payload.Values["AccountName"] = accountName;
                 payload.Values["AccountNameUpper"] = accountName.ToUpper();
-                payload.Values["CreateDate"] = DateTime.Now;
-                payload.Values["CreateUser"] = UserID;
+                //payload.Values["CreateDate"] = DateTime.Now;
+                //payload.Values["CreateUser"] = UserID;
                 payload.Values["Type"] = localize(language, "Account Type", null, null, null, true);
                 payload.Values["Status"] = localize(language, "Account Status", null, null, null, true);
 
@@ -2390,52 +3006,162 @@ namespace Demo_Bot
                     ResourceKind = "accounts",
                     Entry = tempEntry
                 };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 request.Create();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Account |  | " + tempTime, fileName);
                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float timed = (after - previous) / 1000;
                 accountsCount++;
                 SetAccountsCreated(accountsCount.ToString());
-                Log(DateTime.Now + " - Created new account: " + payload.Values["AccountName"] + " - " + timed + " seconds", fileName);
+                Log(DateTime.Now + " | " + guid + " | Total | Account | " + payload.Values["AccountName"] + " | " + tempTime, fileName);
             }
             catch (Exception e) { 
-                Log(e.ToString(),fileName);
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
         }
 
         // Functional
-        public SDataPayload makeAccountWithName(string accountName)
+        public SDataPayload makeAccountWithName(SDataPayload leadPayload)
         {
+            SDataPayload accountPayload = null;
             try
             {
+                Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataTemplateResourceRequest accountTemplate = new SDataTemplateResourceRequest(dynamic);
                 accountTemplate.ResourceKind = "accounts";
                 Sage.SData.Client.Atom.AtomEntry tempEntry = accountTemplate.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Account Template |  | " + tempTime, fileName);
                 SDataPayload payload = tempEntry.GetSDataPayload();
+                string accountName = (string)leadPayload.Values["Company"];
+
+                SDataPayload accPayload = null;
+
+                try
+                {
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    SDataResourceCollectionRequest accounts = new SDataResourceCollectionRequest(dynamic)
+                    {
+                        ResourceKind = "accounts",
+                        QueryValues = { { "where", "AccountNameUpper eq '" + accountName.ToUpper() + "'" } }
+                    };
+
+                    var feed = accounts.Read();
+                    tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    tempTime = (tempAfter - tempPre) / 1000;
+                    Log(DateTime.Now + " | " + guid + " | Check | AccountName |  | " + tempTime, fileName);
+                    int count = feed.Entries.Count();
+                    if (count != 0)
+                    {
+                        foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
+                        {
+                            SDataPayload tempPayload = entry.GetSDataPayload();
+                            if (string.Compare((string)tempPayload.Values["Status"], "Duplicated") == 0)
+                            {
+                                deleteSpecificAccount(tempPayload);
+                            }
+                            else
+                            {
+                                accPayload = entry.GetSDataPayload();
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                    //SetText("Connection to server lost... Please check your connection");
+                    //this.stop();
+                }
+                if (accPayload != null)
+                {
+                    return accPayload;
+                }
+
+                SDataPayload address = null;
+
+                SDataResourceCollectionRequest addresses = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "addresses",
+                    QueryValues = { { "where", "Country eq 'USA'" } }
+                };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var feed2 = addresses.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Addresses |  | " + tempTime, fileName);
+                int count2 = feed2.Entries.Count();
+                int choice = rand.Next(count2);
+                address = feed2.Entries.ElementAt(choice).GetSDataPayload();
 
                 payload.Values["AccountName"] = accountName;
                 payload.Values["AccountNameUpper"] = accountName.ToUpper();
-                payload.Values["CreateDate"] = DateTime.Now;
-                payload.Values["CreateUser"] = UserID;
+                //payload.Values["CreateDate"] = DateTime.Now;
+                //payload.Values["CreateUser"] = UserID;
                 payload.Values["Type"] = localize(language, "Account Type", null, null, null, true);
                 payload.Values["Status"] = localize(language, "Account Status", null, null, null, true);
+                //payload.Values["Notes"] = leadPayload.Values["Notes"];
+                payload.Values["Address"] = address;
+                string[] region = getRegion((string)address.Values["State"]);
+                payload.Values["Region"] = region[0];
+                string accountMan = region[1];
+
+                SDataResourceCollectionRequest users = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "users",
+                    QueryValues = { { "where", "UserName eq '" + accountMan + "'" } }
+                };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var feed4 = users.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Users |  | " + tempTime, fileName);
+                SDataPayload accountManager = feed4.Entries.ElementAt(0).GetSDataPayload();
+
+                payload.Values["AccountManager"] = accountManager;
+
+                SDataPayload owner = null;
+
+                SDataResourceCollectionRequest owners = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "owners",
+                    QueryValues = { { "where", "OwnerDescription eq '" + region[0] + "'" } }
+                };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var feed3 = owners.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Owners |  | " + tempTime, fileName);
+                owner = feed3.Entries.ElementAt(0).GetSDataPayload();
+
+                payload.Values["Owner"] = owner;
 
                 tempEntry.SetSDataPayload(payload);
 
-                /*SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
+                SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
                 {
                     ResourceKind = "accounts",
                     Entry = tempEntry
                 };
-                request.Create(); */
+                float requestPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var response = request.Create();
                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float requestTime = (after - requestPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Account |  | " + requestTime, fileName);
                 float timed = (after - previous) / 1000;
+                accountPayload = (SDataPayload)response.GetSDataPayload();
+
                 accountsCount++;
                 SetAccountsCreated(accountsCount.ToString());
-                Log(DateTime.Now + " - Created new account: " + payload.Values["AccountName"] +  " - " + timed + " seconds", fileName);
-                return payload;
+                Log(DateTime.Now + " | " + guid + " | Total | Account | " + payload.Values["AccountName"] + " | " + timed, fileName);
             }
-            catch { return null; }
+            catch (Exception e ){ Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName); }
+            return accountPayload;
         }
 
         // Functional
@@ -2443,10 +3169,15 @@ namespace Demo_Bot
         {
             try
             {
+                Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataTemplateResourceRequest contactTemplate = new SDataTemplateResourceRequest(dynamic);
                 contactTemplate.ResourceKind = "contacts";
                 Sage.SData.Client.Atom.AtomEntry tempEntry = contactTemplate.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Contact Template |  | " + tempTime, fileName);
                 SDataPayload payload = tempEntry.GetSDataPayload();
                 SDataPayload accountPayload = null;
                 int i = 0;
@@ -2464,12 +3195,16 @@ namespace Demo_Bot
 
                 if (accountPayload.Values["Contacts"] != null)
                 {
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                     SDataResourceCollectionRequest contact = new SDataResourceCollectionRequest(dynamic)
                         {
                             ResourceKind = "contacts",
                             QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
                         };
                     var feed = contact.Read();
+                    tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    tempTime = (tempAfter - tempPre) / 1000;
+                    Log(DateTime.Now + " | " + guid + " | Check | ContactName |  | " + tempTime, fileName);
                     SDataPayload contactPayload = null;
                     if (feed.Entries.Count() != 0)
                     {
@@ -2562,39 +3297,233 @@ namespace Demo_Bot
                     ResourceKind = "contacts",
                     Entry = tempEntry
                 };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 request.Create();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Contact |  | " + tempTime, fileName);
                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Total | Contact | " + payload.Values["Name"] + " | " + timed, fileName);
                 contactsCount++;
                 SetContactsCreated(contactsCount.ToString());
-                Log(DateTime.Now + " - Created contact: " + payload.Values["Name"] +  " - " + timed + " seconds", fileName);
             }
             catch (Exception e) {
-                Log(e.ToString(), fileName);
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
 
         }
 
-        // Functional
-        public void makeLead()
+        public SDataPayload makeContactWithName(SDataPayload leadPayload)
         {
+            SDataPayload contactPayload = null;
             try
             {
+                Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                SDataTemplateResourceRequest contactTemplate = new SDataTemplateResourceRequest(dynamic);
+                contactTemplate.ResourceKind = "contacts";
+                Sage.SData.Client.Atom.AtomEntry tempEntry = contactTemplate.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Contact Template |  | " + tempTime, fileName);
+                SDataPayload payload = tempEntry.GetSDataPayload();
+
+                actPayload = makeAccountWithName(leadPayload);
+                string firstName = (string)leadPayload.Values["FirstName"];
+                string lastName = (string)leadPayload.Values["LastName"];
+
+                if (actPayload.Values["Contacts"] != null)
+                {
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    SDataResourceCollectionRequest contact = new SDataResourceCollectionRequest(dynamic)
+                    {
+                        ResourceKind = "contacts",
+                        QueryValues = { { "where", "Account.Id eq '" + actPayload.Key + "'" } }
+                    };
+                    var feed = contact.Read();
+                    tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    tempTime = (tempAfter - tempPre) / 1000;
+                    Log(DateTime.Now + " | " + guid + " | Check | ContactName |  | " + tempTime, fileName);
+                    SDataPayload tempPayload = null;
+                    if (feed.Entries.Count() != 0)
+                    {
+                        foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
+                        {
+                            tempPayload = entry.GetSDataPayload();
+                            if (string.Compare((string)tempPayload.Values["FirstName"], firstName) == 0 && string.Compare((string)tempPayload.Values["LastName"], lastName) == 0)
+                            {
+                                return tempPayload;
+                            }
+                        }
+                    }
+                }
+
+                string emailProvider = "gmail";
+                int temp = rand.Next(0, 4);
+                switch (temp)
+                {
+                    case 0:
+                        emailProvider = "yahoo";
+                        break;
+                    case 1:
+                        emailProvider = "gmail";
+                        break;
+                    case 2:
+                        emailProvider = "mail";
+                        break;
+                    case 3:
+                        emailProvider = "me";
+                        break;
+                    default:
+                        emailProvider = "hotmail";
+                        break;
+                }
+
+                payload.Values["FirstName"] = firstName;
+                payload.Values["LastName"] = lastName;
+                payload.Values["LastNameUpper"] = lastName.ToUpper();
+                payload.Values["NameLF"] = lastName + ", " + firstName;
+                payload.Values["Name"] = firstName + " " + lastName;
+                payload.Values["FullName"] = lastName + " , " + firstName;
+                payload.Values["NamePFL"] = " " + firstName + " " + lastName;
+                payload.Values["IsPrimary"] = false;
+                payload.Values["Salutation"] = firstName;
+                payload.Values["AccountName"] = actPayload.Values["AccountName"];
+                payload.Values["Account"] = actPayload;
+                payload.Values["CreateDate"] = DateTime.Now;
+                payload.Values["ModifyDate"] = DateTime.Now;
+                payload.Values["ModifyUser"] = UserID;
+                payload.Values["CreateUser"] = UserID;
+                payload.Values["Email"] = firstName + lastName + "@" + emailProvider + ".com";
+                string phone = rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString() +
+                    rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString() +
+                    rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString();
+                payload.Values["WorkPhone"] = phone;
+                payload.Values["Mobile"] = phone;
+                payload.Values["DoNotEmail"] = false;
+                payload.Values["DoNotFax"] = false;
+                payload.Values["DoNotMail"] = false;
+                payload.Values["DoNotPhone"] = false;
+                payload.Values["DoNotSolicit"] = false;
+                payload.Values["IsServiceAuthorized"] = false;
+                payload.Values["WebAddress"] = actPayload.Values["WebAddress"];
+                payload.Values["Status"] = "Active";
+                payload.Values["Address"] = new SDataPayload
+                {
+                    ResourceName = "addresses",
+                    Values = {
+                                            {"Description", "Office"},
+                                            {"CreateDate", DateTime.Now},
+                                            {"CreateUser", UserID},
+                                            {"IsMailing", true},
+                                            {"IsPrimary", true},
+                                            {"AddressType", "Billing &amp; Shipping"}
+                                        }
+                };
+
+                payload.Values["Description"] = actPayload.Values["Description"];
+                payload.Values["PreferredContact"] = "Unknown";
+
+                tempEntry.SetSDataPayload(payload);
+
+                SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
+                {
+                    ResourceKind = "contacts",
+                    Entry = tempEntry
+                };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var response = request.Create();
+                contactPayload = response.GetSDataPayload();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Contact |  | " + tempTime, fileName);
+
+                SDataResourceCollectionRequest notes = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "history",
+                    QueryValues = { { "where", "LeadId eq '" + leadPayload.Key + "'" } }
+                };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var feed2 = notes.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | History |  | " + tempTime, fileName);
+                foreach (Sage.SData.Client.Atom.AtomEntry entry in feed2.Entries)
+                {
+                    SDataPayload tempPayload = entry.GetSDataPayload();
+
+                    tempPayload.Values["ContactName"] = tempPayload.Values["LeadName"];
+                    tempPayload.Values["ContactId"] = contactPayload.Key;
+                    tempPayload.Values["LeadName"] = null;
+                    tempPayload.Values["LeadId"] = null;
+                    tempPayload.Values["AccountId"] = actPayload.Key;
+                    tempPayload.Values["AccountName"] = actPayload.Values["AccountName"];
+
+                    entry.SetSDataPayload(tempPayload);
+                    SDataSingleResourceRequest request2 = new SDataSingleResourceRequest(dynamic)
+                    {
+                        ResourceKind = "history",
+                        Entry = entry
+                    };
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    var response2 = request2.Create();
+                    tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    tempTime = (tempAfter - tempPre) / 1000;
+                    Log(DateTime.Now + " | " + guid + " | Put | Note | " + tempPayload.Values["Description"] + " | " + tempTime, fileName);
+                }
+
+                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float timed = (after - previous) / 1000;
+
+                /*
+                SDataResourceCollectionRequest getContact = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "contacts",
+                    QueryValues = { { "where", "Contact.Id eq '" + contactPayload.Key + "'" } }
+                };
+                var feed4 = getContact.Read();
+                contactPayload = feed4.Entries.ElementAt(0).GetSDataPayload(); */
+
+                Log(DateTime.Now + " | " + guid + " | Total | Contact | " + payload.Values["Name"] + " | " + timed, fileName);
+                contactsCount++;
+                SetContactsCreated(contactsCount.ToString());
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+            }
+            return contactPayload;
+        }
+
+        // Functional
+        public SDataPayload makeLead()
+        {
+            SDataPayload leadPayload = null;
+            try
+            {
+                Guid guid = Guid.NewGuid();
+                float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempPre;
                 SDataTemplateResourceRequest leadsTemplate = new SDataTemplateResourceRequest(dynamic);
                 leadsTemplate.ResourceKind = "leads";
 
-                bool checker = true;
+                bool checker = false;
                 string firstName = "";
                 string lastName = "";
 
                 Sage.SData.Client.Atom.AtomEntry tempEntry = leadsTemplate.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Lead Template |  | " + tempTime, fileName);
                 SDataPayload payload = tempEntry.GetSDataPayload();
                 // Checks to see if there is a lead with that name already created
                 do
                 {
                     firstName = localize(language, "Fake First Name", null, null, null, true);
                     lastName = localize(language, "Fake Last Name", null, null, null, true);
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                     SDataResourceCollectionRequest check = new SDataResourceCollectionRequest(dynamic)
                     {
                         ResourceKind = "contacts",
@@ -2604,7 +3533,7 @@ namespace Demo_Bot
                     foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
                     {
                         SDataPayload tempPayload = entry.GetSDataPayload();
-                        if ((string)tempPayload.Values["FirstName"] == firstName)
+                        if (string.Compare((string)tempPayload.Values["FirstName"],firstName) == 0)
                         {
                             checker = true;
                             break;
@@ -2613,6 +3542,9 @@ namespace Demo_Bot
                             checker = false;
                     }
                 } while (checker);
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Check | LeadName |  | " + tempTime, fileName);
 
                 string emailProvider = "gmail";
                 int temp = rand.Next(0, 4);
@@ -2648,22 +3580,183 @@ namespace Demo_Bot
                 payload.Values["Mobile"] = phone;
                 payload.Values["LeadNameFirstLast"] = firstName + " " + lastName;
                 payload.Values["LeadNameLastFirst"] = lastName + ", " + firstName;
+                payload.Values["LeadSource"] = fetchLeadSource();
 
                 SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
                 {
                     ResourceKind = "leads",
                     Entry = tempEntry
                 };
-
-                request.Create();
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var response = request.Create();
+                leadPayload = response.GetSDataPayload();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Lead |  | " + tempTime, fileName);
                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float timed = (after - previous) / 1000;
-                Log(DateTime.Now + " - Created lead: " + payload.Values["Company"] + ", " + payload.Values["LeadNameFirstLast"] + " - " + timed + " seconds", fileName);
+                Log(DateTime.Now + " | " + guid + " | Total | Lead | " + payload.Values["Company"] + ", " + payload.Values["LeadNameFirstLast"] + " | " + timed, fileName);
                 leadsCount++;
                 SetLeadsCreated(leadsCount.ToString());
+                return leadPayload;
             }
             catch (Exception e) { 
-                Log(e.ToString(), fileName); 
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName); 
+            }
+            return leadPayload;
+        }
+
+        // Needs help!
+        public void promoteLead()
+        {
+            try
+            {
+                Guid guid = Guid.NewGuid();
+                float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                SDataTemplateResourceRequest contactTemplate = new SDataTemplateResourceRequest(dynamic);
+                contactTemplate.ResourceKind = "contacts";
+
+                Sage.SData.Client.Atom.AtomEntry tempEntry = contactTemplate.Read();
+                //SDataPayload payload = tempEntry.GetSDataPayload();
+
+                Sage.SData.Client.Atom.AtomEntry leadEntry = null;
+                do
+                {
+                    leadEntry = fetchLead();
+                } while (leadEntry == null);
+
+                SDataPayload leadPayload = leadEntry.GetSDataPayload();
+                bool check = false;
+                var feed = new Sage.SData.Client.Atom.AtomFeed();
+
+                
+                SDataPayload accountPayload = null;
+                /*int i = 0;
+                do
+                {
+                    accountPayload = fetchAccount();
+                    i++;
+                } while (accountPayload == null && i < 50);
+
+                if (i == 50)
+                    return; */
+
+                do
+                {
+                    try
+                    {
+                        SDataResourceCollectionRequest search = new SDataResourceCollectionRequest(dynamic)
+                        {
+                            ResourceKind = "accounts",
+                            QueryValues = { { "where", "AccountName eq '" + leadPayload.Values["Company"] + "'" } }
+                        };
+
+                        feed = search.Read();
+                    }
+                    catch { return; }
+                } while (check);
+
+                bool test = false;
+                foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
+                {
+                    if (entry != null)
+                    {
+                        accountPayload = entry.GetSDataPayload();
+                        test = true;
+                        break;
+                    }
+                    else
+                        test = false;
+                }
+
+                if (test)
+                {
+                    SDataServiceOperationRequest request = new SDataServiceOperationRequest(dynamic)
+                    {
+                        ResourceKind = "leads",
+                        Entry = new Sage.SData.Client.Atom.AtomEntry(),
+                        OperationName = "ConvertLeadToContact"
+                    };
+
+
+                    //if (leadPayload.Values["Company"] != null)
+                    //{
+                    //    accountPayload = makeAccountWithName((string)leadPayload.Values["Company"]);
+                    //}
+
+                    var entity = new SDataPayload()
+                    {
+                        Key = leadPayload.Key
+                    };
+                    request.Entry.SetSDataPayload(
+                       new SDataPayload
+                       {
+                           ResourceName = "LeadConvertLeadToContact",
+                           Namespace = "http://schemas.sage.com/dynamic/2007",
+                           Values = {
+                       {"request", new SDataPayload
+                           {
+                           Values = {
+                               {"entity", leadPayload},
+                               {"LeadId", entity},
+                               {"contact", tempEntry},
+                               {"account", leadPayload.Values["Company"]},
+                               {"rule", ""}
+                                    }
+                           }
+                        }
+                                 }
+                       });
+                    request.Create();
+                    float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    float timed = (after - previous) / 1000;
+                    Log(DateTime.Now + " | Converted " + leadPayload.Values["FirstName"] + " " + leadPayload.Values["LastName"] + " to a contact | " + timed + " seconds", fileName);
+                }
+                else
+                {
+                    SDataServiceOperationRequest request = new SDataServiceOperationRequest(dynamic)
+                    {
+                        ResourceKind = "leads",
+                        //Entry = leadEntry,
+                        Entry = new Sage.SData.Client.Atom.AtomEntry(),
+                        OperationName = "ConvertLeadToAccount"
+                    };
+                    var entity = new SDataPayload()
+                    {
+                        Key = leadPayload.Key
+                    };
+
+                    request.Entry.SetSDataPayload(
+                       new SDataPayload
+                       {
+                           ResourceName = "LeadConvertLeadToAccount",
+                           Namespace = "http://schemas.sage.com/dynamic/2007",
+                           Values = {
+                       {"request", new SDataPayload
+                           {
+                           Values = {
+                               {"entity", leadPayload},
+                               {"LeadId", entity},
+                               {"contact", tempEntry},
+                               {"account", accountPayload.Key},
+                               {"rule", ""}
+                                    }
+                           }
+                        }
+                                 }
+                       });
+                    request.Create();
+                    float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    float timed = (after - previous) / 1000;
+                    Log(DateTime.Now + " | Converted " + leadPayload.Values["FirstName"] + " " + leadPayload.Values["LastName"]
+                        + " to a contact with Account " + leadPayload.Values["Company"] + " | " + timed + " seconds", fileName);
+                }
+                leadsPromotedCount++;
+                SetLeadsPromoted(leadsPromotedCount.ToString());
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
         }
 
@@ -2672,20 +3765,29 @@ namespace Demo_Bot
         {
             try
             {
+                Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempPre;
                 SDataTemplateResourceRequest opportunityTemplate = new SDataTemplateResourceRequest(dynamic);
                 opportunityTemplate.ResourceKind = "opportunities";
 
                 Sage.SData.Client.Atom.AtomEntry tempEntry = opportunityTemplate.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Opportunity Template |  | " + tempTime, fileName);
                 SDataPayload payload = tempEntry.GetSDataPayload();
 
                 SDataPayload accountPayload = null;
                 int i = 0;
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 do
                 {
                     accountPayload = fetchAccount();
                     i++;
                 } while (accountPayload == null && i < 50);
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Account |  | " + tempTime, fileName);
 
                 if (i == 50)
                     return;   
@@ -2716,14 +3818,19 @@ namespace Demo_Bot
                     break;
                 }
 
+                /*
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 var getUserRequest = new SDataServiceOperationRequest(service)
                 {
                     OperationName = "getCurrentUser",
                     Entry = new Sage.SData.Client.Atom.AtomEntry()
                 };
                 var temp = getUserRequest.Create();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | CurrentUser |  | " + tempTime, fileName);
                 var userPayload = temp.GetSDataPayload();
-                userPayload = (SDataPayload)userPayload.Values["response"];
+                userPayload = (SDataPayload)userPayload.Values["response"]; */
 
                 //payload.Values["ActualAmount"] = oppValue;
                 payload.Values["CreateUser"] = UserID;
@@ -2738,18 +3845,22 @@ namespace Demo_Bot
                 payload.Values["LeadSource"] = fetchLeadSource();
                 payload.Values["Type"] = type;
                 payload.Values["AccountManager"] = accountPayload.Values["AccountManager"];
+                payload.Values["Campaign"] = fetchCampaign();
                 //payload.Values["Weighted"] = oppValue / 100;
                 //payload.Values["OverrideSalesPotential"] = false;
                 //payload.Values["EstimatedClose"] = randomDateGenerator();
 
                 if (accountPayload.Values["Contacts"] != null)
                 {
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                     SDataBatchRequest contact = new SDataBatchRequest(dynamic)
                     {
                         ResourceKind = "contacts",
                         QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
                     };
-
+                    tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    tempTime = (tempAfter - tempPre) / 1000;
+                    Log(DateTime.Now + " | " + guid + " | Get | ContactBatch |  | " + tempTime, fileName);
 
                     /*
                     var feed = contact.Read();
@@ -2768,20 +3879,296 @@ namespace Demo_Bot
 
                 tempEntry.SetSDataPayload(payload);
 
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
                 {
                     ResourceKind = "opportunities",
                     Entry = tempEntry
                 };
                 request.Create();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Opportunity |  | " + tempTime, fileName);
                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Total | Opportunity | " + accountPayload.Values["AccountName"] + " | " + timed, fileName);
                 opportunitiesCount++;
                 SetOppsCreated(opportunitiesCount.ToString());
-                Log(DateTime.Now + " - Opportunity made for account: " + accountPayload.Values["AccountName"] + " - " + timed + " seconds", fileName);
             }
             catch (Exception e) { 
-                Log(e.ToString(), fileName); 
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName); 
+            }
+        }
+
+        public void makeOpportunityFor(SDataPayload accountPayload)
+        {
+            try
+            {
+                Guid guid = Guid.NewGuid();
+                float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempPre;
+                SDataTemplateResourceRequest opportunityTemplate = new SDataTemplateResourceRequest(dynamic);
+                opportunityTemplate.ResourceKind = "opportunities";
+                SDataPayload address = (SDataPayload)accountPayload.Values["Address"];
+
+                if (address.Values.Count == 0)
+                {
+                    accountPayload = updateAccount(accountPayload);
+                }
+
+                Sage.SData.Client.Atom.AtomEntry tempEntry = opportunityTemplate.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Opportunity Template |  | " + tempTime, fileName);
+                SDataPayload payload = tempEntry.GetSDataPayload();
+
+                int oppValue = 500 * rand.Next(5, 1000);
+                DateTime closeDate = DateTime.Now;
+                closeDate = closeDate.AddMonths(3);
+                int month = rand.Next(0, 12);
+                int day = rand.Next(0, 30);
+                closeDate = closeDate.AddMonths(month);
+                closeDate = closeDate.AddDays(day);
+
+                string type = "";
+                int x = rand.Next(1, 2);
+                switch (language)
+                {
+                    case "English":
+                        if (x == 1)
+                            type = "Add-On";
+                        else
+                            type = "New";
+                        break;
+                    case "Chinese":
+                        if (x == 1)
+                            type = "附加";
+                        else
+                            type = "新";
+                        break;
+                }
+
+                /*
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var getUserRequest = new SDataServiceOperationRequest(service)
+                {
+                    OperationName = "getCurrentUser",
+                    Entry = new Sage.SData.Client.Atom.AtomEntry()
+                };
+                var temp = getUserRequest.Create();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | CurrentUser |  | " + tempTime, fileName);
+                var userPayload = temp.GetSDataPayload();
+                userPayload = (SDataPayload)userPayload.Values["response"]; */
+
+                //payload.Values["ActualAmount"] = oppValue;
+                //payload.Values["CreateUser"] = UserID;
+                payload.Values["Description"] = accountPayload.Values["AccountName"] + " - Phase " + rand.Next(0, 10);
+                payload.Values["Account"] = accountPayload;
+                payload.Values["Owner"] = accountPayload.Values["Owner"];
+                //payload.Values["SalesAmount"] = oppValue;
+                payload.Values["SalesPotential"] = oppValue;
+                payload.Values["CloseProbability"] = 1;//5 * rand.Next(0, 20);
+                payload.Values["EstimatedClose"] = closeDate;
+                payload.Values["Stage"] = "1-Prospect";
+                payload.Values["LeadSource"] = fetchLeadSource();
+                payload.Values["Type"] = type;
+                payload.Values["AccountManager"] = accountPayload.Values["AccountManager"];
+                payload.Values["Campaign"] = fetchCampaign();
+                //payload.Values["Weighted"] = oppValue / 100;
+                //payload.Values["OverrideSalesPotential"] = false;
+                //payload.Values["EstimatedClose"] = randomDateGenerator();
+
+                /*
+                if (accountPayload.Values["Contacts"] != null)
+                {
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    SDataSingleResourceRequest contact = new SDataSingleResourceRequest(dynamic)
+                    {
+                        ResourceKind = "contacts",
+                        QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
+                    };
+                    var feed = contact.Read();
+                    tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    tempTime = (tempAfter - tempPre) / 1000;
+                    Log(DateTime.Now + " | " + guid + " | Get | ContactBatch |  | " + tempTime, fileName);
+
+                    var feed = contact.Read();
+                    SDataPayload contactPayload = ;
+                    if (feed.Entries.Count() != 0)
+                    {
+                        int i = 1;
+                        foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
+                        {
+                            contactPayload.Values["Contact" + i] = entry.GetSDataPayload();
+                            i++;
+                        } 
+                    payload.Values["Contacts"] = feed;
+                    //}
+                } */
+
+                tempEntry.SetSDataPayload(payload);
+
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
+                {
+                    ResourceKind = "opportunities",
+                    Entry = tempEntry
+                };
+                request.Create();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Opportunity |  | " + tempTime, fileName);
+                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Total | Opportunity | " + accountPayload.Values["AccountName"] + " | " + timed, fileName);
+                opportunitiesCount++;
+                SetOppsCreated(opportunitiesCount.ToString());
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+            }
+        }
+
+        public void makeMarketingOpportunity()
+        {
+            try
+            {
+                Guid guid = Guid.NewGuid();
+                float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempPre;
+                SDataTemplateResourceRequest opportunityTemplate = new SDataTemplateResourceRequest(dynamic);
+                opportunityTemplate.ResourceKind = "opportunities";
+
+                Sage.SData.Client.Atom.AtomEntry tempEntry = opportunityTemplate.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Opportunity Template |  | " + tempTime, fileName);
+                SDataPayload payload = tempEntry.GetSDataPayload();
+
+                SDataPayload accountPayload = null;
+                int i = 0;
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                do
+                {
+                    accountPayload = fetchAccount();
+                    i++;
+                } while (accountPayload == null && i < 50);
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Account |  | " + tempTime, fileName);
+
+                if (i == 50)
+                    return;
+
+                int oppValue = 500 * rand.Next(5, 1000);
+                DateTime closeDate = DateTime.Now;
+                closeDate = closeDate.AddMonths(3);
+                int month = rand.Next(0, 12);
+                int day = rand.Next(0, 30);
+                closeDate = closeDate.AddMonths(month);
+                closeDate = closeDate.AddDays(day);
+
+                string type = "";
+                int x = rand.Next(1, 2);
+                switch (language)
+                {
+                    case "English":
+                        if (x == 1)
+                            type = "Add-On";
+                        else
+                            type = "New";
+                        break;
+                    case "Chinese":
+                        if (x == 1)
+                            type = "附加";
+                        else
+                            type = "新";
+                        break;
+                }
+
+                /*
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var getUserRequest = new SDataServiceOperationRequest(service)
+                {
+                    OperationName = "getCurrentUser",
+                    Entry = new Sage.SData.Client.Atom.AtomEntry()
+                };
+                var temp = getUserRequest.Create();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | CurrentUser |  | " + tempTime, fileName);
+                var userPayload = temp.GetSDataPayload();
+                userPayload = (SDataPayload)userPayload.Values["response"]; */
+
+                //payload.Values["ActualAmount"] = oppValue;
+                payload.Values["CreateUser"] = UserID;
+                payload.Values["Description"] = accountPayload.Values["AccountName"] + " - Phase " + rand.Next(0, 10);
+                payload.Values["Account"] = accountPayload;
+                payload.Values["Owner"] = accountPayload.Values["Owner"];
+                //payload.Values["SalesAmount"] = oppValue;
+                payload.Values["SalesPotential"] = oppValue;
+                payload.Values["CloseProbability"] = 1;//5 * rand.Next(0, 20);
+                payload.Values["EstimatedClose"] = closeDate;
+                payload.Values["Stage"] = "1-Prospect";
+                payload.Values["LeadSource"] = fetchLeadSource();
+                payload.Values["Type"] = type;
+                payload.Values["AccountManager"] = accountPayload.Values["AccountManager"];
+                payload.Values["Campaign"] = fetchCampaign();
+                //payload.Values["Weighted"] = oppValue / 100;
+                //payload.Values["OverrideSalesPotential"] = false;
+                //payload.Values["EstimatedClose"] = randomDateGenerator();
+
+                if (accountPayload.Values["Contacts"] != null)
+                {
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    SDataBatchRequest contact = new SDataBatchRequest(dynamic)
+                    {
+                        ResourceKind = "contacts",
+                        QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
+                    };
+                    tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    tempTime = (tempAfter - tempPre) / 1000;
+                    Log(DateTime.Now + " | " + guid + " | Get | ContactBatch |  | " + tempTime, fileName);
+
+                    /*
+                    var feed = contact.Read();
+                    SDataPayload contactPayload = ;
+                    if (feed.Entries.Count() != 0)
+                    {
+                        int i = 1;
+                        foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
+                        {
+                            contactPayload.Values["Contact" + i] = entry.GetSDataPayload();
+                            i++;
+                        } */
+                    payload.Values["Contacts"] = contact;
+                    //}
+                }
+
+                tempEntry.SetSDataPayload(payload);
+
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
+                {
+                    ResourceKind = "opportunities",
+                    Entry = tempEntry
+                };
+                request.Create();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Opportunity |  | " + tempTime, fileName);
+                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Total | Opportunity | " + accountPayload.Values["AccountName"] + " | " + timed, fileName);
+                opportunitiesCount++;
+                SetOppsCreated(opportunitiesCount.ToString());
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
         }
 
@@ -2790,20 +4177,31 @@ namespace Demo_Bot
         {
             try
             {
+                Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempPre;
                 SDataTemplateResourceRequest ticketTemplate = new SDataTemplateResourceRequest(dynamic);
                 ticketTemplate.ResourceKind = "tickets";
 
                 Sage.SData.Client.Atom.AtomEntry tempEntry = ticketTemplate.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Ticket Template |  | " + tempTime, fileName);
                 SDataPayload payload = tempEntry.GetSDataPayload();
 
                 SDataPayload accountPayload = null;
                 int j = 0;
+                var contacts = "";
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 do
                 {
                     accountPayload = fetchAccount();
+                    contacts = (String)accountPayload.Values["Contacts"];
                     j++;
-                } while (accountPayload == null && j < 50);
+                } while (accountPayload == null && contacts == null && j < 50);
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Account |  | " + tempTime, fileName);
                 //accountPayload.Values["UserField1"] = UserID;
                 if (j == 50)
                     return;
@@ -2812,25 +4210,26 @@ namespace Demo_Bot
                 payload.Values["Account"] = accountPayload;
                 try
                 {
-                    if (accountPayload.Values["Contacts"] != null)
-                    {
+                    //if (accountPayload.Values["Contacts"] != null)
+                    //{
+                        tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                         SDataResourceCollectionRequest contact = new SDataResourceCollectionRequest(dynamic)
                         {
                             ResourceKind = "contacts",
                             QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
                         };
                         var feed = contact.Read();
+                        tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                        tempTime = (tempAfter - tempPre) / 1000;
+                        Log(DateTime.Now + " | " + guid + " | Get | Contact |  | " + tempTime, fileName);
                         SDataPayload contactPayload = null;
                         if (feed.Entries.Count() != 0)
                         {
-                            foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
-                            {
-                                contactPayload = entry.GetSDataPayload();
-                                break;
-                            }
+                            contactPayload = feed.Entries.ElementAt(0).GetSDataPayload();
                             payload.Values["Contact"] = contactPayload;
                         }
-                    }
+                    //}
+                        /*
                     else
                     {
                         int i = rand.Next(0, 150);
@@ -2850,38 +4249,165 @@ namespace Demo_Bot
                             }
                             payload.Values["Contact"] = contactPayload;
                         }
-                    }
+                    } */
                 }
                 catch (Exception e)
                 {
-                    Log(e.ToString(), fileName);
+                    Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
                 }
 
                 tempEntry.SetSDataPayload(payload);
 
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
                 {
                     ResourceKind = "tickets",
                     Entry = tempEntry
                 };
                 request.Create();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Ticket |  | " + tempTime, fileName);
                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float timed = (after - previous) / 1000;
-                Log(DateTime.Now + " - Created ticket number: " + accountPayload.Values["AccountName"] +  " - " + timed + " seconds", fileName);
+                Log(DateTime.Now + " | " + guid + " | Push | Ticket | " + accountPayload.Values["AccountName"] + " | " + timed, fileName);
                 ticketsCount++;
                 SetTicketsCreated(ticketsCount.ToString());
             }
             catch (Exception e) { 
-                Log(e.ToString(), fileName); 
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName); 
             }
 
         }
 
-        // Functional
-        public void completeActivity()
+        // Test Functionality... in development
+        public void updateTicket()
         {
             try
             {
+                // Include adding TicketActivity and completing TicketActivities
+                int chance = rand.Next(0, 7);
+                if (chance <= 7)
+                {
+                    makeTicketActivity();
+                }
+                chance = rand.Next(0, 7);
+                if (chance <= 7)
+                {
+                    completeTicketActivity();
+                }
+            }
+            catch (Exception e)
+            {
+                Log(e.ToString(), fileName);
+            }
+
+        }
+
+        // Test Functionality... in development
+        public void completeTicketActivity()
+        {
+            try
+            {
+                // Initiates a value to keep track of amount of activities created.
+                int i = 0;
+                float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+
+                var request = new SDataServiceOperationRequest(dynamic)
+                {
+                    ResourceKind = "ticketActivities",
+                    OperationName = "CompleteTicketActivity",
+                    Entry = new Sage.SData.Client.Atom.AtomEntry()
+                };
+
+                // From the Whitepaper pdf to get the user payload
+                var getUserRequest = new SDataServiceOperationRequest(service)
+                {
+                    OperationName = "getCurrentUser",
+                    Entry = new Sage.SData.Client.Atom.AtomEntry()
+                };
+                var temp = getUserRequest.Create();
+                var userPayload = temp.GetSDataPayload();
+                userPayload = (SDataPayload)userPayload.Values["response"];
+
+                SDataResourceCollectionRequest ticketActivities = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "ticketActivities",
+                    QueryValues = { { "where", "CreateUser eq '" + userPayload.Values["userId"] + "'" } }
+                };
+
+                var feed = ticketActivities.Read();
+
+                foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
+                {
+                    var payload = entry.GetSDataPayload();
+                    var time = payload.Values["AssignedDate"];
+                    DateTime stime = Convert.ToDateTime(time);  
+
+                    if (payload != null)
+                    {
+                        if (DateTime.Compare(stime, DateTime.Now) < 0)
+                        {
+                            if (i >= 1)
+                                previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+
+                            // Change in the future to allow for multiple completion of ticket activities (similar to regular activities)
+                            if (1 == i)
+                                break;
+
+                            try
+                            {
+                                var entity = new SDataPayload()
+                                {
+                                    Key = payload.Key
+                                };
+                                request.Entry.SetSDataPayload(
+                                   new SDataPayload
+                                   {
+                                       ResourceName = "TicketActivityComplete",
+                                       Namespace = "http://schemas.sage.com/slx/system/2010",
+                                       Values = {
+                       {"Request", new SDataPayload
+                           {
+                           Values = {
+                               {"Entity", entity},
+                               {"UserId", userPayload.Values["userId"]},
+                               {"Result", "Complete"},
+                               {"CompleteDate", DateTime.Now.ToUniversalTime()}
+                                    }
+                           }
+                        }
+                                 }
+                                   });
+                                var response = request.Create();
+                                var responsePayload = response.GetSDataPayload();
+                                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                                float timed = (after - previous) / 1000;
+                                Log(DateTime.Now + " | Completed Ticket Activity: " + payload.Values["Description"] + " | " + timed + "seconds", fileName);
+                                i++;
+                            }
+                            catch (Exception e)
+                            {
+                                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                            }
+                        }
+                    }
+
+                }
+            }
+            catch (ArgumentNullException e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+            }
+        }
+
+        // Functional
+        public SDataPayload completeActivity()
+        {
+            SDataPayload activityPayload = null;
+            try
+            {
+                Guid guid = Guid.NewGuid();
                 // Initiates a value to keep track of amount of activities created.
                 int i = 0;
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
@@ -2893,6 +4419,7 @@ namespace Demo_Bot
                     Entry = new Sage.SData.Client.Atom.AtomEntry()
                 };
 
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 // From the Whitepaper pdf to get the user payload
                 var getUserRequest = new SDataServiceOperationRequest(service)
                 { OperationName = "getCurrentUser", 
@@ -2900,7 +4427,11 @@ namespace Demo_Bot
                  var temp = getUserRequest.Create();
                  var userPayload = temp.GetSDataPayload();
                  userPayload = (SDataPayload)userPayload.Values["response"];
+                 float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                 float tempTime = (tempAfter - tempPre) / 1000;
+                 Log(DateTime.Now + " | " + guid + " | Get | CurrentUser |  | " + tempTime, fileName);
 
+                 tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataResourceCollectionRequest activities = new SDataResourceCollectionRequest(service)
                 {
                     ResourceKind = "activities",
@@ -2908,6 +4439,9 @@ namespace Demo_Bot
                 };
 
                 var feed = activities.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Activities |  | " + tempTime, fileName);
 
                 // From the Whitepaper pdf to get the user payload
                 //var getUserRequest = new SDataServiceOperationRequest(service)
@@ -2968,18 +4502,22 @@ namespace Demo_Bot
                         }
                                  }
                                     });
+                                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                                 var response = request.Create();
-                                var responsePayload = response.GetSDataPayload();
+                                activityPayload = response.GetSDataPayload();
+                                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                                tempTime = (tempAfter - tempPre) / 1000;
+                                Log(DateTime.Now + " | " + guid + " | Push | CompleteActivity |  | " + tempTime, fileName);
                                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                                 float timed = (after - previous) / 1000;
-                                Log(DateTime.Now + " - Completed activity: " + payload.Values["Description"] + " - " + timed + "seconds", fileName);
+                                Log(DateTime.Now + " | " + guid + " | Total | CompleteActivity | " + payload.Values["Description"] + " | " + timed, fileName);
                                 i++;
                                 activitiesCompleteCount++;
                                 SetCompletedActivities(activitiesCompleteCount.ToString());
                             }
                             catch (Exception e)
                             {
-                                Log(e.ToString(),fileName);
+                                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
                             }
                         }
                     }
@@ -2988,157 +4526,94 @@ namespace Demo_Bot
             }
             catch (ArgumentNullException e)
             {
-                Log(e.ToString(), fileName);
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
+            return activityPayload;
         }
 
-        // Needs help!
-        public void promoteLead()
+        public SDataPayload completeSpecificActivity(SDataPayload activityPayload)
         {
+            SDataPayload completedActivityPayload = null;
             try
             {
-                float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                SDataTemplateResourceRequest contactTemplate = new SDataTemplateResourceRequest(dynamic);
-                contactTemplate.ResourceKind = "contacts";
-
-                Sage.SData.Client.Atom.AtomEntry tempEntry = contactTemplate.Read();
-                //SDataPayload payload = tempEntry.GetSDataPayload();
-
-                Sage.SData.Client.Atom.AtomEntry leadEntry = null;
-                do
-                {
-                    leadEntry = fetchLead();
-                } while (leadEntry == null);
-
-                SDataPayload leadPayload = leadEntry.GetSDataPayload();
-                bool check = false;
-                var feed = new Sage.SData.Client.Atom.AtomFeed();
-
-                SDataPayload accountPayload = null;
+                Guid guid = Guid.NewGuid();
+                // Initiates a value to keep track of amount of activities created.
                 int i = 0;
-                do
+                float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+
+                var request = new SDataServiceOperationRequest(service)
                 {
-                    accountPayload = fetchAccount();
-                    i++;
-                } while (accountPayload == null && i < 50);
+                    ResourceKind = "activities",
+                    OperationName = "Complete",
+                    Entry = new Sage.SData.Client.Atom.AtomEntry()
+                };
 
-                if (i == 50)
-                    return;
-
-                do
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                // From the Whitepaper pdf to get the user payload
+                var getUserRequest = new SDataServiceOperationRequest(service)
                 {
-                    try
+                    OperationName = "getCurrentUser",
+                    Entry = new Sage.SData.Client.Atom.AtomEntry()
+                };
+                var temp = getUserRequest.Create();
+                var userPayload = temp.GetSDataPayload();
+                userPayload = (SDataPayload)userPayload.Values["response"];
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | CurrentUser |  | " + tempTime, fileName);
+
+                
+                    if (activityPayload != null)//(string)payload.Values["Description"] != "")
                     {
-                        SDataResourceCollectionRequest search = new SDataResourceCollectionRequest(dynamic)
-                        {
-                            ResourceKind = "accounts",
-                            QueryValues = { { "where", "AccountName eq '" + leadPayload.Values["Company"] + "'" } }
-                        };
-
-                        feed = search.Read();
-                    }
-                    catch { check = true; }
-                } while (check);
-
-                bool test = false;
-                foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
-                {
-                    if (entry != null)
-                    {
-                        accountPayload = entry.GetSDataPayload();
-                        test = true;
-                        break;
-                    }
-                    else
-                        test = false;
-                }
-
-                if (!test)
-                {
-                    var request = new SDataServiceOperationRequest(dynamic)
-                    {
-                        ResourceKind = "leads",
-                        Entry = new Sage.SData.Client.Atom.AtomEntry(),
-                        OperationName = "ConvertLeadToContact"
-                    };
-
-
-                    //if (leadPayload.Values["Company"] != null)
-                    //{
-                    //    accountPayload = makeAccountWithName((string)leadPayload.Values["Company"]);
-                    //}
-
-                    var entity = new SDataPayload()
-                    {
-                        Key = leadPayload.Key
-                    };
-                    request.Entry.SetSDataPayload(
-                       new SDataPayload
+                       try
                        {
-                           ResourceName = "LeadConvertLeadToContact",
-                           Namespace = "http://schemas.sage.com/dynamic/2007",
-                           Values = {
-                       {"request", new SDataPayload
+                                var entity = new SDataPayload()
+                                {
+                                    Key = activityPayload.Key
+                                };
+                                request.Entry.SetSDataPayload(
+                                   new SDataPayload
+                                   {
+                                       ResourceName = "ActivityComplete",
+                                       Namespace = "http://schemas.sage.com/slx/system/2010",
+                                       Values = {
+                       {"Request", new SDataPayload
                            {
                            Values = {
-                               {"entity", leadPayload},
-                               {"LeadId", entity},
-                               {"contact", tempEntry},
-                               {"account", leadPayload.Values["Company"]},
-                               {"rule", ""}
+                               {"Entity", entity},
+                               {"UserId", userPayload.Values["userId"]},
+                               {"Result", "Complete"},
+                               {"CompleteDate", DateTime.Now.ToUniversalTime()}
                                     }
                            }
                         }
                                  }
-                       });
-                    request.Create();
-                    float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                    float timed = (after - previous) / 1000;
-                    Log(DateTime.Now + " - Converted " + leadPayload.Values["FirstName"] + " " + leadPayload.Values["LastName"] + " to a contact - " + timed + " seconds", fileName);
-                }
-                else
-                {
-                    SDataServiceOperationRequest request = new SDataServiceOperationRequest(dynamic)
-                    {
-                        ResourceKind = "leads",
-                        //Entry = leadEntry,
-                        Entry = new Sage.SData.Client.Atom.AtomEntry(),
-                        OperationName = "ConvertLeadToAccount"
-                    };
-                    var entity = new SDataPayload()
-                    {
-                        Key = leadPayload.Key
-                    };
-
-                    request.Entry.SetSDataPayload(
-                       new SDataPayload
-                       {
-                           ResourceName = "LeadConvertLeadToAccount",
-                           Namespace = "http://schemas.sage.com/dynamic/2007",
-                           Values = {
-                       {"request", new SDataPayload
-                           {
-                           Values = {
-                               {"entity", leadPayload},
-                               {"LeadId", entity},
-                               {"account", accountPayload.Key}
-                                    }
-                           }
+                                   });
+                                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                                var response = request.Create();
+                                completedActivityPayload = (SDataPayload)response.GetSDataPayload().Values["Response"];
+                                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                                tempTime = (tempAfter - tempPre) / 1000;
+                                Log(DateTime.Now + " | " + guid + " | Push | CompleteActivity |  | " + tempTime, fileName);
+                                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                                float timed = (after - previous) / 1000;
+                                Log(DateTime.Now + " | " + guid + " | Total | CompleteActivity | " + activityPayload.Values["Description"] + " | " + timed, fileName);
+                                i++;
+                                activitiesCompleteCount++;
+                                SetCompletedActivities(activitiesCompleteCount.ToString());
+                            }
+                            catch (Exception e)
+                            {
+                                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                            }
                         }
-                                 }
-                       });
-                    request.Create();
-                    float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                    float timed = (after - previous) / 1000;
-                    Log(DateTime.Now + " - Converted " + leadPayload.Values["FirstName"] + " " + leadPayload.Values["LastName"] 
-                        + " to a contact with Account " + leadPayload.Values["Company"] + " - " + timed + " seconds", fileName);
-                }
-                leadsPromotedCount++;
-                SetLeadsPromoted(leadsPromotedCount.ToString());
+                
             }
-            catch (Exception e) { 
-                Log(e.ToString(), fileName); 
+            catch (ArgumentNullException e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
             }
+            return completedActivityPayload;
         }
 
         // Functional, updated to include transitions between stages...
@@ -3146,20 +4621,28 @@ namespace Demo_Bot
         {
             try
             {
+                Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 Sage.SData.Client.Atom.AtomEntry entry = null;
                 SDataPayload payload = null;
                 int counter = 0;
                 int counter2 = 0;
                 bool checker = false;
+                float tempPre;
+                float tempAfter;
+                float tempTime;
                 do
                 {
                     checker = false;
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                         do
                         {
                             entry = fetchOpportunity();
                             counter++;
                         } while (entry == null || counter == 50);
+                        tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                        tempTime = (tempAfter - tempPre) / 1000;
+                        Log(DateTime.Now + " | " + guid + " | Get | Opportunity |  | " + tempTime, fileName);
                         
                         if (counter == 50)
                         {
@@ -3182,10 +4665,18 @@ namespace Demo_Bot
                 int x = rand.Next(0, 100);
                 if (x < (Convert.ToInt32(payload.Values["CloseProbability"]) + 20) && payload.Values["AddToForecast"].ToString() == "false")
                 {
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    double days = rand.Next(7, 31);
+                    int months = rand.Next(2);
+                    DateTime closeDate = DateTime.Now;
+                    closeDate = closeDate.AddDays(days);
+                    closeDate = closeDate.AddMonths(months);
                     payload.Values["AddToForecast"] = true;
-                    float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                    float timed = (after - previous) / 1000;
-                    Log(DateTime.Now + " - Added " + payload.Values["Description"] + " to forecast - " + timed + " seconds of searching", fileName);
+                    payload.Values["EstimatedClose"] = closeDate;
+                    payload.Values["EstimatedCloseDateProbability"] = payload.Values["CloseProbability"];
+                    tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    tempTime = (tempAfter - tempPre) / 1000;
+                    Log(DateTime.Now + " | " + guid + " | Put | Opportunity | Added " + payload.Values["Description"] + " to forecast | " + tempTime, fileName);
                     Debug.WriteLine("Added " + payload.Values["Description"] + " to forecast");
                 }
 
@@ -3216,11 +4707,15 @@ namespace Demo_Bot
                         ResourceKind = "opportunities",
                         Entry = entry
                     };
-
+                    tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                     request.Update();
+                    tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    tempTime = (tempAfter - tempPre) / 1000;
+                    Log(DateTime.Now + " | " + guid + " | Push | Opportunity |  | " + tempTime, fileName);
                     float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                     float timed = (after - previous) / 1000;
-                    Log(DateTime.Now + " - Updated Opp with win: " + payload.Values["Description"]  + " - " + timed + " seconds", fileName);
+
+                    Log(DateTime.Now + " | " + guid + " | Put | Opportunity | Updated Opp with win: " + payload.Values["Description"] + " | " + timed, fileName);
                     Debug.WriteLine("Updated Opp with win: " + payload.Values["Description"]);
                     oppsUpdatedCount++;
                     SetOppsUpdated(oppsUpdatedCount.ToString());
@@ -3239,7 +4734,6 @@ namespace Demo_Bot
                             if (testMyLuck <= luckyOne)
                             {
                                 // Winner winner! Close the opportunity with a win.
-                                // Is this a service request? Close-win?
                                 string reason = localize(language, "Reason", null, null, null, true);
                                 payload.Values["Closed"] = true;
                                 payload.Values["CloseProbability"] = 100;
@@ -3265,11 +4759,15 @@ namespace Demo_Bot
                                     ResourceKind = "opportunities",
                                     Entry = entry
                                 };
-
+                                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                                 request.Update();
+                                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                                tempTime = (tempAfter - tempPre) / 1000;
+                                Log(DateTime.Now + " | " + guid + " | Push | Opportunity |  | " + tempTime, fileName);
                                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                                 float timed = (after - previous) / 1000;
-                                Log(DateTime.Now + " - Updated Opp with win: " + payload.Values["Description"] +  " - " + timed + " seconds", fileName);
+
+                                Log(DateTime.Now + " | " + guid + " | Put | Opportunity | Updated Opp with win: " + payload.Values["Description"] + " | " + timed, fileName);
                                 Debug.WriteLine("Updated Opp with win: " + payload.Values["Description"]);
                                 oppsUpdatedCount++;
                                 SetOppsUpdated(oppsUpdatedCount.ToString());
@@ -3301,11 +4799,14 @@ namespace Demo_Bot
                                     ResourceKind = "opportunities",
                                     Entry = entry
                                 };
-
+                                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                                 request.Update();
+                                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                                tempTime = (tempAfter - tempPre) / 1000;
+                                Log(DateTime.Now + " | " + guid + " | Push | Opportunity |  | " + tempTime, fileName);
                                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                                 float timed = (after - previous) / 1000;
-                                Log(DateTime.Now + " - Updated Opp with loss: " + payload.Values["Description"]  + " - " + timed + " seconds", fileName);
+                                Log(DateTime.Now + " | " + guid + " | Put | Opportunity | Updated Opp with loss: " + payload.Values["Description"] + " | " + tempTime, fileName);
                                 Debug.WriteLine("Updated Opp with loss: " + payload.Values["Description"]);
                                 oppsUpdatedCount++;
                                 SetOppsUpdated(oppsUpdatedCount.ToString());
@@ -3314,6 +4815,8 @@ namespace Demo_Bot
                         }
                         else
                         {
+                            float after;
+                            float timed;
                             int unlucky = rand.Next(0, 100);
                             if (unlucky < 3)
                             {
@@ -3332,11 +4835,14 @@ namespace Demo_Bot
                                     ResourceKind = "opportunities",
                                     Entry = entry
                                 };
-
+                                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                                 request.Update();
-                                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                                float timed = (after - previous) / 1000;
-                                Log(DateTime.Now + " - Updated Opp with loss: " + payload.Values["Description"]  + " - " + timed + " seconds", fileName);
+                                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                                tempTime = (tempAfter - tempPre) / 1000;
+                                Log(DateTime.Now + " | " + guid + " | Push | Opportunity |  | " + tempTime, fileName);
+                                after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                                timed = (after - previous) / 1000;
+                                Log(DateTime.Now + " | " + guid + " | Put | Opportunity | Updated Opp with loss: " + payload.Values["Description"] + " | " + timed, fileName);
                                 Debug.WriteLine("Updated Opp with loss: " + payload.Values["Description"]);
                                 oppsUpdatedCount++;
                                 SetOppsUpdated(oppsUpdatedCount.ToString());
@@ -3344,7 +4850,9 @@ namespace Demo_Bot
                             }
                             // Add a note to the opportunity
                             makeNoteFor(payload);
-                            Log(DateTime.Now + " - Note made for: " + payload.Values["Description"], fileName);
+                            after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                            timed = (after - previous) / 1000;
+                            Log(DateTime.Now + " | " + guid + " | Total | Note | For: " + payload.Values["Description"] + " | " + timed, fileName);
                             Debug.WriteLine("Note made for: " + payload.Values["Description"]);
                             return;
                         }
@@ -3363,10 +4871,14 @@ namespace Demo_Bot
                                 ResourceKind = "opportunities",
                                 Entry = entry
                             };
+                            tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                             requested.Update();
+                            tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                            tempTime = (tempAfter - tempPre) / 1000;
+                            Log(DateTime.Now + " | " + guid + " | Push | Opportunity |  | " + tempTime, fileName);
                             float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                             float timed = (after - previous) / 1000;
-                            Log(DateTime.Now + " - Opportunity: " + payload.Values["Description"] + " moved to the next stage - " + timed + " seconds", fileName);
+                            Log(DateTime.Now + " | " + guid + " | Put | Opportunity | " + payload.Values["Description"] + " moved to the next stage | " + timed, fileName);
                             Debug.WriteLine("Opportunity: " + payload.Values["Description"] + " moved to the next stage");
                             oppsUpdatedCount++;
                             SetOppsUpdated(oppsUpdatedCount.ToString());
@@ -3374,6 +4886,8 @@ namespace Demo_Bot
                         else
                         {
                             int unlucky = rand.Next(0, 100);
+                            float after;
+                            float timed;
                             if (unlucky < 3)
                             {
                                 string reason = localize(language, "Reason", null, null, null, false);
@@ -3399,11 +4913,14 @@ namespace Demo_Bot
                                     ResourceKind = "opportunities",
                                     Entry = entry
                                 };
-
+                                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                                 request.Update();
-                                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                                float timed = (after - previous) / 1000;
-                                Log(DateTime.Now + " - Updated Opp with loss: " + payload.Values["Description"]  + " - " + timed + " seconds", fileName);
+                                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                                tempTime = (tempAfter - tempPre) / 1000;
+                                Log(DateTime.Now + " | " + guid + " | Push | Opportunity |  | " + tempTime, fileName);
+                                after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                                timed = (after - previous) / 1000;
+                                Log(DateTime.Now + " | " + guid + " | Put | Opportunity | " + payload.Values["Description"] + " updated with loss | " + timed, fileName);
                                 Debug.WriteLine("Updated Opp with loss: " + payload.Values["Description"]);
                                 oppsUpdatedCount++;
                                 SetOppsUpdated(oppsUpdatedCount.ToString());
@@ -3411,16 +4928,257 @@ namespace Demo_Bot
                             }
                             // Add an activity to the opportunity
                             makeActivityFor(payload);
-                            Log(DateTime.Now + " - Activity made for: " + payload.Values["Description"], fileName);
+                            after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                            timed = (after - previous) / 1000;
+                            Log(DateTime.Now + " | " + guid + " | Total | Activity |  For: " + payload.Values["Description"] + " | " + timed, fileName);
                             Debug.WriteLine("Activity made for: " + payload.Values["Description"]);
                         }
                     }
                 }
             }
             catch (Exception e) { 
-                Log(e.ToString(), fileName); 
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName); 
             }
         }
+
+        public void makeProduct()
+        {
+            SDataTemplateResourceRequest productsTemplate = new SDataTemplateResourceRequest(dynamic);
+            productsTemplate.ResourceKind = "products";
+            Sage.SData.Client.Atom.AtomEntry tempEntry = productsTemplate.Read();
+            SDataPayload payload = tempEntry.GetSDataPayload();
+
+            //payload.Values["Description"] = 
+
+            //tempEntry.SetSDataPayload(payload);
+
+            // Maybe AddTicketActivity service request
+            SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
+            {
+                ResourceKind = "products",
+                Entry = tempEntry
+            };
+            var response = request.Create();
+        }
+
+        public void updateProduct()
+        {
+
+        }
+
+        public void makeCampaign()
+        {
+            try
+            {
+                float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                SDataTemplateResourceRequest campaignTemplate = new SDataTemplateResourceRequest(dynamic);
+                campaignTemplate.ResourceKind = "campaigns";
+
+                Sage.SData.Client.Atom.AtomEntry tempEntry = campaignTemplate.Read();
+                SDataPayload payload = tempEntry.GetSDataPayload();
+
+                var getUserRequest = new SDataServiceOperationRequest(service)
+                {
+                    OperationName = "getCurrentUser",
+                    Entry = new Sage.SData.Client.Atom.AtomEntry()
+                };
+                var temp = getUserRequest.Create();
+                var userPayload = temp.GetSDataPayload();
+                userPayload = (SDataPayload)userPayload.Values["response"];
+
+                payload.Values["CreateDate"] = DateTime.Now;
+                payload.Values["CreateUser"] = userPayload.Values["userId"];
+                payload.Values["Description"] = randomCampaignDescriptionGenerator();
+                payload.Values["CampaignName"] = payload.Values["Description"];
+                payload.Values["Objectives"] = randomCampaignObjective();
+                payload.Values["CampaignLeadSources"] = fetchLeadSource();
+                payload.Values["CallToAction"] = getCallToAction(payload.Values["Objectives"].ToString());
+                payload.Values["ForecastBudget"] = rand.Next(1000, 10000);
+                payload.Values["ExpensesBudget"] = (int)payload.Values["ForecastBudget"] * rand.NextDouble();
+                payload.Values["Status"] = "Active";
+                // Use CampaignTargets to calculate the amount of ExpectedContactResponses and ExpectedLeadResponses
+                //payload.Values["CampaignProducts"] = fetchCampaignProduct();
+                //payload.Values["CampaignResponses"] = fetchCampaignResponse();
+                //payload.Values["CampaignTargets"] = fetchCampaignTarget();
+                //payload.Values["Opportunities"] = fetchOpportunityCampaign(payload.Key);
+
+                tempEntry.SetSDataPayload(payload);
+
+                SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
+                {
+                    ResourceKind = "campaigns",
+                    Entry = tempEntry
+                };
+                request.Create();
+                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | Campaign made with name: " + payload.Values["CampaignName"] + " | " + timed + " seconds", fileName);
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+            }
+        }
+
+        public void updateCampaign()
+        {
+            try
+            {
+                float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                SDataTemplateResourceRequest campaignProductsTemplate = new SDataTemplateResourceRequest(dynamic);
+                campaignProductsTemplate.ResourceKind = "campaignProducts";
+                Sage.SData.Client.Atom.AtomEntry tempEntry = campaignProductsTemplate.Read();
+                SDataPayload payload = tempEntry.GetSDataPayload();
+
+                var product = fetchCampaignProduct();
+
+                payload.Values["Product"] = product;
+                payload.Values["Name"] = product.Values["Description"];
+                payload.Values["Family"] = product.Values["Family"];
+
+                SDataResourceCollectionRequest campaign = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "campaigns"
+                };
+
+                SDataPayload campaignPayload = new SDataPayload();
+                var feed = campaign.Read();
+                int count = feed.Entries.Count();
+                if (count != 0)
+                {
+                    int i = rand.Next(1, count);
+                    campaignPayload = feed.Entries.ElementAt(i).GetSDataPayload();
+                }
+
+                payload.Values["Campaign"] = campaignPayload;
+
+                tempEntry.SetSDataPayload(payload);
+
+                SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
+                {
+                    ResourceKind = "campaignProducts",
+                    Entry = tempEntry
+                };
+                var response = request.Create();
+
+                //campaignPayload.Values["CampaignProducts"] = payload;
+
+                SDataTemplateResourceRequest campaignResponsesTemplate = new SDataTemplateResourceRequest(dynamic);
+                campaignProductsTemplate.ResourceKind = "targetResponses";
+                Sage.SData.Client.Atom.AtomEntry tempEntry2 = campaignProductsTemplate.Read();
+                SDataPayload payload2 = tempEntry.GetSDataPayload();
+
+
+                payload2.Values["Campaign"] = campaignPayload;
+                payload2.Values["CampaignTarget"] = product.Values["Description"];
+                payload2.Values["Family"] = product.Values["Family"];
+
+
+                tempEntry2.SetSDataPayload(payload);
+
+                SDataSingleResourceRequest request2 = new SDataSingleResourceRequest(dynamic)
+                {
+                    ResourceKind = "campaignProduct",
+                    Entry = tempEntry
+                };
+                var response2 = request.Create(); 
+                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | Updated Campaign: " + campaignPayload.Values["CampaignName"] + " | " + timed + " seconds", fileName);
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+            }
+        }
+
+        public SDataPayload updateAccount(SDataPayload accountPayload)
+        {
+            Guid guid = Guid.NewGuid();
+            try
+            {
+                float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                SDataPayload address = null;
+
+                SDataTemplateResourceRequest account = new SDataTemplateResourceRequest(dynamic)
+                {
+                    ResourceKind = "accounts"
+                };
+                var tempEntry = account.Read();
+
+                SDataResourceCollectionRequest addresses = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "addresses",
+                    QueryValues = { { "where", "Country eq 'USA'" } }
+                };
+                float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var feed = addresses.Read();
+                float tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Addresses |  | " + tempTime, fileName);
+                int count = feed.Entries.Count();
+                int choice = rand.Next(count);
+                address = feed.Entries.ElementAt(choice).GetSDataPayload();
+                accountPayload.Values["Address"] = address;
+                string[] region = getRegion((string)address.Values["State"]);
+                accountPayload.Values["Region"] = region[0];
+                string accountMan = region[1];
+
+                SDataResourceCollectionRequest users = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "users",
+                    QueryValues = { { "where", "UserName eq '" + accountMan.ToLower() + "'" } }
+                };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var feed5 = users.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Users |  | " + tempTime, fileName);
+                SDataPayload accountManager = feed5.Entries.ElementAt(0).GetSDataPayload();
+
+                accountPayload.Values["AccountManager"] = accountManager;
+
+                SDataPayload owner = null;
+
+                SDataResourceCollectionRequest owners = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "owners",
+                    QueryValues = { { "where", "OwnerDescription eq '" + region[0] + "'" } }
+                };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var feed3 = owners.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Owners |  | " + tempTime, fileName);
+                owner = feed3.Entries.ElementAt(0).GetSDataPayload();
+
+                accountPayload.Values["Owner"] = owner;
+
+                tempEntry.SetSDataPayload(accountPayload);
+                
+
+                SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
+                {
+                    ResourceKind = "accounts",
+                    Entry = tempEntry
+                };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var response = request.Update();
+                accountPayload = (SDataPayload)response.GetSDataPayload();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Put | Account |  | " + tempTime, fileName);
+                float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                float timed = (after - previous) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Total | Account | " + accountPayload.Values["AccountName"] + " | " + timed, fileName);
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+            }
+            return accountPayload;
+        }
+
         #endregion
 
         #region SDataDecoding
@@ -3467,43 +5225,43 @@ namespace Demo_Bot
 
             return type;
         }
+
         #endregion
 
         #region RandomDataGenerators
         private SDataPayload fetchAccount()
         {
-            Random rand = new Random();
-            int i = rand.Next(1139); // Where 'i' is based on the number of accounts
-            //int count = 0;
             SDataPayload payload = null;
 
             try
             {
+                var getUserRequest = new SDataServiceOperationRequest(service)
+                {
+                    OperationName = "getCurrentUser",
+                    Entry = new Sage.SData.Client.Atom.AtomEntry()
+                };
+                var temp = getUserRequest.Create();
+                var userPayload = temp.GetSDataPayload();
+                userPayload = (SDataPayload)userPayload.Values["response"];
+
                 SDataResourceCollectionRequest accounts = new SDataResourceCollectionRequest(dynamic)
                 {
                     ResourceKind = "accounts",
-                    QueryValues = { { "startIndex", i.ToString() } }
-                    //QueryValues = { { "orderBy", "StartDate" } }
+                    QueryValues = { { "where" , "AccountManager.Id eq '" + userPayload.Values["userId"] + "'" } }
                 };
 
                 var feed = accounts.Read();
-                foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
+                int count = feed.Entries.Count();
+                if (count != 0)
                 {
-                    payload = entry.GetSDataPayload();
-                    if (payload != null)
-                    {
-                        break;
-                    }
+                    int i = rand.Next(1, count);
+                    payload = feed.Entries.ElementAt(i).GetSDataPayload();
                 }
             }
             catch (Exception e)
             {
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileName, true))
-                                {
-                                    file.WriteLine(e);
-                                }
-                //Log(e.ToString(),fileName);
-                SetText("Connection to server lost... Please check your connection");
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                //SetText("Connection to server lost... Please check your connection");
                 //this.stop();
             }
 
@@ -3512,33 +5270,27 @@ namespace Demo_Bot
 
         private Sage.SData.Client.Atom.AtomEntry fetchLead()
         {
-            Random rand = new Random();
-            int i = rand.Next(250);
             Sage.SData.Client.Atom.AtomEntry tempEntry = null;
 
             try
             {
                 SDataResourceCollectionRequest leads = new SDataResourceCollectionRequest(dynamic)
                 {
-                    ResourceKind = "leads",
-                    QueryValues = { { "startIndex", i.ToString() } }
+                    ResourceKind = "leads"
                 };
 
                 var feed = leads.Read();
-                foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
+                int count = feed.Entries.Count();
+                if (count != 0)
                 {
-                    tempEntry = entry;
-                    break;
+                    int i = rand.Next(1, count);
+                    tempEntry = feed.Entries.ElementAt(i);
                 }
             }
             catch (Exception e)
             {
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileName, true))
-                                {
-                                    file.WriteLine(e);
-                                }
-                //Log(e.ToString(),fileName);;
-                SetText("Connection to server lost... Please check your connection");
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                //SetText("Connection to server lost... Please check your connection");
                 //this.stop();
             }
 
@@ -3547,37 +5299,27 @@ namespace Demo_Bot
 
         private SDataPayload fetchLeadSource()
         {
-            Random rand = new Random();
-            int i = rand.Next(0, 8);
             SDataPayload payload = null;
 
             try
             {
                 SDataResourceCollectionRequest leadSources = new SDataResourceCollectionRequest(dynamic)
                 {
-                    ResourceKind = "leadSources",
-                    QueryValues = { { "startIndex", i.ToString() } }
-                    //QueryValues = { { "orderBy", "StartDate" } }
+                    ResourceKind = "leadSources"
                 };
 
                 var feed = leadSources.Read();
-                foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
+                int count = feed.Entries.Count();
+                if (count != 0)
                 {
-                    payload = entry.GetSDataPayload();
-                    if (payload != null)
-                    {
-                        break;
-                    }
+                    int i = rand.Next(1, count);
+                    payload = feed.Entries.ElementAt(i).GetSDataPayload();
                 }
             }
             catch (Exception e)
             {
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileName, true))
-                                {
-                                    file.WriteLine(e);
-                                }
-                //Log(e.ToString(), fileName);
-                SetText("Connection to server lost... Please check your connection");
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                //SetText("Connection to server lost... Please check your connection");
                 //this.stop();
             }
 
@@ -3586,41 +5328,329 @@ namespace Demo_Bot
 
         private Sage.SData.Client.Atom.AtomEntry fetchOpportunity()
         {
-            Random rand = new Random();
             Sage.SData.Client.Atom.AtomEntry returnEntry = null;
-            //SDataPayload payload = null;
-            int i = rand.Next(100);
 
             try
             {
                 SDataResourceCollectionRequest opportunities = new SDataResourceCollectionRequest(dynamic)
                 {
                     ResourceKind = "opportunities",
-                    QueryValues = { {"where", "Status eq 'Open'"} , { "startIndex", i.ToString() } }
+                    QueryValues = { {"where", "Status eq 'Open'"} }
                 };
 
                 var feed = opportunities.Read();
-                foreach (Sage.SData.Client.Atom.AtomEntry entry in feed.Entries)
+                int count = feed.Entries.Count();
+                if (count != 0)
                 {
-                    if (entry != null)
-                    {
-                        returnEntry = entry;
-                        break;
-                    }
+                    int i = rand.Next(count);
+                    returnEntry = feed.Entries.ElementAt(i);
                 }
+                return returnEntry;
             }
             catch (Exception e)
             {
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileName, true))
-                                {
-                                    file.WriteLine(e);
-                                }
-                //Log(e.ToString(),fileName);;
-                SetText("Connection to server lost... Please check your connection");
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                //SetText("Connection to server lost... Please check your connection");
                 //this.stop();
             }
 
             return returnEntry;
+        }
+
+        private SDataPayload fetchTicket()
+        {
+            SDataPayload ticketPayload = null;
+            try
+            {
+                SDataResourceCollectionRequest tick = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "tickets"
+                };
+
+                var feed = tick.Read();
+                int count = feed.Entries.Count();
+                if (count != 0)
+                {
+                    int i = rand.Next(1, count);
+                    // Get the ticket payload at the random element at i
+                    ticketPayload = feed.Entries.ElementAt(i).GetSDataPayload();
+                }
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                //SetText("Connection to server lost... Please check your connection");
+                //this.stop();
+            }
+            return ticketPayload;
+        }
+
+        private SDataPayload fetchTicketActivityRate()
+        {
+            SDataPayload rate = null;
+
+            try
+            {
+                SDataResourceCollectionRequest ticketActivityRate = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "ticketActivityRates"
+                };
+
+                var feed = ticketActivityRate.Read();
+                int count = feed.Entries.Count();
+                if (count != 0)
+                {
+                    int i = rand.Next(1, count);
+                    rate = feed.Entries.ElementAt(i).GetSDataPayload();
+                }
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                //SetText("Connection to server lost... Please check your connection");
+            }
+            return rate;
+        }
+
+        private SDataPayload fetchTicketActivityItem()
+        {
+            SDataPayload item = null;
+
+            try
+            {
+                SDataResourceCollectionRequest ticketActivityItem = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "ticketActivityItems"
+                };
+
+                var feed = ticketActivityItem.Read();
+                int count = feed.Entries.Count();
+                if (count != 0)
+                {
+                    int i = rand.Next(1, count);
+                    item = feed.Entries.ElementAt(i).GetSDataPayload();
+                }
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                //SetText("Connection to server lost... Please check your connection");
+            }
+            return item;
+        }
+
+        private SDataPayload fetchCampaign()
+        {
+            SDataPayload item = null;
+
+            try
+            {
+                SDataResourceCollectionRequest campaigns = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "campaigns"
+                };
+
+                var feed = campaigns.Read();
+                int count = feed.Entries.Count();
+                if (count != 0)
+                {
+                    int i = rand.Next(1, count);
+                    item = feed.Entries.ElementAt(i).GetSDataPayload();
+                }
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                //SetText("Connection to server lost... Please check your connection");
+            }
+            return item;
+        }
+
+        private SDataPayload fetchCampaignProduct()
+        {
+            SDataPayload item = null;
+
+            try
+            {
+                SDataResourceCollectionRequest campaignProducts = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "products"
+                };
+
+                var feed = campaignProducts.Read();
+                int count = feed.Entries.Count();
+                if (count != 0)
+                {
+                    int i = rand.Next(1, count);
+                    item = feed.Entries.ElementAt(i).GetSDataPayload();
+                }
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                //SetText("Connection to server lost... Please check your connection");
+            }
+            return item;
+        }
+
+        private SDataPayload fetchCampaignResponse()
+        {
+            SDataPayload item = null;
+
+            try
+            {
+                SDataResourceCollectionRequest targetResponses = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "targetResponses"
+                };
+
+                var feed = targetResponses.Read();
+                int count = feed.Entries.Count();
+                if (count != 0)
+                {
+                    int i = rand.Next(1, count);
+                    item = feed.Entries.ElementAt(i).GetSDataPayload();
+                }
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                //SetText("Connection to server lost... Please check your connection");
+            }
+            return item;
+        }
+
+        private SDataPayload fetchCampaignTarget()
+        {
+            SDataPayload item = null;
+
+            try
+            {
+                SDataResourceCollectionRequest campaignTargets = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "campaignTargets"
+                };
+
+                var feed = campaignTargets.Read();
+                int count = feed.Entries.Count();
+                if (count != 0)
+                {
+                    int i = rand.Next(1, count);
+                    item = feed.Entries.ElementAt(i).GetSDataPayload();
+                }
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                //SetText("Connection to server lost... Please check your connection");
+            }
+            return item;
+        }
+
+        private SDataPayload fetchOpportunityCampaign(SDataPayload campaignPayload)
+        {
+            SDataPayload item = null;
+
+            try
+            {
+                SDataResourceCollectionRequest opportunityCampaigns = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "opportunityCampaigns",
+                    QueryValues = { { "where", "Campaign.Id eq '" + campaignPayload.Key + "'" } }
+                };
+
+                var feed = opportunityCampaigns.Read();
+                int count = feed.Entries.Count();
+                if (count != 0)
+                {
+                    int i = rand.Next(1, count);
+                    item = feed.Entries.ElementAt(i).GetSDataPayload();
+                }
+            }
+            catch (Exception e)
+            {
+                Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                //SetText("Connection to server lost... Please check your connection");
+            }
+            return item;
+        }
+
+        private string getCallToAction(string objective)
+        {
+            string call = null;
+            switch (objective)
+            {
+                case "Increase sales to new and existing customers":
+                    int discount = rand.Next(50,500);
+                    call = "$" + discount + " off select models";
+                    break;
+                case "Rase awareness of the product":
+                    int choice = rand.Next(1, 4);
+                    switch (choice)
+                    {
+                        case 1:
+                            call = "Increase TV advertisement presence";
+                            break;
+                        case 2:
+                            call = "Increase mailing presence";
+                            break;
+                        case 3:
+                            call = "Increase web advertisement";
+                            break;
+                        case 4:
+                            call = "Increase e-mail marketing";
+                            break;
+                    }
+                    break;
+                case "Increase credibility":
+                    int choice2 = rand.Next(1, 3);
+                    switch (choice2)
+                    {
+                        case 1:
+                            call = "Get real customer stories";
+                            break;
+                        case 2:
+                            call = "Quote customer service successes";
+                            break;
+                        case 3:
+                            call = "Highlight pros of product over competition";
+                            break;
+                    }
+                    break;
+                case "Compete in the market":
+                    int discount2 = rand.Next(10, 25);
+                    int length = rand.Next(1,15);
+                    call = "Provide product discount of $" + discount2 + " for " + length + " days";
+                    break;
+                case "Increase revenue":
+                    int choice3 = rand.Next(1, 2);
+                    switch (choice3)
+                    {
+                        case 1:
+                            call = "Provide limited time cloud free support for new signups";
+                            break;
+                        case 2:
+                            int discount3 = rand.Next(10, 25);
+                            int length2 = rand.Next(1,15);
+                            call = "Provide product discount of $" + discount3 + " for " + length2 + " days";
+                            break;
+                    }
+                    break;
+                case "Become a recognised member of society":
+                    int choice4 = rand.Next(1, 2);
+                    switch (choice4)
+                    {
+                        case 1:
+                            int amount = rand.Next(1000,10000);
+                            call = "Donate " + amount + " to a local charity";
+                            break;
+                        case 2:
+                            call = "Setup a charity day for workers to volunteer locally";
+                            break;
+                    }
+                    break;
+            }
+            return call;
         }
 
         private void progressStage(SDataPayload oppPayload)
@@ -3697,6 +5727,39 @@ namespace Demo_Bot
             }
         }
 
+        private string[] getRegion(string state)
+        {
+            string[] region = new string[2];
+            switch (state)
+            {
+                case "ME": case "VT": case "NH": case "MA": case "RI": case "NY": case "CT": case "PA": case "NJ": case "DE": case "MD":
+                    region[0] = "Northeast";
+                    region[1] = "Dan";
+                    break;
+                case "WV": case "VA": case "KY": case "NC": case "SC": case "TN": case "AR": case "LA": case "MS": case "AL": case "GA": case "FL":
+                    region[0] = "Southeast";
+                    region[1] = "Linda";
+                    break;
+                case "ND": case "SD": case "NE": case "KS": case "MN": case "IA": case "MO": case "WI": case "IL": case "MI": case "IN": case "OH":
+                    region[0] = "Midwest";
+                    region[1] = "Lee";
+                    break;
+                case "AZ": case "NM": case "OK": case "TX":
+                    region[0] = "Southwest";
+                    region[1] = "Ed";
+                    break;
+                case "WA": case "OR": case "CA": case "NV": case "ID": case "MT": case "WY": case "UT": case "CO":
+                    region[0] = "Northwest";
+                    region[1] = "Cathy";
+                    break;
+                default:
+                    region[0] = "Midwest";
+                    region[1] = "Lee";
+                    break;
+            }
+            return region;
+        }
+
         // Currently excludes Event Activity due to it causing problems on activity creation.
         private string randomTypeGenerator()
         {
@@ -3714,7 +5777,7 @@ namespace Demo_Bot
                     returnType = "PhoneCall";
                 else
                 {
-                    if (choice >= 1)
+                    if (choice >= 0.15)
                         returnType = "ToDo";
                     //else
                     //{
@@ -3730,6 +5793,22 @@ namespace Demo_Bot
                     //}
                 }
             }
+
+            return returnType;
+        }
+
+        private string leadTypeGenerator()
+        {
+            Random rand = new Random();
+            // Random number to determine which type will be created.
+
+            int choice = rand.Next(1,2);
+            string returnType;
+
+            if (choice == 1)
+                returnType = "Appointment";
+            else
+                returnType = "PhoneCall";
 
             return returnType;
         }
@@ -3970,6 +6049,53 @@ namespace Demo_Bot
             return category;
         }
 
+        private string leadCategoryGenerator(string type)
+        {
+            Random rand = new Random();
+            string category = "";
+            int index;
+
+            string[] categories = new string[]
+            {
+                #region Categories
+                // Meeting categories and Personal: (14 total)
+                "",
+                "Goodwill Visit",
+                "Other Visit",
+                "Sales Visit",
+                "Strategic Relationship",
+                "Trade Show",
+                "Travel",
+                "Venture Capitol",
+                // Phone call categories: (5 total)
+                "",
+                "Cold Call",
+                "Follow-up",
+                "Leads",
+                #endregion
+            };
+            switch (type)
+            {
+                case "Appointment":
+                    index = rand.Next(0, 7);
+                    category = categories[index];
+                    break;
+                case "Follow-Up":
+                    category = categories[8];
+                    break;
+                case "ColdCall":
+                    category = categories[9];
+                    break;
+                case "LeadCall":
+                    category = categories[10];
+                    break;
+                default:
+                    category = "";
+                    break;
+            }
+            return category;
+        }
+
         private string randomChineseCategoryGenerator(string type)
         {
             Random rand = new Random();
@@ -4145,6 +6271,104 @@ namespace Demo_Bot
             }
 
             return returnDescription;
+        }
+
+        private string leadDescriptionGenerator(string type)
+        {
+            Random rand = new Random();
+            // For the random number generation
+
+            int index;
+            string returnDescription = "";
+            string[] descriptions = new string[]
+            {
+                #region Descriptions
+                // Listed are the predefined 'regarding' values on the mobile client.
+                // For Meeting: (8 total)
+                "Breakfast meeting",
+                "Demonstration",
+                "Dinner meeting",
+                "Discuss Opportunities",
+                "Lunch Meeting",
+                "Presentation",
+                "Review proposal",
+                "Review requirements",
+                // For Phone Call: (9 total)
+                "Confirm Literature Received",
+                "Confirm Meeting",
+                "Discuss Opportunities",
+                "Return voice mail message",
+                "Schedule a Meeting",
+                "Follow up - next step",
+                "Follow up on proposal",
+                "Follow-up",
+                // For Notes: (5 total)
+                "Meeting notes",
+                "Phone meeting",
+                "Proposal",
+                "Qualification",
+                "Questions"
+            #endregion
+            };
+
+
+            switch (type)
+            {
+                case "Appointment":
+                    index = rand.Next(8);
+                    returnDescription = descriptions[index];
+                    break;
+                case "PhoneCall":
+                    index = rand.Next(8, 12);
+                    returnDescription = descriptions[index];
+                    break;
+                case "Follow-Up":
+                    index = rand.Next(13, 15);
+                    returnDescription = descriptions[index];
+                    break;
+                case "Note":
+                    index = rand.Next(16, 21);
+                    returnDescription = descriptions[index];
+                    break;
+                default:
+                    returnDescription = "";
+                    break;
+            }
+
+            return returnDescription;
+        }
+
+        private string randomCampaignDescriptionGenerator()
+        {
+            string value = null;
+            string[] description = new string[]
+            {
+                "E-mail marketing",
+                "Television advertisements",
+                "Website advertisements",
+                "Fundraising for Charity",
+                "Reeling in new prospects"
+            };
+            int i = rand.Next(0, description.Length - 1);
+            value = description[i];
+            return value;
+        }
+
+        private string randomCampaignObjective()
+        {
+            string value = null;
+            string[] objective = new string[]
+            {
+                "Increase sales to new and existing customers",
+                "Raise awareness of the product",
+                "Increase credibility",
+                "Compete in the market",
+                "Increase revenue",
+                "Become a recognised member of society"
+            };
+            int i = rand.Next(0, objective.Length - 1);
+            value = objective[i];
+            return value;
         }
 
         private string randomChineseDescriptionGenerator(string type)
@@ -4339,7 +6563,7 @@ namespace Demo_Bot
         }
         */
 
-        private string randomNoteGenerator(string type, SDataPayload payload, string description)
+        private string randomNoteGenerator(string type, string accountName, string description)
         {
             Random rand = new Random();
             string note = "";
@@ -4349,15 +6573,15 @@ namespace Demo_Bot
                 #region Notes
                 "",
                 // Meeting notes: (5 total)
-                "Representatives from " + payload.Values["AccountName"] + " wanted to get together to talk about the product.",
-                "Meeting with " + payload.Values["AccountName"] + " should help move along business with them.",
-                "Talked with " + payload.Values["AccountName"] + " on the phone and they wanted to speak in person for clarifications.",
-                payload.Values["AccountName"] + " wanted to congratulate us in person on our product.",
-                "Checking up on " + payload.Values["AccountName"] + ". Have not heard from them in a while.",
+                "Representatives from " + accountName + " wanted to get together to talk about the product.",
+                "Meeting with " + accountName + " should help move along business with them.",
+                "Talked with " + accountName + " on the phone and they wanted to speak in person for clarifications.",
+                accountName + " wanted to congratulate us in person on our product.",
+                "Checking up on " + accountName + ". Have not heard from them in a while.",
                 // Phone call notes: (3 total)
-                payload.Values["AccountName"] + " wanted clarifications",
-                "Following up on " + payload.Values["AccountName"] + " because they seemed interested in the product",
-                payload.Values["AccountName"] + " wanted to talk about mobile implementation",
+                accountName + " wanted clarifications",
+                "Following up on " + accountName + " because they seemed interested in the product",
+                accountName + " wanted to talk about mobile implementation",
                 // Personal notes: (4 total)
                 "So excited for " + description,
                 "Can't wait to " + description,
@@ -4472,6 +6696,83 @@ namespace Demo_Bot
                     note = "";
                     break;
             }
+
+            return note;
+        }
+
+        private string randomNoteforLeadGenerator(string value,SDataPayload payload, string type)
+        {
+            Random rand = new Random();
+            string note = "";
+            string company = "";
+            string name = "";
+            if (string.Compare(value, "Lead") == 0)
+            {
+                company = (string)payload.Values["Company"];
+                name = (string)payload.Values["FirstName"] + " " + (string)payload.Values["LastName"];
+            }
+            if (string.Compare(value, "Contact") == 0)
+            {
+                company = (string)payload.Values["AccountName"];
+                name = (string)payload.Values["Name"];
+            }
+            if (string.Compare(value, "Activity") == 0)
+            {
+                company = (string)payload.Values["AccountName"];
+                name = (string)payload.Values["LeadName"];
+            }
+            
+            // Array of note structures to be used
+            string[] notes = new string[17]
+            {
+                #region Notes
+                "",
+                // Meeting notes: (5 total)
+                "Representatives from " + company + " wanted to get together to talk about the product.",
+                "Meeting with " + name + " should help move along business with them.",
+                "Talked with " + name + " on the phone and they wanted to speak in person for clarifications.",
+                name + " wanted to congratulate us in person on our product.",
+                "Went well",
+                "Seemed to enjoy the prospect of working with us",
+                "Thought the product was more than adequate for the desired tasks",
+                "Talked about the product and got lots of constructive feedback",
+                "The chat was brief, but overall seemed optimistic",
+                // Phone call notes: (3 total)
+                name + " wanted clarifications",
+                name + " wanted to talk about mobile implementation",
+                "Following up on " + name + " because they seemed interested in the product",
+                // No answer / New activity: ( total)
+                "Didn't answer, set up new activity to check in again",
+                "Couldn't talk at that time, will call again later",
+                "Wanted answers to questions, made a new activity to account for this",
+                "Lead wanted to meet in person to talk about the product, made an appointment"
+                #endregion
+            };
+
+            int choice;
+            switch (type)
+            {
+                case "Appointment":
+                    choice = rand.Next(10);
+                    note = notes[choice];
+                    break;
+                case "PhoneCall":
+                    choice = rand.Next(5,13);
+                    note = notes[choice];
+                    break;
+                case "Follow-Up":
+                    note = notes[13];
+                    break;
+                case "NewActivity":
+                    choice = rand.Next(13,17);
+                    note = notes[choice];
+                    break;
+                default:
+                    choice = rand.Next(8,13);
+                    note = notes[choice];
+                    break;
+            }
+            
 
             return note;
         }
@@ -16096,7 +18397,7 @@ namespace Demo_Bot
                         value = fetchLeadSource();
                         break; */
                     case "Note Generator":
-                        value = randomNoteGenerator(type, payload, description);
+                        value = randomNoteGenerator(type,payload.Values["AccountName"].ToString(), description);
                         break;
                     case "Location Generator":
                         value = randomLocationGenerator(type);

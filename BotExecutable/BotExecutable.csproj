@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>C:\Users\tyler.wallace\Desktop\Bot Executable\</PublishUrl>
+    <PublishUrl>C:\Users\tyler.wallace.SWIFTPAGE\Desktop\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -22,7 +22,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>5</ApplicationRevision>
+    <ApplicationRevision>7</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -46,49 +46,29 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>2466F9BFA35124EA6D5C14A56AD3F1C6B8E3C139</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>8863AF00CC34956D668FDF540BBFE6A43E1DD563</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>BotExecutable_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>Saleslogix%252c N_A_%252c LLC.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.ReportViewer.Common, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" />
     <Reference Include="Microsoft.ReportViewer.WinForms, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" />
-    <Reference Include="Sage.Common">
-      <HintPath>..\Demo Bot\Properties\Sage.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Sage.Common.Syndication">
-      <HintPath>..\Demo Bot\Properties\Sage.Common.Syndication.dll</HintPath>
-    </Reference>
-    <Reference Include="Sage.Platform">
-      <HintPath>..\Demo Bot\Properties\Sage.Platform.dll</HintPath>
-    </Reference>
-    <Reference Include="Sage.Platform.Application">
-      <HintPath>..\Demo Bot\Properties\Sage.Platform.Application.dll</HintPath>
-    </Reference>
-    <Reference Include="Sage.Platform.Configuration">
-      <HintPath>..\Demo Bot\Properties\Sage.Platform.Configuration.dll</HintPath>
-    </Reference>
-    <Reference Include="Sage.SalesLogix">
-      <HintPath>..\Demo Bot\Properties\Sage.SalesLogix.dll</HintPath>
-    </Reference>
-    <Reference Include="Sage.SalesLogix.API">
-      <HintPath>..\Demo Bot\Properties\Sage.SalesLogix.API.dll</HintPath>
-    </Reference>
-    <Reference Include="Sage.SalesLogix.System">
-      <HintPath>..\Demo Bot\Properties\Sage.SalesLogix.System.dll</HintPath>
-    </Reference>
-    <Reference Include="Sage.SalesLogix.Web">
-      <HintPath>..\Demo Bot\Properties\Sage.SalesLogix.Web.dll</HintPath>
-    </Reference>
     <Reference Include="Sage.SData.Client">
       <HintPath>..\Demo Bot\Properties\Sage.SData.Client.dll</HintPath>
     </Reference>
@@ -126,7 +106,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <None Include="BotExecutable_TemporaryKey.pfx" />
+    <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

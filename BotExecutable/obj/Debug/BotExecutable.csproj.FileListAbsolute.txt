@@ -1,29 +1,21 @@
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\BotExecutable.exe.config
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\BotExecutable.exe.manifest
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\BotExecutable.application
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\BotExecutable.exe
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\BotExecutable.pdb
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Demo Bot.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Sage.Common.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Sage.Common.Syndication.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Sage.Platform.Application.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Sage.Platform.Configuration.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Sage.Platform.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Sage.SalesLogix.API.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Sage.SalesLogix.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Sage.SalesLogix.System.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Sage.SalesLogix.Web.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Sage.SData.Client.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Google.GData.Client.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Google.GData.Spreadsheets.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Newtonsoft.Json.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Google.GData.Extensions.dll
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\bin\Debug\Demo Bot.pdb
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\obj\Debug\BotExecutable.csprojResolveAssemblyReference.cache
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\obj\Debug\BotExecutable.AutoBot.resources
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\obj\Debug\BotExecutable.Properties.Resources.resources
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\obj\Debug\BotExecutable.csproj.GenerateResource.Cache
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\obj\Debug\BotExecutable.exe.manifest
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\obj\Debug\BotExecutable.application
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\obj\Debug\BotExecutable.exe
-C:\Users\twallace\documents\visual studio 2012\Projects\Demo Bot\BotExecutable\obj\Debug\BotExecutable.pdb
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\bin\Debug\BotExecutable.exe.config
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\bin\Debug\BotExecutable.exe.manifest
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\bin\Debug\BotExecutable.application
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\bin\Debug\BotExecutable.exe
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\bin\Debug\BotExecutable.pdb
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\bin\Debug\Demo Bot.dll
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\bin\Debug\Sage.SData.Client.dll
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\bin\Debug\Google.GData.Client.dll
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\bin\Debug\Google.GData.Spreadsheets.dll
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\bin\Debug\Newtonsoft.Json.dll
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\bin\Debug\Google.GData.Extensions.dll
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\bin\Debug\Demo Bot.pdb
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\obj\Debug\BotExecutable.csprojResolveAssemblyReference.cache
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\obj\Debug\BotExecutable.AutoBot.resources
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\obj\Debug\BotExecutable.Properties.Resources.resources
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\obj\Debug\BotExecutable.csproj.GenerateResource.Cache
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\obj\Debug\BotExecutable.TrustInfo.xml
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\obj\Debug\BotExecutable.exe.manifest
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\obj\Debug\BotExecutable.application
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\obj\Debug\BotExecutable.exe
+C:\Users\tyler.wallace.SWIFTPAGE\Desktop\Demo-Bot-master\BotExecutable\obj\Debug\BotExecutable.pdb
