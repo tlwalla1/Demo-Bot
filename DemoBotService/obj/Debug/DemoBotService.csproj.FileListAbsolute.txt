@@ -1,0 +1,16 @@
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.exe.config
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\DemoBotService\obj\Debug\DemoBotService.csprojResolveAssemblyReference.cache
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.exe
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.pdb
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\BotLibrary.dll
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\Sage.SData.Client.dll
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\BotLibrary.pdb
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\DemoBotService\obj\Debug\DemoBotService.exe
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\DemoBotService\obj\Debug\DemoBotService.pdb
+C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\obj\Debug\DemoBotService.DemoBotService.resources
+C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\obj\Debug\DemoBotService.csproj.GenerateResource.Cache
+C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\obj\Debug\DemoBotService.ProjectInstaller.resources
+C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.exe.manifest
+C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.application
+C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\obj\Debug\DemoBotService.exe.manifest
+C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\obj\Debug\DemoBotService.application
