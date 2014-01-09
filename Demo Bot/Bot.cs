@@ -768,148 +768,162 @@ namespace Demo_Bot
 
         private void leadQual()
         {
-            // Runs update lead. Include random chance to write note about current stage
-            switch (dirty)
-            {
-                case 0:
-                    SDataPayload leadPayload = null;
-                    do
-                    {
-                         leadPayload = fetchLead().GetSDataPayload();
-                    } while (leadPayload.Values["Company"]== null);
-                    int choice = rand.Next(1, 3);
-                    switch (choice)
-                    {
-                        case 1:
-                            makeNoteLead("Lead",leadPayload, "Follow-Up");
-                            dirty = 0;
-                            break;
-                        case 2:
-                            string action = "";
-                            int pick = rand.Next(1,3);
-                            if (pick == 1)
-                                action = "Appointment";
-                            if (pick == 2)
-                                action = "PhoneCall";
-                            activityPayload = makeActivityLead("Lead",leadPayload, action);
-                            dirty = 1;
-                            break;
-                        case 3:
-                            activityPayload = makeActivityLead("Lead",leadPayload, "ColdCall");
-                            dirty = 1;
-                            break;
-                        default:
-                            makeNoteLead("Lead",leadPayload, "Follow-Up");
-                            dirty = 0;
-                            break;
-                    }
-                    break;
-                case 1:
-                    int choice2 = rand.Next(1, 3);
-                    switch (choice2)
-                    {
-                        case 1:
-                            completeSpecificActivity(activityPayload);
-                            dirty = 2;
-                            break;
-                        case 2:
-                            completeSpecificActivity(activityPayload);
-                            string action = "";
-                            if (string.Compare((string)activityPayload.Values["Type"], "atAppointment") == 0)
-                                action = "Appointment";
-                            if (string.Compare((string)activityPayload.Values["Type"], "atPhoneCall") == 0)
-                                action = "PhoneCall";
-                            makeNoteLead("Activity",activityPayload, action);
-                            dirty = 2;
-                            break;
-                        case 3:
-                            completeSpecificActivity(activityPayload);
-                            makeNoteLead("Activity",activityPayload, "NewActivity");
-                            dirty = 0;
-                            break;
-                        default:
-                            completeSpecificActivity(activityPayload);
-                            string action2 = "";
-                            if (string.Compare((string)activityPayload.Values["Type"], "atAppointment") == 0)
-                                action = "Appointment";
-                            if (string.Compare((string)activityPayload.Values["Type"], "atPhoneCall") == 0)
-                                action = "PhoneCall";
-                            makeNoteLead("Activity",activityPayload, action2);
-                            dirty = 2;
-                            break;
-                        }
-                         break;
-                case 2:
-                    // Convert lead to contact
-                         var leadId = activityPayload.Values["LeadId"];
-                        // Get the lead payload then call makeContactWithName(leadPayload)
-                         SDataPayload conversionPayload = null;
-                         try
-                         {
-                             SDataResourceCollectionRequest leads = new SDataResourceCollectionRequest(dynamic)
-                             {
-                                 ResourceKind = "leads"
-                             };
+            Random rand = new Random();
+            double tempReliability = reliability / 100;
+            double reliable = rand.NextDouble();
 
-                             var feed2 = leads.Read();
-                             int count = feed2.Entries.Count();
-                             if (count != 0)
-                             {
-                                 int i = rand.Next(count);
-                                 conversionPayload = feed2.Entries.ElementAt(i).GetSDataPayload();
-                             }
-                         }
-                         catch (Exception e)
-                         {
-                             Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
-                             //SetText("Connection to server lost... Please check your connection");
-                             //this.stop();
-                         }
-                         contactPayload = makeContactWithName(conversionPayload);
-                    // Delete the current lead
-                         deleteSpecificLead(conversionPayload);
-                         dirty = 3;
-                         break;
-                case 3:
-                    //Schedule a follow-up and make a note or just create an opportunity
-                         int random = rand.Next(2);
-                         if (random == 0)
-                         {
-                             makeActivityLead("Contact", contactPayload, "Follow-Up");
-                             dirty = 4;
-                         }
-                         if (random == 1)
-                         {
-                             makeActivityLead("Contact", contactPayload, "Follow-Up");
-                             makeNoteLead("Contact", contactPayload, "Follow-Up");
-                             dirty = 4;
-                         }
-                         break;
-                case 4:
-                         makeOpportunityFor(actPayload);
-                         dirty = 0;
-                         break;
-             }
+            if (reliable < tempReliability)
+            {
+                // Runs update lead. Include random chance to write note about current stage
+                switch (dirty)
+                {
+                    case 0:
+                        SDataPayload leadPayload = null;
+                        do
+                        {
+                            leadPayload = fetchLead().GetSDataPayload();
+                        } while (leadPayload.Values["Company"] == null);
+                        int choice = rand.Next(1, 3);
+                        switch (choice)
+                        {
+                            case 1:
+                                makeNoteLead("Lead", leadPayload, "Follow-Up");
+                                dirty = 0;
+                                break;
+                            case 2:
+                                string action = "";
+                                int pick = rand.Next(1, 3);
+                                if (pick == 1)
+                                    action = "Appointment";
+                                if (pick == 2)
+                                    action = "PhoneCall";
+                                activityPayload = makeActivityLead("Lead", leadPayload, action);
+                                dirty = 1;
+                                break;
+                            case 3:
+                                activityPayload = makeActivityLead("Lead", leadPayload, "ColdCall");
+                                dirty = 1;
+                                break;
+                            default:
+                                makeNoteLead("Lead", leadPayload, "Follow-Up");
+                                dirty = 0;
+                                break;
+                        }
+                        break;
+                    case 1:
+                        int choice2 = rand.Next(1, 3);
+                        switch (choice2)
+                        {
+                            case 1:
+                                completeSpecificActivity(activityPayload);
+                                dirty = 2;
+                                break;
+                            case 2:
+                                completeSpecificActivity(activityPayload);
+                                string action = "";
+                                if (string.Compare((string)activityPayload.Values["Type"], "atAppointment") == 0)
+                                    action = "Appointment";
+                                if (string.Compare((string)activityPayload.Values["Type"], "atPhoneCall") == 0)
+                                    action = "PhoneCall";
+                                makeNoteLead("Activity", activityPayload, action);
+                                dirty = 2;
+                                break;
+                            case 3:
+                                completeSpecificActivity(activityPayload);
+                                makeNoteLead("Activity", activityPayload, "NewActivity");
+                                dirty = 0;
+                                break;
+                            default:
+                                completeSpecificActivity(activityPayload);
+                                string action2 = "";
+                                if (string.Compare((string)activityPayload.Values["Type"], "atAppointment") == 0)
+                                    action = "Appointment";
+                                if (string.Compare((string)activityPayload.Values["Type"], "atPhoneCall") == 0)
+                                    action = "PhoneCall";
+                                makeNoteLead("Activity", activityPayload, action2);
+                                dirty = 2;
+                                break;
+                        }
+                        break;
+                    case 2:
+                        // Convert lead to contact
+                        var leadId = activityPayload.Values["LeadId"];
+                        // Get the lead payload then call makeContactWithName(leadPayload)
+                        SDataPayload conversionPayload = null;
+                        try
+                        {
+                            SDataResourceCollectionRequest leads = new SDataResourceCollectionRequest(dynamic)
+                            {
+                                ResourceKind = "leads"
+                            };
+
+                            var feed2 = leads.Read();
+                            int count = feed2.Entries.Count();
+                            if (count != 0)
+                            {
+                                int i = rand.Next(count);
+                                conversionPayload = feed2.Entries.ElementAt(i).GetSDataPayload();
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName);
+                            //SetText("Connection to server lost... Please check your connection");
+                            //this.stop();
+                        }
+                        contactPayload = makeContactWithName(conversionPayload);
+                        // Delete the current lead
+                        deleteSpecificLead(conversionPayload);
+                        dirty = 3;
+                        break;
+                    case 3:
+                        //Schedule a follow-up and make a note or just create an opportunity
+                        int random = rand.Next(2);
+                        if (random == 0)
+                        {
+                            makeActivityLead("Contact", contactPayload, "Follow-Up");
+                            dirty = 4;
+                        }
+                        if (random == 1)
+                        {
+                            makeActivityLead("Contact", contactPayload, "Follow-Up");
+                            makeNoteLead("Contact", contactPayload, "Follow-Up");
+                            dirty = 4;
+                        }
+                        break;
+                    case 4:
+                        makeOpportunityFor(actPayload);
+                        dirty = 0;
+                        break;
+                }
+            }
 
         }
 
         private void leadGen()
         {
-            // Runs the makelead. Creates the first activity for the lead.
-            SDataPayload leadPayload = null;
-            if (dirty == 0)
+            Random rand = new Random();
+            double tempReliability = reliability / 100;
+            double reliable = rand.NextDouble();
+
+            if (reliable < tempReliability)
             {
-                leadPayload = makeLead();
-                dirty = 1;
-            }
-            if (dirty == 1 && leadPayload != null)
-            {
-                makeActivityLead("Lead",leadPayload, "Follow-Up");
-                dirty = 0;
-            }
-            if (leadPayload == null)
-            {
-                dirty = 0;
+                // Runs the makelead. Creates the first activity for the lead.
+                SDataPayload leadPayload = null;
+                if (dirty == 0)
+                {
+                    leadPayload = makeLead();
+                    dirty = 1;
+                }
+                if (dirty == 1 && leadPayload != null)
+                {
+                    makeActivityLead("Lead", leadPayload, "Follow-Up");
+                    dirty = 0;
+                }
+                if (leadPayload == null)
+                {
+                    dirty = 0;
+                }
             }
         }
 
