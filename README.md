@@ -7,6 +7,10 @@ Populates data on an SData run Server to create Demo Data based off an Eval user
 
 Make sure move the RunUserProfile.txt from the DemoBotService folder into C:/Swiftpage. If this folder is not made already, add it then place the text file into it. Furthermore make sure you unlock the DemoBotService.exe, located in the DemoBotService/bin/Debug folder, by right-clicking the file and going to properties. Once there click the unlock button.
 
+## How to Install
+
+To install, first unlock the DemoBotService.exe by locating it within the DemoBotService/bin/Debug folder and right-clicking the file. Then go to properties and click the 'Unlock' button and finally click apply. Now open up a command prompt window. Navigate the prompt to the folder containing your installutil.exe. This folder will generally be within your windows/microsoft.NET/framework/(version #) folder. Make sure you are using v4.0 or better because the Bot was made to run on this version. Once there type 'installutil.exe C:/...doclocation...' without the apostrophes and substituting the location of the DemoBotService.exe file in for ...doclocation... Hit enter and the command line will prompt you with a successfull install. If not check to make sure you have unlocked the file. Congratulations you have now instlled the Demo-Bot service application. To uninstall, follow the previous steps but type 'installutil.exe /u C:/...docpath...'. To make the service being running, or check its status, click on start, then right click Computer and navigate to Manage. Then go to Services and Applications and there it will be! Right click the service to start or stop it. For Windows 8, search for Server Manager and DemoBotService will be within there.
+
 
 ## Questions and Answers
 
