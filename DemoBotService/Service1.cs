@@ -59,55 +59,10 @@ namespace DemoBotService
                     bot[i] = new Bot(userName, password, reliability);
                     bot[i].setStopCommand(false);
                 }
-                timer.Elapsed += new ElapsedEventHandler(runBot);
-                timer.Enabled = true;
-            }
-            else
-            {
-                Debug.WriteLine("No RunUserProfile.txt found in C:/Swiftpage/");
-            }
-        }
-
-        protected override void OnStop()
-        {
-            timer.Enabled = false;
-            for (int i = 0; i < bot.Count(); i++)
-            {
-                bot[i] = null;
-            }
-            timer = null;
-        }
-
-        private void runBot(object source, ElapsedEventArgs e)
-        {
-            timer.Enabled = false;
-            // Checks whether button2 was pressed by the user, determining whether or not to continue running the bot.
-            for (int i = 0; i < bot.Count(); i++)
-            {
                 if (DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftAM.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftPM.ToUniversalTime()) <= 0)
                 {
-                    bot[i].Run();
-
-                    minTime = lower * 60000;
-                    maxTime = upper * 60000;
-                    double time = 300000;
-                    if (maxTime != 0)
-                    {
-                        if (maxTime == minTime)
-                        {
-                            time = maxTime;
-                        }
-                        else
-                        {
-                            do
-                            {
-                                time = maxTime * rand.NextDouble();
-                            } while (time < minTime || time == 0);
-                        }
-                        timer.Interval = time;
-                        time = time / 1000;
-                        timer.Enabled = true;
-                    }
+                    timer.Elapsed += new ElapsedEventHandler(runBot);
+                    timer.Enabled = true;
                 }
                 else
                 {
@@ -129,10 +84,51 @@ namespace DemoBotService
                     }
                     double time = (hour * 3600 * 1000) + (minute * 60 * 1000);
                     timer.Interval = time;
-                    time = time / 1000;
                     timer.Elapsed += new ElapsedEventHandler(runBot);
                     timer.Enabled = true;
                 }
+            }
+            else
+            {
+                Debug.WriteLine("No RunUserProfile.txt found in C:/Swiftpage/");
+            }
+        }
+
+        protected override void OnStop()
+        {
+            timer.Enabled = false;
+            for (int i = 0; i < bot.Count(); i++)
+            {
+                bot[i] = null;
+            }
+            timer = null;
+        }
+
+        private void runBot(object source, ElapsedEventArgs e)
+        {
+            for (int i = 0; i < bot.Count(); i++)
+            {
+                timer.Enabled = false;
+                bot[i].Run();
+            }
+            minTime = lower * 60000;
+            maxTime = upper * 60000;
+            double time = 300000;
+            if (maxTime != 0)
+            {
+                if (maxTime == minTime)
+                {
+                    time = maxTime;
+                }
+                else
+                {
+                    do
+                    {
+                        time = maxTime * rand.NextDouble();
+                    } while (time < minTime || time == 0);
+                }
+                timer.Interval = time;
+                timer.Enabled = true;
             }
         }
     }
