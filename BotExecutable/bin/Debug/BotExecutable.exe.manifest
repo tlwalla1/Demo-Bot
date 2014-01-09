@@ -67,14 +67,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="BotExecutable.exe" size="102912">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="BotExecutable.exe" size="110592">
       <assemblyIdentity name="BotExecutable" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>2AepHe39zW1CGzryraavyYV8ruR+lbh6dIaDwus/Bqw=</dsig:DigestValue>
+        <dsig:DigestValue>f81cBz1uiZxobz4CXGV83cMVSjD7yXuIZxtGBbzAZZI=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -86,7 +86,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>vvqEVbI1z7FHlN4NICUajAEtj6dBymgfsZmSYYga0Vg=</dsig:DigestValue>
+        <dsig:DigestValue>wqaZ95coP5WoaxQKAT51vdCA0j8aJUYOJsndze3hjaE=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

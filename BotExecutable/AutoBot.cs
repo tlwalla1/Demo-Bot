@@ -239,8 +239,9 @@ namespace BotExecutable
                         shiftPM5.Text = "5:30";
 
                     timer5 = new System.Timers.Timer();
-
-                    if (DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftAM5.Text + "AM") ).ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftPM5.Text + "PM")).ToUniversalTime()) <= 0)
+                    DateTime morning5 = Convert.ToDateTime(shiftAM5.Text + "AM");
+                    DateTime afternoon5 = Convert.ToDateTime(shiftPM5.Text + "PM");
+                    if (DateTime.Compare(DateTime.Now.ToUniversalTime(), morning5.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), afternoon5.ToUniversalTime()) <= 0)
                     {
                         userLabel5.Text = "User: " + userIDBox5.Text;
                         robot5 = new Bot(client, shiftAM5.Text, shiftPM5.Text, userIDBox5.Text, passwordBox5.Text, progressLabel5, activitiesCreated5, notesCreated5, activitiesCompleted5, leadsCreated5, accountsCreated5, contactsCreated5, oppsCreated5, ticketsCreated5, oppsUpdated5, leadsPromoted5, role5, activityCompleteAmount5.Value, roleSelector5, noteCheckBox5.Checked, activityCheckBox5.Checked, leadCheckBox5.Checked, accountCheckBox5.Checked, contactCheckBox5.Checked, oppCheckBox5.Checked, ticketCheckBox5.Checked, oppUpdateCheckBox5.Checked, completeActCheckBox5.Checked, promoteLeadCheckBox5.Checked, reliabilityValue5.Value, creationUpperBound.Text);
@@ -252,18 +253,16 @@ namespace BotExecutable
                     }
                     else
                     {
-                        DateTime morning = Convert.ToDateTime(shiftAM5.Text + "AM");
-                        DateTime afternoon = Convert.ToDateTime(shiftPM5.Text + "PM");
                         int hour = 0, minute = 0;
-                        if (DateTime.Now.Hour <= morning.Hour && DateTime.Now.Minute <= morning.Minute)
+                        if (DateTime.Now.Hour <= morning5.Hour && DateTime.Now.Minute <= morning5.Minute)
                         {
-                            hour = morning.Hour - DateTime.Now.Hour;
-                            minute = morning.Minute - DateTime.Now.Minute;
+                            hour = morning5.Hour - DateTime.Now.Hour;
+                            minute = morning5.Minute - DateTime.Now.Minute;
                         }
-                        if (DateTime.Now.Hour >= afternoon.Hour && DateTime.Now.Minute >= afternoon.Minute)
+                        if (DateTime.Now.Hour >= afternoon5.Hour && DateTime.Now.Minute >= afternoon5.Minute)
                         {
-                            hour = (24 - DateTime.Now.Hour) + morning.Hour;
-                            minute = morning.Minute - DateTime.Now.Minute;
+                            hour = (24 - DateTime.Now.Hour) + morning5.Hour;
+                            minute = morning5.Minute - DateTime.Now.Minute;
                             if (minute < 0)
                             {
                                 hour--;
@@ -288,8 +287,9 @@ namespace BotExecutable
                         shiftPM4.Text = "5:30";
 
                     timer4 = new System.Timers.Timer();
-
-                    if (DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftAM4.Text + "AM")).ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftPM4.Text + "PM")).ToUniversalTime()) <= 0)
+                    DateTime morning4 = Convert.ToDateTime(shiftAM4.Text + "AM");
+                    DateTime afternoon4 = Convert.ToDateTime(shiftPM4.Text + "PM");
+                    if (DateTime.Compare(DateTime.Now.ToUniversalTime(), morning4.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), afternoon4.ToUniversalTime()) <= 0)
                     {
                         userLabel4.Text = "User: " + userIDBox4.Text;
                         robot4 = new Bot(client, shiftAM4.Text, shiftPM4.Text, userIDBox4.Text, passwordBox4.Text, progressLabel4, activitiesCreated4, notesCreated4, activitiesCompleted4, leadsCreated4, accountsCreated4, contactsCreated4, oppsCreated4, ticketsCreated4, oppsUpdated4, leadsPromoted4, role4, activityCompleteAmount4.Value, roleSelector4, noteCheckBox4.Checked, activityCheckBox4.Checked, leadCheckBox4.Checked, accountCheckBox4.Checked, contactCheckBox4.Checked, oppCheckBox4.Checked, ticketCheckBox4.Checked, oppUpdateCheckBox4.Checked, completeActCheckBox4.Checked, promoteLeadCheckBox4.Checked, reliabilityValue4.Value, creationUpperBound.Text);
@@ -301,18 +301,16 @@ namespace BotExecutable
                     }
                     else
                     {
-                        DateTime morning = Convert.ToDateTime(shiftAM4.Text + "AM");
-                        DateTime afternoon = Convert.ToDateTime(shiftPM4.Text + "PM");
                         int hour = 0, minute = 0;
-                        if (DateTime.Now.Hour <= morning.Hour && DateTime.Now.Minute <= morning.Minute)
+                        if (DateTime.Now.Hour <= morning4.Hour && DateTime.Now.Minute <= morning4.Minute)
                         {
-                            hour = morning.Hour - DateTime.Now.Hour;
-                            minute = morning.Minute - DateTime.Now.Minute;
+                            hour = morning4.Hour - DateTime.Now.Hour;
+                            minute = morning4.Minute - DateTime.Now.Minute;
                         }
-                        if (DateTime.Now.Hour >= afternoon.Hour && DateTime.Now.Minute >= afternoon.Minute)
+                        if (DateTime.Now.Hour >= afternoon4.Hour && DateTime.Now.Minute >= afternoon4.Minute)
                         {
-                            hour = (24 - DateTime.Now.Hour) + morning.Hour;
-                            minute = morning.Minute - DateTime.Now.Minute;
+                            hour = (24 - DateTime.Now.Hour) + morning4.Hour;
+                            minute = morning4.Minute - DateTime.Now.Minute;
                             if (minute < 0)
                             {
                                 hour--;
@@ -337,8 +335,9 @@ namespace BotExecutable
                         shiftPM3.Text = "5:30";
 
                     timer3 = new System.Timers.Timer();
-
-                    if (DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftAM3.Text + "AM")).ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftPM3.Text + "PM")).ToUniversalTime()) <= 0)
+                    DateTime morning3 = Convert.ToDateTime(shiftAM3.Text + "AM");
+                    DateTime afternoon3 = Convert.ToDateTime(shiftPM3.Text + "PM");
+                    if (DateTime.Compare(DateTime.Now.ToUniversalTime(), morning3.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), afternoon3.ToUniversalTime()) <= 0)
                     {
                         userLabel3.Text = "User: " + userIDBox3.Text;
                         robot3 = new Bot(client, shiftAM3.Text, shiftPM3.Text, userIDBox3.Text, passwordBox3.Text, progressLabel3, activitiesCreated3, notesCreated3, activitiesCompleted3, leadsCreated3, accountsCreated3, contactsCreated3, oppsCreated3, ticketsCreated3, oppsUpdated3, leadsPromoted3, role3, activityCompleteAmount3.Value, roleSelector3, noteCheckBox3.Checked, activityCheckBox3.Checked, leadCheckBox3.Checked, accountCheckBox3.Checked, contactCheckBox3.Checked, oppCheckBox3.Checked, ticketCheckBox3.Checked, oppUpdateCheckBox3.Checked, completeActCheckBox3.Checked, promoteLeadCheckBox3.Checked, reliabilityValue3.Value, creationUpperBound.Text);
@@ -350,18 +349,17 @@ namespace BotExecutable
                     }
                     else
                     {
-                        DateTime morning = Convert.ToDateTime(shiftAM3.Text + "AM");
-                        DateTime afternoon = Convert.ToDateTime(shiftPM3.Text + "PM");
+                        
                         int hour = 0, minute = 0;
-                        if (DateTime.Now.Hour <= morning.Hour && DateTime.Now.Minute <= morning.Minute)
+                        if (DateTime.Now.Hour <= morning3.Hour && DateTime.Now.Minute <= morning3.Minute)
                         {
-                            hour = morning.Hour - DateTime.Now.Hour;
-                            minute = morning.Minute - DateTime.Now.Minute;
+                            hour = morning3.Hour - DateTime.Now.Hour;
+                            minute = morning3.Minute - DateTime.Now.Minute;
                         }
-                        if (DateTime.Now.Hour >= afternoon.Hour && DateTime.Now.Minute >= afternoon.Minute)
+                        if (DateTime.Now.Hour >= afternoon3.Hour && DateTime.Now.Minute >= afternoon3.Minute)
                         {
-                            hour = (24 - DateTime.Now.Hour) + morning.Hour;
-                            minute = morning.Minute - DateTime.Now.Minute;
+                            hour = (24 - DateTime.Now.Hour) + morning3.Hour;
+                            minute = morning3.Minute - DateTime.Now.Minute;
                             if (minute < 0)
                             {
                                 hour--;
@@ -386,8 +384,9 @@ namespace BotExecutable
                         shiftPM2.Text = "5:30";
 
                     timer2 = new System.Timers.Timer();
-
-                    if (DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftAM2.Text + "AM")).ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftPM2.Text + "PM")).ToUniversalTime()) <= 0)
+                    DateTime morning2 = Convert.ToDateTime(shiftAM2.Text + "AM");
+                    DateTime afternoon2 = Convert.ToDateTime(shiftPM2.Text + "PM");
+                    if (DateTime.Compare(DateTime.Now.ToUniversalTime(), morning2.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), afternoon2.ToUniversalTime()) <= 0)
                     {
                         userLabel2.Text = "User: " + userIDBox2.Text;
                         robot2 = new Bot(client, shiftAM2.Text, shiftPM2.Text, userIDBox2.Text, passwordBox2.Text, progressLabel2, activitiesCreated2, notesCreated2, activitiesCompleted2, leadsCreated2, accountsCreated2, contactsCreated2, oppsCreated2, ticketsCreated2, oppsUpdated2, leadsPromoted2, role2, activityCompleteAmount2.Value, roleSelector2, noteCheckBox2.Checked, activityCheckBox2.Checked, leadCheckBox2.Checked, accountCheckBox2.Checked, contactCheckBox2.Checked, oppCheckBox2.Checked, ticketCheckBox2.Checked, oppUpdateCheckBox2.Checked, completeActCheckBox2.Checked, promoteLeadCheckBox2.Checked, reliabilityValue2.Value, creationUpperBound.Text);
@@ -399,18 +398,17 @@ namespace BotExecutable
                     }
                     else
                     {
-                        DateTime morning = Convert.ToDateTime(shiftAM2.Text + "AM");
-                        DateTime afternoon = Convert.ToDateTime(shiftPM2.Text + "PM");
+                       
                         int hour = 0, minute = 0;
-                        if (DateTime.Now.Hour <= morning.Hour && DateTime.Now.Minute <= morning.Minute)
+                        if (DateTime.Now.Hour <= morning2.Hour && DateTime.Now.Minute <= morning2.Minute)
                         {
-                            hour = morning.Hour - DateTime.Now.Hour;
-                            minute = morning.Minute - DateTime.Now.Minute;
+                            hour = morning2.Hour - DateTime.Now.Hour;
+                            minute = morning2.Minute - DateTime.Now.Minute;
                         }
-                        if (DateTime.Now.Hour >= afternoon.Hour && DateTime.Now.Minute >= afternoon.Minute)
+                        if (DateTime.Now.Hour >= afternoon2.Hour && DateTime.Now.Minute >= afternoon2.Minute)
                         {
-                            hour = (24 - DateTime.Now.Hour) + morning.Hour;
-                            minute = morning.Minute - DateTime.Now.Minute;
+                            hour = (24 - DateTime.Now.Hour) + morning2.Hour;
+                            minute = morning2.Minute - DateTime.Now.Minute;
                             if (minute < 0)
                             {
                                 hour--;
@@ -434,7 +432,9 @@ namespace BotExecutable
                     if (shiftPM.Text == "")
                         shiftPM.Text = "5:30";
                     timer = new System.Timers.Timer();
-                    if (DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftAM.Text + "AM")).ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), (Convert.ToDateTime(shiftPM.Text + "PM")).ToUniversalTime()) <= 0)
+                    DateTime morning = Convert.ToDateTime(shiftAM.Text + "AM");
+                    DateTime afternoon = Convert.ToDateTime(shiftPM.Text + "PM");
+                    if (DateTime.Compare(DateTime.Now.ToUniversalTime(), morning.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), afternoon.ToUniversalTime()) <= 0)
                     {
                         userLabel.Text = "User: " + userIDBox.Text;
                         robot = new Bot(client, shiftAM.Text, shiftPM.Text, userIDBox.Text, passwordBox.Text, progressLabel, activitiesCreated, notesCreated, activitiesCompleted, leadsCreated, accountsCreated, contactsCreated, oppsCreated, ticketsCreated, oppsUpdated, leadsPromoted, role, activityCompleteAmount.Value, roleSelector, noteCheckBox.Checked, activityCheckBox.Checked, leadCheckBox.Checked, accountCheckBox.Checked, contactCheckBox.Checked, oppCheckBox.Checked, ticketCheckBox.Checked, oppUpdateCheckBox.Checked, completeActCheckBox.Checked, promoteLeadCheckBox.Checked, reliabilityValue.Value, creationUpperBound.Text);
@@ -446,8 +446,7 @@ namespace BotExecutable
                     }
                     else
                     {
-                        DateTime morning = Convert.ToDateTime(shiftAM.Text + "AM");
-                        DateTime afternoon = Convert.ToDateTime(shiftPM.Text + "PM");
+                        
                         int hour = 0, minute = 0;
                         if (DateTime.Now.Hour <= morning.Hour && DateTime.Now.Minute <= morning.Minute)
                         {

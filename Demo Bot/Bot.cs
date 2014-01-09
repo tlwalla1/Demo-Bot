@@ -172,7 +172,7 @@ namespace Demo_Bot
                         }
                         if (DateTime.Now.Hour == endWork.Hour)
                         {
-                            if (DateTime.Now.Hour >= endWork.Minute)
+                            if (DateTime.Now.Minute >= endWork.Minute)
                                 return;
                         }
                         // Checks to see if the bot was first commanded to run, if so demonstrates that it can connect to the server.

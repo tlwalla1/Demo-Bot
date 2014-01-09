@@ -3,6 +3,10 @@ Demo-Bot
 
 Populates data on an SData run Server to create Demo Data based off an Eval user set.
 
+## How to Install
+
+Launch the application in Visual Studio. Then click the Build drop down menu and select Publish. Then navigate through the wizard to create the setup.exe. Once finished it is simply a double-click process on the setup.exe to install the program.
+
 
 ## Questions and Answers
 
