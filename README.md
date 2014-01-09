@@ -5,7 +5,7 @@ Populates data on an SData run Server to create Demo Data based off an Eval user
 
 ## Before Use
 
-Make sure move the RunUserProfile.txt from the DemoBotService folder into C:/Swiftpage. If this folder is not made already, add it then place the text file into it. Furthermore make sure you unlock the DemoBotService.exe by right-clicking the file and going to properties. Once there click the unlock button.
+Make sure move the RunUserProfile.txt from the DemoBotService folder into C:/Swiftpage. If this folder is not made already, add it then place the text file into it. Furthermore make sure you unlock the DemoBotService.exe, located in the DemoBotService/bin/Debug folder, by right-clicking the file and going to properties. Once there click the unlock button.
 
 
 ## Questions and Answers
