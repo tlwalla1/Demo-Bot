@@ -35,10 +35,27 @@ namespace BotLibrary
         string fileName = "";
         int dirty;
 
-        public Bot(string userID, string password, int reliable)
+        public Bot(string userID, string password, int reliable, string endpoint, int server)
         {
-            service = new SDataService("https://slx81.saleslogixcloud.com/sdata/slx/system/-/") { UserName = userID, Password = password };
-            dynamic = new SDataService("https://slx81.saleslogixcloud.com/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
+            /*
+            switch (server)
+            {
+                case 3:
+                    service = new SDataService("https://bddemocust1.saleslogixcloud.com/sdata/slx/system/-/") { UserName = userID, Password = password };
+                    dynamic = new SDataService("https://bddemocust1.saleslogixcloud.com/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
+                    break;
+                case 2:
+                    service = new SDataService("https://bddemocust2.saleslogixcloud.com/sdata/slx/system/-/") { UserName = userID, Password = password };
+                    dynamic = new SDataService("https://bddemocust2.saleslogixcloud.com/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
+                    break;
+                case 1:
+                    service = new SDataService("https://bddemocust3.saleslogixcloud.com/sdata/slx/system/-/") { UserName = userID, Password = password };
+                    dynamic = new SDataService("https://bddemocust3.saleslogixcloud.com/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
+                    break;
+            } */
+
+            service = new SDataService(endpoint + "/sdata/slx/system/-/") { UserName = userID, Password = password };
+            dynamic = new SDataService(endpoint + "/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
             startWork = Convert.ToDateTime("8:00 AM");
             endWork = Convert.ToDateTime("5:00 PM");
             UserID = userID;
@@ -49,7 +66,7 @@ namespace BotLibrary
             dirty = 0;
             upperBoundMonth = 2;
             //writer = new StreamWriter(@"C:\Swiftpage\" + UserID + DateTime.Now.Month + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute + ".txt");
-            fileName = @"C:\Swiftpage\" + UserID + DateTime.Now.Month + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute + ".txt";
+            fileName = @"C:\Swiftpage\" + UserID + server + DateTime.Now.Month + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute + ".txt";
             // Change which user creates data in Chinese (Simplified) by adding '|| UserID == "user"' after current value, or merely replace 'China' with the desired user.
             if (UserID == "China")
                 language = "Chinese";
@@ -77,7 +94,7 @@ namespace BotLibrary
                     }
                     if (DateTime.Now.Hour == endWork.Hour)
                     {
-                        if (DateTime.Now.Hour >= endWork.Minute)
+                        if (DateTime.Now.Minute >= endWork.Minute)
                             return;
                     }
                     // Checks to see if the bot was first commanded to run, if so demonstrates that it can connect to the server.
@@ -92,12 +109,23 @@ namespace BotLibrary
                             System.IO.Directory.CreateDirectory(@"c:\Swiftpage");
                             Log("Logging at: " + DateTime.Now + "\n================================================================\n", fileName);
                         }
-                        SDataResponse response = request.GetResponse();
-                        ok = (response.StatusCode == HttpStatusCode.OK);
+                        Log("Connecting to: " + service.Url, fileName);
+                        try
+                        {
+                            SDataResponse response = request.GetResponse();
+                            ok = (response.StatusCode == HttpStatusCode.OK);
+                        }
+                        catch (Exception e)
+                        {
+                            Log("Unable to Connect for reason: " + e.ToString(), fileName);
+                            return;
+                        }
                         if (ok != true)
                         {
-                            this.stop();
+                            Log("Failed to Connect", fileName);
+                            return;
                         }
+                        Log("Connected", fileName);
                         firstRun = false;
                         roleSetter(UserID);
                     }
@@ -109,8 +137,9 @@ namespace BotLibrary
                 else
                     return;
             }
-            catch (Sage.SData.Client.Framework.SDataException)
+            catch (Sage.SData.Client.Framework.SDataException e)
             {
+                Log(e.ToString(), fileName);
             }
         }
 
@@ -4356,28 +4385,24 @@ namespace BotLibrary
             string returnType;
 
             if (choice >= 4)
+            {
                 returnType = "Appointment";
+            }
+            else if (choice >= 2.5)
+            {
+                returnType = "PhoneCall";
+            }
+            else if (choice >= 0.0015) 
+            {
+                returnType = "ToDo";
+            }
+            else if (UserID == "admin")
+            {
+                returnType = "ToDo";
+            }
             else
             {
-                if (choice >= 2.5)
-                    returnType = "PhoneCall";
-                else
-                {
-                    if (choice >= 0.15)
-                        returnType = "ToDo";
-                    //else
-                    //{
-                    //if (choice >= 1)
-                    //returnType = "Internal";
-                    else
-                    {
-                        if (UserID == "admin")
-                            returnType = "ToDo";
-                        else
-                            returnType = "Personal";
-                    }
-                    //}
-                }
+                returnType = "Personal";
             }
 
             return returnType;
@@ -4415,7 +4440,7 @@ namespace BotLibrary
                     returnType = "电话呼叫";
                 else
                 {
-                    if (choice >= 1)
+                    if (choice >= 0.0015)
                         returnType = "要不要";
                     //else
                     //{
@@ -4790,7 +4815,8 @@ namespace BotLibrary
                 "Schedule a Meeting",
                 // For To-Do: (6 total)
                 "Send e-mail message",
-                "Send fax",
+                "Send e-mail message",
+                // Outdated: "Send fax",
                 "Send letter",
                 "Send literature",
                 "Send proposal",
