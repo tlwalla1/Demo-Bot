@@ -9,10 +9,11 @@ Make sure move the RunUserProfile.txt from the DemoBotService folder into C:/Swi
 
 ## How to Install
 
-Open up the Windows Service project to change where the service points to, defaulted to 'https://slx81.saleslogixcloud.com'. To modify, open the file Bot.cs and look under the public Bot(string userID, string password, int reliable) constructor. Modify the service and dynamic addresses to desired. You are now all set to run the service on your server, build and install.
+To install, first 'Unblock' the DemoBotService.exe by locating it within the DemoBotService/bin/Debug folder and right-clicking the file. Then go to properties and click the 'Unblock' button and finally click apply. Now open up a command prompt window. Navigate the prompt to the folder containing your installutil.exe. This folder will generally be within your windows/microsoft.NET/framework/(version #) folder. Make sure you are using v4.0 or better because the Bot was made to run on this version. Once there type 'installutil.exe C:/...doclocation...' without the apostrophes and substituting the location of the DemoBotService.exe file in for ...doclocation... Hit enter and the command line will prompt you with a successful install. If not check to make sure you have unlocked the file. Congratulations you have now installed the Demo-Bot service application. To uninstall, follow the previous steps but type 'installutil.exe /u C:/...docpath...'. To make the service being running, or check its status, click on start, then right click Computer and navigate to Manage. Then go to Services and Applications and there it will be! Right click the service to start or stop it. For Windows 8, search for Server Manager and DemoBotService will be within there.
 
-To install, first unlock the DemoBotService.exe by locating it within the DemoBotService/bin/Debug folder and right-clicking the file. Then go to properties and click the 'Unlock' button and finally click apply. Now open up a command prompt window. Navigate the prompt to the folder containing your installutil.exe. This folder will generally be within your windows/microsoft.NET/framework/(version #) folder. Make sure you are using v4.0 or better because the Bot was made to run on this version. Once there type 'installutil.exe C:/...doclocation...' without the apostrophes and substituting the location of the DemoBotService.exe file in for ...doclocation... Hit enter and the command line will prompt you with a successfull install. If not check to make sure you have unlocked the file. Congratulations you have now instlled the Demo-Bot service application. To uninstall, follow the previous steps but type 'installutil.exe /u C:/...docpath...'. To make the service being running, or check its status, click on start, then right click Computer and navigate to Manage. Then go to Services and Applications and there it will be! Right click the service to start or stop it. For Windows 8, search for Server Manager and DemoBotService will be within there. 
+## What's New?
 
+Currently I have updated the service to fix a bug that was causing problems with users who only had one account associated to them. Also the service has been updated to include another source file called 'EndPoints.txt' that must be located in the C:/Swiftpage folder for running. This file will allow the service to hit multiple endpoints and makes it so the service does not have to be stopped to modify the endpoints that will be hit. Note that removal of an endpoint will not cause the service to stop hitting the endpoint, this is still being worked on. Also the service application will now generate a file called 'Companies.txt' in the C:/Swiftpage folder. This file will show which companies are using the service, given in the EndPoints.txt file. The purpose of EndPoints.txt is to allow for additions (potentially through the web) of endpoints for companies that wish to have Demo Data generated.
 
 ## Questions and Answers
 
@@ -69,7 +70,7 @@ Q:</b> I was browsing your code and it looks like there are functions left blank
 
 
 <b>
-A:</b> I have been coding this project in multiple segments. I am currently a college student and thus have been interning at the fantastic company that has granted me this great opportunity, Swiftpage, over my breaks from school. Thus, these empty functions are solely empty because I was unable to complete them within my limited amount of time. Think of them as nuggets for knowing what the bot will soon be capable of ;)
+A:</b> I have been coding this project in multiple segments. I am currently a college student and thus have been interning at the fantastic company that granted me this great opportunity, Swiftpage, over my breaks from school. Thus, these empty functions are solely empty because I was unable to complete them within my limited amount of time. Think of them as nuggets for knowing what the bot will soon be capable of ;)
 
 
 
@@ -95,7 +96,7 @@ A:</b> If you are running the bot with the UI, it will display incremental value
 Q:</b> Can I run more than just 5 actors?
 
 <b>
-A:</b> Yes you can, if you publish the program and run multiple exes you can run 5 more per exe. Or you that is too stressfull on your computer, I suggest downloading the 'Service' branch and using that as a service application. The service application runs all known users for Saleslogix demoing. If you need to modify these users please look at the question about running specific users.
+A:</b> Yes you can, if you publish the program and run multiple exes you can run 5 more per exe. Or if that is too stressful on your computer, I suggest downloading the 'Service' branch and using that as a service application. The service application runs all known users for Saleslogix demoing. If you need to modify these users please look at the question about running specific users.
 
 
 
@@ -110,8 +111,13 @@ A:</b> Some variables are remnants from the previous build of the Demo-Bot. Curr
 <b>
 Q:</b> Where are the service application users located?
 
+<b>
+A:</b> The bot reads in users from a text file located in the Demo-Bot/Demo Bot/RunUserProfile.txt file.
 
 
 
 <b>
-A:</b> The bot reads in users from a text file located in the Demo-Bot/Demo Bot/RunUserProfile.txt file.
+Q:</b> How do I modify the Service Bot?
+
+<b>
+A:</b> There are two files that need to be located in C:/Swiftpage, these are 'EndPoints.txt' and 'RunUserProfile.txt'. For the RunUserProfile the format is 'user|password|reliability' where user is the username, password is the password associated to that user name, and the reliability represents how reliable the user will be on completing an action. For the EndPoints file the format is 'company_name|endpoint' where company_name is arbitrary (the program will generate a file with all of the companies that use the bot) and endpoint is the address you want the server to hit.
