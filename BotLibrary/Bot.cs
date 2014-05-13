@@ -2208,7 +2208,7 @@ namespace BotLibrary
             return leadPayload;
         }
 
-        // Needs help!
+        // Roundabout way of doing this method is used in LeadQual above. promoteLead cannot be done using SData right now.
         public void promoteLead()
         {
             try

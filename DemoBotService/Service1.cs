@@ -89,6 +89,7 @@ namespace DemoBotService
             }
             else
             {
+                Log("No RunUserProfile.txt found in C:/Swiftpage/", serverLog);
                 Debug.WriteLine("No RunUserProfile.txt found in C:/Swiftpage/");
             }
         }
@@ -133,6 +134,7 @@ namespace DemoBotService
             }
             else
             {
+                Log("No EndPoints.txt found in C:/Swiftpage/", serverLog);
                 Debug.WriteLine("No EndPoints.txt found in C:/Swiftpage/");
             }
         }
