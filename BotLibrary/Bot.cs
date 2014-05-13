@@ -3618,7 +3618,7 @@ namespace BotLibrary
                 int count = feed.Entries.Count();
                 if (count != 0)
                 {
-                    int i = rand.Next(1, count);
+                    int i = rand.Next(0, count);
                     campaignPayload = feed.Entries.ElementAt(i).GetSDataPayload();
                 }
 
@@ -3826,7 +3826,7 @@ namespace BotLibrary
                 int count = feed.Entries.Count();
                 if (count != 0)
                 {
-                    int i = rand.Next(1, count);
+                    int i = rand.Next(0, count);
                     payload = feed.Entries.ElementAt(i).GetSDataPayload();
                 }
             }
@@ -3855,7 +3855,7 @@ namespace BotLibrary
                 int count = feed.Entries.Count();
                 if (count != 0)
                 {
-                    int i = rand.Next(1, count);
+                    int i = rand.Next(0, count);
                     tempEntry = feed.Entries.ElementAt(i);
                 }
             }
@@ -3884,7 +3884,7 @@ namespace BotLibrary
                 int count = feed.Entries.Count();
                 if (count != 0)
                 {
-                    int i = rand.Next(1, count);
+                    int i = rand.Next(0, count);
                     payload = feed.Entries.ElementAt(i).GetSDataPayload();
                 }
             }
@@ -3943,7 +3943,7 @@ namespace BotLibrary
                 int count = feed.Entries.Count();
                 if (count != 0)
                 {
-                    int i = rand.Next(1, count);
+                    int i = rand.Next(0, count);
                     // Get the ticket payload at the random element at i
                     ticketPayload = feed.Entries.ElementAt(i).GetSDataPayload();
                 }
@@ -3972,7 +3972,7 @@ namespace BotLibrary
                 int count = feed.Entries.Count();
                 if (count != 0)
                 {
-                    int i = rand.Next(1, count);
+                    int i = rand.Next(0, count);
                     rate = feed.Entries.ElementAt(i).GetSDataPayload();
                 }
             }
@@ -3999,7 +3999,7 @@ namespace BotLibrary
                 int count = feed.Entries.Count();
                 if (count != 0)
                 {
-                    int i = rand.Next(1, count);
+                    int i = rand.Next(0, count);
                     item = feed.Entries.ElementAt(i).GetSDataPayload();
                 }
             }
@@ -4026,7 +4026,7 @@ namespace BotLibrary
                 int count = feed.Entries.Count();
                 if (count != 0)
                 {
-                    int i = rand.Next(1, count);
+                    int i = rand.Next(0, count);
                     item = feed.Entries.ElementAt(i).GetSDataPayload();
                 }
             }
@@ -4053,7 +4053,7 @@ namespace BotLibrary
                 int count = feed.Entries.Count();
                 if (count != 0)
                 {
-                    int i = rand.Next(1, count);
+                    int i = rand.Next(0, count);
                     item = feed.Entries.ElementAt(i).GetSDataPayload();
                 }
             }
@@ -4080,7 +4080,7 @@ namespace BotLibrary
                 int count = feed.Entries.Count();
                 if (count != 0)
                 {
-                    int i = rand.Next(1, count);
+                    int i = rand.Next(0, count);
                     item = feed.Entries.ElementAt(i).GetSDataPayload();
                 }
             }
@@ -4107,7 +4107,7 @@ namespace BotLibrary
                 int count = feed.Entries.Count();
                 if (count != 0)
                 {
-                    int i = rand.Next(1, count);
+                    int i = rand.Next(0, count);
                     item = feed.Entries.ElementAt(i).GetSDataPayload();
                 }
             }
@@ -4135,7 +4135,7 @@ namespace BotLibrary
                 int count = feed.Entries.Count();
                 if (count != 0)
                 {
-                    int i = rand.Next(1, count);
+                    int i = rand.Next(0, count);
                     item = feed.Entries.ElementAt(i).GetSDataPayload();
                 }
             }

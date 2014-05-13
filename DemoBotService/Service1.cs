@@ -111,7 +111,7 @@ namespace DemoBotService
                 {
                     // Write out the companies to the Companies.txt file for Evaluation use
                     string[] words = line.Split(delimeterChars);
-                    for(int i = 0; i < endPoints.Count; i++)
+                    for (int i = 0; i < endPoints.Count; i++)
                     {
                         if (string.Compare(endPoints.ElementAt(i), words[1]) == 0)
                             doesExist = true;
@@ -190,23 +190,20 @@ namespace DemoBotService
             minTime = lower * 60000;
             maxTime = upper * 60000;
             double time = 300000;
-            if (maxTime != 0)
+            if (maxTime == minTime)
             {
-                if (maxTime == minTime)
-                {
-                    time = maxTime;
-                }
-                else
-                {
-                    do
-                    {
-                        time = maxTime * rand.NextDouble();
-                    } while (time < minTime || time == 0);
-                }
-                timer.Interval = time;
-                Log("Waiting " + time / 1000 + " seconds", serverLog);
-                timer.Enabled = true;
+                time = maxTime;
             }
+            else
+            {
+                do
+                {
+                    time = maxTime * rand.NextDouble();
+                } while (time < minTime || time == 0);
+            }
+            timer.Interval = time;
+            Log("Waiting " + time / 1000 + " seconds", serverLog);
+            timer.Enabled = true;
         }
 
         public void stopAll()
