@@ -118,6 +118,7 @@ namespace DemoBotService
                 StreamReader file = new StreamReader(tpath);
                 StreamWriter writeFile = new StreamWriter(compPath, true);
                 Boolean doesExist = false;
+                LinkedList<string> temp = new LinkedList<string>();
 
                 // Set the delimeter
                 char[] delimeterChars = { '|' };
@@ -129,6 +130,7 @@ namespace DemoBotService
                     doesExist = false;
                     // Write out the companies to the Companies.txt file for Evaluation use
                     string[] words = line.Split(delimeterChars);
+                    temp.AddLast(words[1]);
                     for (int i = 0; i < endPoints.Count; i++)
                     {
                         if (string.Compare(endPoints.ElementAt(i), words[1]) == 0)
@@ -140,6 +142,25 @@ namespace DemoBotService
                     {
                         writeFile.WriteLine(words[0]);
                         endPoints.AddLast(words[1]);
+                    }
+                }
+                foreach (string endPoint in endPoints)
+                {
+                    Boolean exists = true;
+                    int i = 0;
+                    for (i = 0; i < temp.Count; i++)
+                    {
+                        if (string.Compare(temp.ElementAt(i), endPoint) == 0)
+                            break;
+                    }
+                    if (i == temp.Count)
+                        exists = false;
+                    if (!exists)
+                    {
+                        Log("Removing endpoint : " + endPoint + " from service", serverLog);
+                        endPoints.Remove(endPoint);
+                        Log("Removing bots from service", serverLog);
+                        removeBots(endPoint);
                     }
                 }
                 Log("End points read", serverLog);
@@ -250,6 +271,20 @@ namespace DemoBotService
                 timer.Enabled = true;
             }
             
+        }
+
+        public void removeBots(string endPoint)
+        {
+            int counter = 0;
+            for (int i = 0; i < bot.Count; i++)
+            {
+                if (string.Compare(bot.ElementAt(i).getEndPoint(),endPoint) == 0)
+                {
+                    bot.Remove(bot.ElementAt(i));
+                    counter++;
+                }
+            }
+            Log("Deleted " + counter + " bots with endPoint: " + endPoint, serverLog);
         }
 
         public void stopAll()

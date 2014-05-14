@@ -17,6 +17,7 @@ namespace BotLibrary
     {
         public SDataService service { get; set; }
         SDataService dynamic;
+        private string endPoint;
         public SDataUri Uri { get; set; }
         public string UserID { get; set; }
         public string Password { get; set; }
@@ -53,7 +54,7 @@ namespace BotLibrary
                     dynamic = new SDataService("https://bddemocust3.saleslogixcloud.com/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
                     break;
             } */
-
+            endPoint = endpoint;
             service = new SDataService(endpoint + "/sdata/slx/system/-/") { UserName = userID, Password = password };
             dynamic = new SDataService(endpoint + "/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
             //startWork = Convert.ToDateTime("8:00 AM");
@@ -396,7 +397,6 @@ namespace BotLibrary
         {
             // Run update opportunity. Also include random event to create activity and complete it, such as phone call, and ability to do notes.
             int choice = rand.Next(4);
-            SDataPayload activityPayload = null;
             switch (choice)
             {
                 case 0:
@@ -583,7 +583,36 @@ namespace BotLibrary
 
         private void marketingRep()
         {
+            double tempReliability = reliability / 100;
+            double reliable = rand.NextDouble();
+            int choice = rand.Next(1, 4);
 
+            if (reliable < tempReliability)
+            {
+                switch (choice)
+                {
+                    case 1:
+                        makeNote();
+                        break;
+                    case 2:
+                        makeActivity();
+                        break;
+                    case 3:
+                        makeCampaign();
+                        break;
+                    case 4:
+                        updateCampaign();
+                        break;
+                    case 5:
+                        updateCampaign();
+                        completeActivity();
+                        break;
+                    case 6:
+                        completeActivity();
+                        makeNote();
+                        break;
+                }
+            }
         }
         #endregion
 
@@ -1008,11 +1037,10 @@ namespace BotLibrary
         }
 
         // Functional
-        public void makeNoteFor(SDataPayload opportunityPayload)
+        public void makeNoteFor(SDataPayload opportunityPayload, Guid guid)
         {
             try
             {
-                Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 // Initializing the variables used to populate the payload. Each variable gets a value using a random value generator as defined below the creation functions.
                 string type = "atNote";
@@ -1060,10 +1088,10 @@ namespace BotLibrary
                         ResourceKind = "contacts",
                         QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
                     };
+                    var feed = contact.Read();
                     tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                     tempTime = (tempAfter - tempPre) / 1000;
                     Log(DateTime.Now + " | " + guid + " | Get | Contact |  | " + tempTime, fileName);
-                    var feed = contact.Read();
                     SDataPayload contactPayload = null;
                     if (feed.Entries.Count() != 0)
                     {
@@ -3428,7 +3456,7 @@ namespace BotLibrary
                                 return;
                             }
                             // Add a note to the opportunity
-                            makeNoteFor(payload);
+                            makeNoteFor(payload, guid);
                             after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                             timed = (after - previous) / 1000;
                             Log(DateTime.Now + " | " + guid + " | Total | Note | For: " + payload.Values["Description"] + " | " + timed, fileName);
@@ -17115,9 +17143,19 @@ namespace BotLibrary
         {
             firstRun = value;
         }
+
+        public string getEndPoint()
+        {
+            return endPoint;
+        }
         #endregion
 
         #region Logging
+        public void LogRemoval()
+        {
+            Log("Bot removed from service", fileName);
+        }
+
         public static void Log(string message, string filename)
         {
             StreamWriter write = new StreamWriter(filename, true);
