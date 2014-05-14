@@ -1202,3 +1202,24 @@ Affected parameters are:
    logtoconsole = 
    logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.InstallLog
    assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.exe
+Uninstalling assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.exe
+Removing EventLog source DemoBotService.
+Service DemoBotService is being removed from the system...
+Service DemoBotService was successfully removed from the system.
+Installing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.exe
+Installing service DemoBotService...
+Service DemoBotService has been successfully installed.
+Creating EventLog source DemoBotService in log Application...
+Committing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\DemoBotService.exe

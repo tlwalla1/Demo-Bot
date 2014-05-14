@@ -1418,11 +1418,10 @@ namespace BotLibrary
         }
 
         // Functional
-        public void makeActivityFor(SDataPayload opportunityPayload)
+        public void makeActivityFor(SDataPayload opportunityPayload, Guid guid)
         {
             try
             {
-                Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 // Initializing the variables used to populate the payload. Each variable gets a value using a random value generator as defined below the creation functions.
                 string temp = localize(language, "Type Generator", null, null, null, true);
@@ -3455,11 +3454,14 @@ namespace BotLibrary
                                 Log(DateTime.Now + " | " + guid + " | Put | Opportunity | Updated Opp with loss: " + payload.Values["Description"] + " | " + timed, fileName);
                                 return;
                             }
-                            // Add a note to the opportunity
-                            makeNoteFor(payload, guid);
-                            after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                            timed = (after - previous) / 1000;
-                            Log(DateTime.Now + " | " + guid + " | Total | Note | For: " + payload.Values["Description"] + " | " + timed, fileName);
+                            if (payload.Values["Account"] != "")
+                            {
+                                // Add a note to the opportunity
+                                makeNoteFor(payload, guid);
+                                after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                                timed = (after - previous) / 1000;
+                                Log(DateTime.Now + " | " + guid + " | Total | Note | For: " + payload.Values["Description"] + " | " + timed, fileName);
+                            }
                             return;
                         }
                     }
@@ -3526,11 +3528,15 @@ namespace BotLibrary
                                 Log(DateTime.Now + " | " + guid + " | Put | Opportunity | " + payload.Values["Description"] + " updated with loss | " + timed, fileName);
                                 return;
                             }
-                            // Add an activity to the opportunity
-                            makeActivityFor(payload);
-                            after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                            timed = (after - previous) / 1000;
-                            Log(DateTime.Now + " | " + guid + " | Total | Activity |  For: " + payload.Values["Description"] + " | " + timed, fileName);
+                            if (payload.Values["Account"] != "")
+                            {
+                                // Add an activity to the opportunity
+                                makeActivityFor(payload, guid);
+                                after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                                timed = (after - previous) / 1000;
+                                Log(DateTime.Now + " | " + guid + " | Total | Activity |  For: " + payload.Values["Description"] + " | " + timed, fileName);
+                            }
+                            return;
                         }
                     }
                 }
