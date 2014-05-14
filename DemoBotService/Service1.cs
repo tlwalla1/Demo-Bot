@@ -144,20 +144,21 @@ namespace DemoBotService
                         endPoints.AddLast(words[1]);
                     }
                 }
-                foreach (string endPoint in endPoints)
+                for(int j = 0; j < endPoints.Count; j++)
                 {
                     Boolean exists = true;
                     int i = 0;
                     for (i = 0; i < temp.Count; i++)
                     {
-                        if (string.Compare(temp.ElementAt(i), endPoint) == 0)
+                        if (string.Compare(temp.ElementAt(i), endPoints.ElementAt(j)) == 0)
                             break;
                     }
                     if (i == temp.Count)
                         exists = false;
                     if (!exists)
                     {
-                        Log("Removing endpoint : " + endPoint + " from service", serverLog);
+                        string endPoint = endPoints.ElementAt(j);
+                        Log("Removing endpoint : " + endPoints.ElementAt(j) + " from service", serverLog);
                         endPoints.Remove(endPoint);
                         Log("Removing bots from service", serverLog);
                         removeBots(endPoint);
