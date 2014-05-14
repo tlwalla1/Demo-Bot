@@ -30,7 +30,7 @@ namespace BotLibrary
         public double reliability;
         Random rand = new Random();
         int upperBoundMonth = 0;
-        DateTime startWork, endWork;
+        //DateTime startWork, endWork;
         string language = "English";
         string fileName = "";
         int dirty;
@@ -56,8 +56,8 @@ namespace BotLibrary
 
             service = new SDataService(endpoint + "/sdata/slx/system/-/") { UserName = userID, Password = password };
             dynamic = new SDataService(endpoint + "/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
-            startWork = Convert.ToDateTime("8:00 AM");
-            endWork = Convert.ToDateTime("5:00 PM");
+            //startWork = Convert.ToDateTime("8:00 AM");
+            //endWork = Convert.ToDateTime("5:00 PM");
             UserID = userID;
             Password = password;
             firstRun = true;
@@ -85,18 +85,18 @@ namespace BotLibrary
             try
             {
                 // Simulates the Bot as only functioning during some typical work schedule. This schedule excludes any work off due to holidays and weekends...
-                if ((DateTime.Now.Hour >= startWork.Hour) && (DateTime.Now.Hour <= endWork.Hour) && (int)DateTime.Now.DayOfWeek >= 1 && (int)DateTime.Now.DayOfWeek <= 5)
-                {
-                    if (DateTime.Now.Hour == startWork.Hour)
-                    {
-                        if (DateTime.Now.Minute <= startWork.Minute)
-                            return;
-                    }
-                    if (DateTime.Now.Hour == endWork.Hour)
-                    {
-                        if (DateTime.Now.Minute >= endWork.Minute)
-                            return;
-                    }
+                //if ((DateTime.Now.Hour >= startWork.Hour) && (DateTime.Now.Hour <= endWork.Hour) && (int)DateTime.Now.DayOfWeek >= 1 && (int)DateTime.Now.DayOfWeek <= 5)
+                //{
+                    //if (DateTime.Now.Hour == startWork.Hour)
+                    //{
+                        //if (DateTime.Now.Minute <= startWork.Minute)
+                            //return;
+                    //}
+                    //if (DateTime.Now.Hour == endWork.Hour)
+                    //{
+                        //if (DateTime.Now.Minute >= endWork.Minute)
+                            //return;
+                    //}
                     // Checks to see if the bot was first commanded to run, if so demonstrates that it can connect to the server.
                     if (firstRun)
                     {
@@ -133,9 +133,9 @@ namespace BotLibrary
                     {
                         roleSetter(UserID);
                     }
-                }
-                else
-                    return;
+                //}
+                //else
+                    //return;
             }
             catch (Sage.SData.Client.Framework.SDataException e)
             {
@@ -17096,6 +17096,7 @@ namespace BotLibrary
             return firstRun;
         }
 
+        /*
         public DateTime getShiftAM()
         {
             return startWork;
@@ -17104,7 +17105,7 @@ namespace BotLibrary
         public DateTime getShiftPM()
         {
             return endWork;
-        }
+        } */
         
         public void setStopCommand(bool value)
         {

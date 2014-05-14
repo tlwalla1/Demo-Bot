@@ -30,6 +30,7 @@ namespace DemoBotService
         private string path = @"c:/Swiftpage/RunUserProfile.txt";
         private string threadPath = @"c:/Swiftpage/EndPoints.txt";
         private string serverLog = @"c:/Swiftpage/ServerLog.txt";
+        private string compPath = @"c:/Swiftpage/Companies.txt";
         private DateTime previousModification;
 
         public DemoBotService()
@@ -41,8 +42,11 @@ namespace DemoBotService
         {
             // Clears the ServerLog.txt file
             StreamWriter write = new StreamWriter(serverLog);
+            StreamWriter writeComp = new StreamWriter(compPath);
             write.WriteLine("Starting Server at " + DateTime.Now.ToString());
             write.Close();
+            writeComp.Write("");
+            writeComp.Close();
             readEndpoints(threadPath);
             setTimer();
         }
@@ -54,16 +58,25 @@ namespace DemoBotService
 
         private void readUsers()
         {
-            int counter = 0;
             string line;
+            int counter = 0;
             if (File.Exists(path))
             {
                 StreamReader file = new StreamReader(path);
+                Boolean doesExist = false;
                 Log("Reading file", serverLog);
                 while ((line = file.ReadLine()) != null)
                 {
-                    users.AddLast(line);
-                    counter++;
+                    doesExist = false;
+                    for (int i = 0; i < users.Count; i++)
+                    {
+                        if (string.Compare(users.ElementAt(i), line) == 0)
+                            doesExist = true;
+                    }
+                    if (!doesExist)
+                    {
+                        users.AddLast(line);
+                    }
                 }
                 Log("File read", serverLog);
                 string text;
@@ -81,10 +94,11 @@ namespace DemoBotService
                         Bot tempBot = new Bot(userName, password, reliability, endPoints.ElementAt(j), j);
                         tempBot.setStopCommand(false);
                         bot.AddLast(tempBot);
+                        counter++;
                     }
                     endPointIndex++;
                 }
-                Log("Made " + bot.Count + " bots", serverLog);
+                Log("Made " + counter + " bots", serverLog);
                 file.Close();
             }
             else
@@ -99,8 +113,10 @@ namespace DemoBotService
             string line;
             if (File.Exists(tpath))
             {
+                // Modify value for previous modification to current reading
+                previousModification = DateTime.Now;
                 StreamReader file = new StreamReader(tpath);
-                StreamWriter writeFile = new StreamWriter(@"c:/Swiftpage/Companies.txt");
+                StreamWriter writeFile = new StreamWriter(compPath, true);
                 Boolean doesExist = false;
 
                 // Set the delimeter
@@ -110,12 +126,15 @@ namespace DemoBotService
                 // Loop through the file reading in the company name first then the endpoint of that company
                 while ((line = file.ReadLine()) != null)
                 {
+                    doesExist = false;
                     // Write out the companies to the Companies.txt file for Evaluation use
                     string[] words = line.Split(delimeterChars);
                     for (int i = 0; i < endPoints.Count; i++)
                     {
                         if (string.Compare(endPoints.ElementAt(i), words[1]) == 0)
+                        {
                             doesExist = true;
+                        }
                     }
                     if (!doesExist)
                     {
@@ -123,14 +142,12 @@ namespace DemoBotService
                         endPoints.AddLast(words[1]);
                     }
                 }
-                // Modify value for previous modification to current reading
-                previousModification = DateTime.Now;
                 Log("End points read", serverLog);
                 file.Close();
                 writeFile.Close();
                 Log("Reading from RunUserProfile", serverLog);
                 readUsers();
-                Log("Read RunUserProfile", serverLog);
+                Log("Set up users and endpoints", serverLog);
             }
             else
             {
@@ -175,37 +192,64 @@ namespace DemoBotService
 
         public void runBot(object source, ElapsedEventArgs z)
         {
-            if (DateTime.Compare(File.GetLastWriteTime(threadPath), previousModification) > 0)
+            if (DateTime.Compare(File.GetLastWriteTimeUtc(threadPath), previousModification.ToUniversalTime()) > 0 || DateTime.Compare(File.GetLastWriteTimeUtc(path), previousModification.ToUniversalTime()) > 0)
             {
                 readEndpoints(threadPath);
             }
-            if (bot.Count > 0)
+            if (DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftAM.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftPM.ToUniversalTime()) <= 0)
             {
-                timer.Enabled = false;
-                Log("Running Bots", serverLog);
-                for (int i = 0; i < bot.Count; i++)
+                if (bot.Count > 0)
                 {
-                    bot.ElementAt(i).Run();
+                    timer.Enabled = false;
+                    Log("Running Bots", serverLog);
+                    for (int i = 0; i < bot.Count; i++)
+                    {
+                        bot.ElementAt(i).Run();
+                    }
+                    Log("Finished Running " + bot.Count + " Bots", serverLog);
                 }
-                Log("Finished Running " + bot.Count + " Bots", serverLog);
-            }
-            minTime = lower * 60000;
-            maxTime = upper * 60000;
-            double time = 300000;
-            if (maxTime == minTime)
-            {
-                time = maxTime;
+                minTime = lower * 60000;
+                maxTime = upper * 60000;
+                double time = 300000;
+                if (maxTime == minTime)
+                {
+                    time = maxTime;
+                }
+                else
+                {
+                    do
+                    {
+                        time = maxTime * rand.NextDouble();
+                    } while (time < minTime || time == 0);
+                }
+                timer.Interval = time;
+                Log("Waiting " + time / 1000 + " seconds", serverLog);
+                timer.Enabled = true;
             }
             else
             {
-                do
+                int hour = 0, minute = 0;
+                if (DateTime.Now.Hour <= shiftAM.Hour && DateTime.Now.Minute <= shiftAM.Minute)
                 {
-                    time = maxTime * rand.NextDouble();
-                } while (time < minTime || time == 0);
+                    hour = shiftAM.Hour - DateTime.Now.Hour;
+                    minute = shiftAM.Minute - DateTime.Now.Minute;
+                }
+                if (DateTime.Now.Hour >= shiftPM.Hour && DateTime.Now.Minute >= shiftPM.Minute)
+                {
+                    hour = (24 - DateTime.Now.Hour) + shiftAM.Hour;
+                    minute = shiftAM.Minute - DateTime.Now.Minute;
+                    if (minute < 0)
+                    {
+                        hour--;
+                        minute = minute + 60;
+                    }
+                }
+                double time = (hour * 3600 * 1000) + (minute * 60 * 1000);
+                timer.Interval = time;
+                Log("Waiting " + time / 1000 + "seconds", serverLog);
+                timer.Enabled = true;
             }
-            timer.Interval = time;
-            Log("Waiting " + time / 1000 + " seconds", serverLog);
-            timer.Enabled = true;
+            
         }
 
         public void stopAll()
