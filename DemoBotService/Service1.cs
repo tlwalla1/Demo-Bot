@@ -280,6 +280,7 @@ namespace DemoBotService
             {
                 if (string.Compare(bot.ElementAt(i).getEndPoint(),endPoint) == 0)
                 {
+                    bot.ElementAt(i).LogRemoval();
                     bot.Remove(bot.ElementAt(i));
                     counter++;
                 }
