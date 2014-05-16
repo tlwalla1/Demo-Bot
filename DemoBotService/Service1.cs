@@ -21,8 +21,10 @@ namespace DemoBotService
         private Random rand = new Random();
         private int lower = 1, upper = 10;
         private double minTime, maxTime;
-        private DateTime shiftAM = Convert.ToDateTime("8:00 AM");
-        private DateTime shiftPM = Convert.ToDateTime("5:00 PM");
+        private DateTime shiftAM;
+        private DateTime shiftPM;
+        private string AM = "8:00 AM";
+        private string PM = "5:00 PM";
         private LinkedList<string> endPoints = new LinkedList<string>();
         private LinkedList<string> users = new LinkedList<string>();
         private int endPointIndex = 0;
@@ -180,6 +182,7 @@ namespace DemoBotService
 
         public void setTimer()
         {
+            updateShift();
             timer = new System.Timers.Timer();
             if (DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftAM.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftPM.ToUniversalTime()) <= 0)
             {
@@ -214,21 +217,24 @@ namespace DemoBotService
 
         public void runBot(object source, ElapsedEventArgs z)
         {
+            updateShift();
+            timer.Enabled = false;
             if (DateTime.Compare(File.GetLastWriteTimeUtc(threadPath), previousModification.ToUniversalTime()) > 0 || DateTime.Compare(File.GetLastWriteTimeUtc(path), previousModification.ToUniversalTime()) > 0)
             {
                 readEndpoints(threadPath);
             }
             if (DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftAM.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftPM.ToUniversalTime()) <= 0)
             {
+                int counter = 0;
                 if (bot.Count > 0)
                 {
-                    timer.Enabled = false;
-                    Log("Running Bots", serverLog);
+                    Log("Running " + bot.Count + " Bots", serverLog);
                     for (int i = 0; i < bot.Count; i++)
                     {
                         bot.ElementAt(i).Run();
+                        counter++;
                     }
-                    Log("Finished Running " + bot.Count + " Bots", serverLog);
+                    Log("Finished Running " + counter + " Bots of " + bot.Count, serverLog);
                 }
                 minTime = lower * 60000;
                 maxTime = upper * 60000;
@@ -258,7 +264,7 @@ namespace DemoBotService
                 }
                 if (DateTime.Now.Hour >= shiftPM.Hour && DateTime.Now.Minute >= shiftPM.Minute)
                 {
-                    hour = (24 - DateTime.Now.Hour) + shiftAM.Hour;
+                    hour = 24 - DateTime.Now.Hour + shiftAM.Hour;
                     minute = shiftAM.Minute - DateTime.Now.Minute;
                     if (minute < 0)
                     {
@@ -268,7 +274,7 @@ namespace DemoBotService
                 }
                 double time = (hour * 3600 * 1000) + (minute * 60 * 1000);
                 timer.Interval = time;
-                Log("Waiting " + time / 1000 + "seconds", serverLog);
+                Log("Waiting " + time / 1000 + " seconds", serverLog);
                 timer.Enabled = true;
             }
             
@@ -287,6 +293,12 @@ namespace DemoBotService
                 }
             }
             Log("Deleted " + counter + " bots with endPoint: " + endPoint, serverLog);
+        }
+
+        public void updateShift()
+        {
+            shiftAM = Convert.ToDateTime(AM);
+            shiftPM = Convert.ToDateTime(PM);
         }
 
         public void stopAll()
