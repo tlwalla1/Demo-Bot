@@ -67,7 +67,7 @@ namespace BotLibrary
             dirty = 0;
             upperBoundMonth = 2;
             //writer = new StreamWriter(@"C:\Swiftpage\" + UserID + DateTime.Now.Month + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute + ".txt");
-            fileName = @"C:\Swiftpage\" + UserID + server + DateTime.Now.Month + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute + ".txt";
+            fileName = @"C:\Swiftpage\UserLogs\" + UserID + server + DateTime.Now.Month + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute + ".txt";
             // Change which user creates data in Chinese (Simplified) by adding '|| UserID == "user"' after current value, or merely replace 'China' with the desired user.
             if (UserID == "China")
                 language = "Chinese";
@@ -107,7 +107,7 @@ namespace BotLibrary
                         }
                         catch (Exception e)
                         {
-                            System.IO.Directory.CreateDirectory(@"c:\Swiftpage");
+                            System.IO.Directory.CreateDirectory(@"c:\Swiftpage\UserLogs");
                             Log("Logging at: " + DateTime.Now + "\n================================================================\n", fileName);
                         }
                         Log("Connecting to: " + service.Url, fileName);
@@ -210,30 +210,30 @@ namespace BotLibrary
             Random rand = new Random();
             double tempReliability = reliability / 100;
             double reliable = rand.NextDouble();
-            int choice = rand.Next(7);
+            int choice = rand.Next(6);
 
             //int choice = 1;
 
-            if (reliable < tempReliability)
+            if (reliable <= tempReliability)
             {
                 switch (choice)
                 {
-                    case 1:
+                    case 0:
                         makeNote();
                         break;
-                    case 2:
+                    case 1:
                         makeActivity();
                         break;
-                    case 3:
+                    case 2:
                         makeOpportunity();
                         break;
-                    case 4:
+                    case 3:
                         completeActivity();
                         break;
-                    case 5:
+                    case 4:
                         updateOpportunity();
                         break;
-                    case 6:
+                    case 5:
                         makeNote();
                         completeActivity();
                         break;
@@ -252,7 +252,7 @@ namespace BotLibrary
             double reliable = rand.NextDouble();
             int choice = rand.Next(1, 5);
 
-            if (reliable < tempReliability)
+            if (reliable <= tempReliability)
             {
                 switch (choice)
                 {
@@ -286,7 +286,7 @@ namespace BotLibrary
             double reliable = rand.NextDouble();
             int choice = rand.Next(1, 3);
 
-            if (reliable < tempReliability)
+            if (reliable <= tempReliability)
             {
                 switch (choice)
                 {
@@ -320,7 +320,7 @@ namespace BotLibrary
             double reliable = rand.NextDouble();
             int choice = rand.Next(1, 3);
 
-            if (reliable < tempReliability)
+            if (reliable <= tempReliability)
             {
                 switch (choice)
                 {
@@ -347,7 +347,7 @@ namespace BotLibrary
             double reliable = rand.NextDouble();
             int choice = rand.Next(1, 4);
 
-            if (reliable < tempReliability)
+            if (reliable <= tempReliability)
             {
                 switch (choice)
                 {

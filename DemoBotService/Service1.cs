@@ -29,10 +29,10 @@ namespace DemoBotService
         private LinkedList<string> users = new LinkedList<string>();
         private int endPointIndex = 0;
         // These are the paths for the configuration files of the service
-        private string path = @"c:/Swiftpage/RunUserProfile.txt";
-        private string threadPath = @"c:/Swiftpage/EndPoints.txt";
-        private string serverLog = @"c:/Swiftpage/ServerLog.txt";
-        private string compPath = @"c:/Swiftpage/Companies.txt";
+        private string path = @"c:/Swiftpage/Configuration/RunUserProfile.txt";
+        private string threadPath = @"c:/Swiftpage/Configuration/EndPoints.txt";
+        private string serverLog = @"c:/Swiftpage/Configuration/ServerLog.txt";
+        private string compPath = @"c:/Swiftpage/Configuration/Companies.txt";
         private DateTime previousModification;
 
         public DemoBotService()
@@ -43,12 +43,30 @@ namespace DemoBotService
         protected override void OnStart(string[] args)
         {
             // Clears the ServerLog.txt file
-            StreamWriter write = new StreamWriter(serverLog);
-            StreamWriter writeComp = new StreamWriter(compPath);
-            write.WriteLine("Starting Server at " + DateTime.Now.ToString());
-            write.Close();
-            writeComp.Write("");
-            writeComp.Close();
+            try
+            {
+                StreamWriter write = new StreamWriter(serverLog);
+                write.WriteLine("Starting Server at " + DateTime.Now.ToString());
+                write.Close(); 
+                StreamWriter writeComp = new StreamWriter(compPath);
+                writeComp.Write("");
+                writeComp.Close();
+            }catch (Exception e)
+            {
+                System.IO.Directory.CreateDirectory(@"c:\Swiftpage\Configuration");
+                StreamWriter write = new StreamWriter(serverLog);
+                write.WriteLine("Please enter new values for Endpoints.txt and RunUserProfile.txt " + DateTime.Now.ToString());
+                write.Close();
+                write = new StreamWriter(compPath);
+                write.Write("");
+                write.Close();
+                write = new StreamWriter(path);
+                write.Write("user|password|reliability");
+                write.Close();
+                write = new StreamWriter(threadPath);
+                write.Write("Company Name|Endpoint");
+                write.Close();
+            }
             readEndpoints(threadPath);
             setTimer();
         }
@@ -73,8 +91,13 @@ namespace DemoBotService
                     for (int i = 0; i < users.Count; i++)
                     {
                         if (string.Compare(users.ElementAt(i), line) == 0)
+                        {
+                            Log("User exists: " + line, serverLog);
                             doesExist = true;
+                        }
                     }
+                    if (string.Compare(line, "user|password|reliability") == 0)
+                        doesExist = true;
                     if (!doesExist)
                     {
                         users.AddLast(line);
@@ -83,7 +106,7 @@ namespace DemoBotService
                 Log("File read", serverLog);
                 string text;
                 char[] delimeterChars = { '|' };
-                Log("Making Bots", serverLog);
+                Log("Making " + (endPoints.Count() * users.Count()) + " Bots", serverLog);
                 for (int j = endPointIndex; j < endPoints.Count(); j++)
                 {
                     for (int i = 0; i < users.Count(); i++)
@@ -105,8 +128,8 @@ namespace DemoBotService
             }
             else
             {
-                Log("No RunUserProfile.txt found in C:/Swiftpage/", serverLog);
-                Debug.WriteLine("No RunUserProfile.txt found in C:/Swiftpage/");
+                Log("No RunUserProfile.txt found in C:/Swiftpage/Configuration", serverLog);
+                Debug.WriteLine("No RunUserProfile.txt found in C:/Swiftpage/Configuration");
             }
         }
 
@@ -137,9 +160,12 @@ namespace DemoBotService
                     {
                         if (string.Compare(endPoints.ElementAt(i), words[1]) == 0)
                         {
+                            Log("Endpoint exists: " + words[1], serverLog);
                             doesExist = true;
                         }
                     }
+                    if (string.Compare(words[1], "Endpoint") == 0)
+                        doesExist = true;
                     if (!doesExist)
                     {
                         writeFile.WriteLine(words[0]);
@@ -164,6 +190,7 @@ namespace DemoBotService
                         endPoints.Remove(endPoint);
                         Log("Removing bots from service", serverLog);
                         removeBots(endPoint);
+                        //endPointIndex--;
                     }
                 }
                 Log("End points read", serverLog);
@@ -175,7 +202,7 @@ namespace DemoBotService
             }
             else
             {
-                Log("No EndPoints.txt found in C:/Swiftpage/", serverLog);
+                Log("No EndPoints.txt found in C:/Swiftpage/Configuration", serverLog);
                 Debug.WriteLine("No EndPoints.txt found in C:/Swiftpage/");
             }
         }
