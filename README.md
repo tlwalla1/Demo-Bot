@@ -5,7 +5,7 @@ Populates data on an SData run Server to create Demo Data based off an Eval user
 
 ## Before Use
 
-Make sure move the RunUserProfile.txt from the DemoBotService folder into C:/Swiftpage. If this folder is not made already, add it then place the text file into it. Furthermore make sure you unlock the DemoBotService.exe, located in the DemoBotService/bin/Debug folder, by right-clicking the file and going to properties. Once there click the unlock button.
+No more pre-setup necessary, you can run the bot right off the bat! The service will now make the folders and files that you need to run, so make sure your C:/Swiftpage folder is empty or non-existent. After running, check the files that are created in the C:/Swiftpage/Configuration folder and modify them to fit your needs and the service will automatically update the program to begin using your configuration.
 
 ## How to Install
 
@@ -13,7 +13,7 @@ To install, first 'Unblock' the DemoBotService.exe by locating it within the Dem
 
 ## What's New?
 
-Updated the service to fix a bug that was causing problems with users who only had one account associated to them. Added a new ServerLog.txt file that will be generated that logs the events of the service for tracking and debugging. Also the service has been updated to include another source file called 'EndPoints.txt' that must be located in the C:/Swiftpage folder for running. This file will allow the service to hit multiple endpoints and makes it so the service does not have to be stopped to modify the endpoints that will be hit. Note that removal of an endpoint will not cause the service to stop hitting the endpoint, this is still being worked on. Also the service application will now generate a file called 'Companies.txt' in the C:/Swiftpage folder. This file will show which companies are using the service, given in the EndPoints.txt file. The purpose of EndPoints.txt is to allow for additions (potentially through the web) of endpoints for companies that wish to have Demo Data generated.
+Fixed a problem that was causing sales actors to not run even though they were supposed to, which led to a hanging feeling. Organization has been drastically improved and user friendliness increased. There are now two new folders, UserLogs that holds every log for the users and Configuration that holds the files for configuration of the service such as the RunUserProfile and EndPoints. Less new is: updated the service to fix a bug that was causing problems with users who only had one account associated to them. Added a new ServerLog.txt file that will be generated that logs the events of the service for tracking and debugging. Also the service has been updated to include another source file called 'EndPoints.txt' that must be located in the C:/Swiftpage folder for running. This file will allow the service to hit multiple endpoints and makes it so the service does not have to be stopped to modify the endpoints that will be hit. Note that removal of an endpoint will not cause the service to stop hitting the endpoint, this is still being worked on. Also the service application will now generate a file called 'Companies.txt' in the C:/Swiftpage folder. This file will show which companies are using the service, given in the EndPoints.txt file. The purpose of EndPoints.txt is to allow for additions (potentially through the web) of endpoints for companies that wish to have Demo Data generated.
 
 ## Questions and Answers
 
@@ -112,7 +112,7 @@ A:</b> Some variables are remnants from the previous build of the Demo-Bot. Curr
 Q:</b> Where are the service application users located?
 
 <b>
-A:</b> The bot reads in users from a text file located in the Demo-Bot/Demo Bot/RunUserProfile.txt file.
+A:</b> The bot reads in users from a text file located in the C:/Swiftpage/Configuration/RunUserProfile.txt file. Follow the example given in the file itself when modifying the file.
 
 
 
@@ -120,4 +120,4 @@ A:</b> The bot reads in users from a text file located in the Demo-Bot/Demo Bot/
 Q:</b> How do I modify the Service Bot?
 
 <b>
-A:</b> There are two files that need to be located in C:/Swiftpage, these are 'EndPoints.txt' and 'RunUserProfile.txt'. For the RunUserProfile the format is 'user|password|reliability' where user is the username, password is the password associated to that user name, and the reliability represents how reliable the user will be on completing an action. For the EndPoints file the format is 'company_name|endpoint' where company_name is arbitrary (the program will generate a file with all of the companies that use the bot) and endpoint is the address you want the server to hit.
+A:</b> There are two files that will be located in C:/Swiftpage/Configuration, these are 'EndPoints.txt' and 'RunUserProfile.txt'. For the RunUserProfile the format is 'user|password|reliability' where user is the username, password is the password associated to that user name, and the reliability represents how reliable the user will be on completing an action. For the EndPoints file the format is 'company_name|endpoint' where company_name is arbitrary (the program will generate a file with all of the companies that use the bot) and endpoint is the address you want the server to hit.
