@@ -15,50 +15,36 @@ namespace BotLibrary
 {
     public class Bot
     {
-        public SDataService service { get; set; }
-        SDataService dynamic;
-        private string endPoint;
-        public SDataUri Uri { get; set; }
-        public string UserID { get; set; }
-        public string Password { get; set; }
-        public string role = "";
-        bool firstRun;
-        decimal activityCompleteAmount;
-        SDataPayload activityPayload;
-        SDataPayload contactPayload;
-        SDataPayload actPayload;
-        private bool stopCommand = false;
-        public double reliability;
-        Random rand = new Random();
-        int upperBoundMonth = 0;
-        //DateTime startWork, endWork;
-        string language = "English";
-        string fileName = "";
-        int dirty;
+        protected SDataService service { get; set; }
+        protected SDataService dynamic;
+        protected string endPoint;
+        protected SDataUri Uri { get; set; }
+        protected string UserID { get; set; }
+        protected string Password { get; set; }
+        protected string role = "";
+        protected bool firstRun;
+        protected decimal activityCompleteAmount;
+        protected SDataPayload activityPayload;
+        protected SDataPayload contactPayload;
+        protected SDataPayload actPayload;
+        protected bool stopCommand = false;
+        protected double reliability;
+        protected Random rand = new Random();
+        protected int upperBoundMonth = 0;
+        protected string language = "English";
+        protected string fileName = "";
+        protected int dirty;
+
+        public Bot()
+        {
+
+        }
 
         public Bot(string userID, string password, int reliable, string endpoint, int server)
         {
-            /*
-            switch (server)
-            {
-                case 3:
-                    service = new SDataService("https://bddemocust1.saleslogixcloud.com/sdata/slx/system/-/") { UserName = userID, Password = password };
-                    dynamic = new SDataService("https://bddemocust1.saleslogixcloud.com/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
-                    break;
-                case 2:
-                    service = new SDataService("https://bddemocust2.saleslogixcloud.com/sdata/slx/system/-/") { UserName = userID, Password = password };
-                    dynamic = new SDataService("https://bddemocust2.saleslogixcloud.com/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
-                    break;
-                case 1:
-                    service = new SDataService("https://bddemocust3.saleslogixcloud.com/sdata/slx/system/-/") { UserName = userID, Password = password };
-                    dynamic = new SDataService("https://bddemocust3.saleslogixcloud.com/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
-                    break;
-            } */
             endPoint = endpoint;
             service = new SDataService(endpoint + "/sdata/slx/system/-/") { UserName = userID, Password = password };
             dynamic = new SDataService(endpoint + "/sdata/slx/dynamic/-/") { UserName = userID, Password = password };
-            //startWork = Convert.ToDateTime("8:00 AM");
-            //endWork = Convert.ToDateTime("5:00 PM");
             UserID = userID;
             Password = password;
             firstRun = true;
@@ -132,7 +118,14 @@ namespace BotLibrary
                     }
                     else
                     {
-                        roleSetter(UserID);
+                        try
+                        {
+                            roleSetter(UserID);
+                        }
+                        catch (Exception e)
+                        {
+                            Log(e.ToString(), fileName);
+                        }
                     }
                 //}
                 //else
@@ -144,10 +137,12 @@ namespace BotLibrary
             }
         }
 
+        
+
         // Below are the roles of the bot
         #region Roles
         // Go here to add names for which role each name will play.
-        private void roleSetter(string username)
+        protected void roleSetter(string username)
         {
             switch (username.ToLower())
             {
@@ -205,7 +200,7 @@ namespace BotLibrary
             }
         }
 
-        private void runSalesRep()
+        protected void runSalesRep()
         {
             Random rand = new Random();
             double tempReliability = reliability / 100;
@@ -246,7 +241,7 @@ namespace BotLibrary
             }
         }
 
-        private void runSalesManager()
+        protected void runSalesManager()
         {
             double tempReliability = reliability / 100;
             double reliable = rand.NextDouble();
@@ -280,7 +275,7 @@ namespace BotLibrary
 
         }
 
-        private void runSupportRep()
+        protected void runSupportRep()
         {
             double tempReliability = reliability / 100;
             double reliable = rand.NextDouble();
@@ -314,7 +309,7 @@ namespace BotLibrary
             }
         }
 
-        private void runSupportManager()
+        protected void runSupportManager()
         {
             double tempReliability = reliability / 100;
             double reliable = rand.NextDouble();
@@ -341,7 +336,7 @@ namespace BotLibrary
             }
         }
 
-        private void runMarketingRep()
+        protected void runMarketingRep()
         {
             double tempReliability = reliability / 100;
             double reliable = rand.NextDouble();
@@ -367,7 +362,7 @@ namespace BotLibrary
             }
         }
 
-        private void runMarketingManager()
+        protected void runMarketingManager()
         {
             double tempReliability = reliability / 100;
             double reliable = rand.NextDouble();
@@ -393,7 +388,7 @@ namespace BotLibrary
             }
         }
 
-        private void fieldRep()
+        protected void fieldRep()
         {
             // Run update opportunity. Also include random event to create activity and complete it, such as phone call, and ability to do notes.
             int choice = rand.Next(4);
@@ -420,7 +415,7 @@ namespace BotLibrary
             }
         }
 
-        private void leadQual()
+        protected void leadQual()
         {
             Random rand = new Random();
             double tempReliability = reliability / 100;
@@ -554,7 +549,7 @@ namespace BotLibrary
 
         }
 
-        private void leadGen()
+        protected void leadGen()
         {
             Random rand = new Random();
             double tempReliability = reliability / 100;
@@ -581,7 +576,7 @@ namespace BotLibrary
             }
         }
 
-        private void marketingRep()
+        protected void marketingRep()
         {
             double tempReliability = reliability / 100;
             double reliable = rand.NextDouble();
@@ -2260,15 +2255,6 @@ namespace BotLibrary
 
 
                 SDataPayload accountPayload = null;
-                /*int i = 0;
-                do
-                {
-                    accountPayload = fetchAccount();
-                    i++;
-                } while (accountPayload == null && i < 50);
-
-                if (i == 50)
-                    return; */
 
                 do
                 {
@@ -3258,16 +3244,15 @@ namespace BotLibrary
                     {
                         entry = fetchOpportunity();
                         counter++;
-                    } while (entry == null || counter == 50);
+                        if (counter == 50)
+                        {
+                            Log("Unable to locate a valid opportunity at " + DateTime.Now, fileName);
+                            return;
+                        }
+                    } while (entry == null);
                     tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                     tempTime = (tempAfter - tempPre) / 1000;
                     Log(DateTime.Now + " | " + guid + " | Get | Opportunity |  | " + tempTime, fileName);
-
-                    if (counter == 50)
-                    {
-                        Log("Unable to locate a valid opportunity at " + DateTime.Now, fileName);
-                        return;
-                    }
                     payload = entry.GetSDataPayload();
                     counter2++;
                     if (counter2 == 50)
@@ -3789,7 +3774,7 @@ namespace BotLibrary
 
         #region SDataDecoding
         // Unnecessary because there are predefined categories, though this can help to put the types into pretty names.
-        private string categoryDecoder(string type)
+        protected string categoryDecoder(string type)
         {
             string category = type;
             switch (type)
@@ -3817,7 +3802,7 @@ namespace BotLibrary
         }
 
         // Necessary to determine the correct type of the To-Do (since there are multiple types)
-        private string todoDecoder(string description)
+        protected string todoDecoder(string description)
         {
             string type = "ToDo";
             //if (description == "Send e-mail message")
@@ -3835,7 +3820,7 @@ namespace BotLibrary
         #endregion
 
         #region RandomDataGenerators
-        private SDataPayload fetchAccount()
+        protected SDataPayload fetchAccount()
         {
             SDataPayload payload = null;
 
@@ -3874,7 +3859,7 @@ namespace BotLibrary
             return payload;
         }
 
-        private Sage.SData.Client.Atom.AtomEntry fetchLead()
+        protected Sage.SData.Client.Atom.AtomEntry fetchLead()
         {
             Sage.SData.Client.Atom.AtomEntry tempEntry = null;
 
@@ -3903,7 +3888,7 @@ namespace BotLibrary
             return tempEntry;
         }
 
-        private SDataPayload fetchLeadSource()
+        protected SDataPayload fetchLeadSource()
         {
             SDataPayload payload = null;
 
@@ -3932,7 +3917,7 @@ namespace BotLibrary
             return payload;
         }
 
-        private Sage.SData.Client.Atom.AtomEntry fetchOpportunity()
+        protected Sage.SData.Client.Atom.AtomEntry fetchOpportunity()
         {
             Sage.SData.Client.Atom.AtomEntry returnEntry = null;
 
@@ -3963,7 +3948,7 @@ namespace BotLibrary
             return returnEntry;
         }
 
-        private SDataPayload fetchTicket()
+        protected SDataPayload fetchTicket()
         {
             SDataPayload ticketPayload = null;
             try
@@ -3991,7 +3976,7 @@ namespace BotLibrary
             return ticketPayload;
         }
 
-        private SDataPayload fetchTicketActivityRate()
+        protected SDataPayload fetchTicketActivityRate()
         {
             SDataPayload rate = null;
 
@@ -4018,7 +4003,7 @@ namespace BotLibrary
             return rate;
         }
 
-        private SDataPayload fetchTicketActivityItem()
+        protected SDataPayload fetchTicketActivityItem()
         {
             SDataPayload item = null;
 
@@ -4045,7 +4030,7 @@ namespace BotLibrary
             return item;
         }
 
-        private SDataPayload fetchCampaign()
+        protected SDataPayload fetchCampaign()
         {
             SDataPayload item = null;
 
@@ -4072,7 +4057,7 @@ namespace BotLibrary
             return item;
         }
 
-        private SDataPayload fetchCampaignProduct()
+        protected SDataPayload fetchCampaignProduct()
         {
             SDataPayload item = null;
 
@@ -4099,7 +4084,7 @@ namespace BotLibrary
             return item;
         }
 
-        private SDataPayload fetchCampaignResponse()
+        protected SDataPayload fetchCampaignResponse()
         {
             SDataPayload item = null;
 
@@ -4126,7 +4111,7 @@ namespace BotLibrary
             return item;
         }
 
-        private SDataPayload fetchCampaignTarget()
+        protected SDataPayload fetchCampaignTarget()
         {
             SDataPayload item = null;
 
@@ -4153,7 +4138,7 @@ namespace BotLibrary
             return item;
         }
 
-        private SDataPayload fetchOpportunityCampaign(SDataPayload campaignPayload)
+        protected SDataPayload fetchOpportunityCampaign(SDataPayload campaignPayload)
         {
             SDataPayload item = null;
 
@@ -4181,7 +4166,7 @@ namespace BotLibrary
             return item;
         }
 
-        private string getCallToAction(string objective)
+        protected string getCallToAction(string objective)
         {
             string call = null;
             switch (objective)
@@ -4259,7 +4244,7 @@ namespace BotLibrary
             return call;
         }
 
-        private void progressStage(SDataPayload oppPayload)
+        protected void progressStage(SDataPayload oppPayload)
         {
             string currentStage = (string)oppPayload.Values["Stage"];
             switch (currentStage)
@@ -4296,7 +4281,7 @@ namespace BotLibrary
             }
         }
 
-        private void progressChineseStage(SDataPayload oppPayload)
+        protected void progressChineseStage(SDataPayload oppPayload)
         {
             string currentStage = (string)oppPayload.Values["Stage"];
             switch (currentStage)
@@ -4333,7 +4318,7 @@ namespace BotLibrary
             }
         }
 
-        private string[] getRegion(string state)
+        protected string[] getRegion(string state)
         {
             string[] region = new string[2];
             switch (state)
@@ -4410,7 +4395,7 @@ namespace BotLibrary
         }
 
         // Currently excludes Event Activity due to it causing problems on activity creation.
-        private string randomTypeGenerator()
+        protected string randomTypeGenerator()
         {
             Random rand = new Random();
             // Random number to determine which type will be created.
@@ -4426,7 +4411,7 @@ namespace BotLibrary
             {
                 returnType = "PhoneCall";
             }
-            else if (choice >= 0.0015) 
+            else if (choice >= 0.0000015) 
             {
                 returnType = "ToDo";
             }
@@ -4442,7 +4427,7 @@ namespace BotLibrary
             return returnType;
         }
 
-        private string leadTypeGenerator()
+        protected string leadTypeGenerator()
         {
             Random rand = new Random();
             // Random number to determine which type will be created.
@@ -4458,7 +4443,7 @@ namespace BotLibrary
             return returnType;
         }
 
-        private string randomChineseTypeGenerator()
+        protected string randomChineseTypeGenerator()
         {
             Random rand = new Random();
             // Random number to determine which type will be created.
@@ -4494,7 +4479,7 @@ namespace BotLibrary
             return returnType;
         }
 
-        private string randomAccountType()
+        protected string randomAccountType()
         {
             Random rand = new Random();
             int choice = rand.Next(0, 8);
@@ -4532,7 +4517,7 @@ namespace BotLibrary
             return type;
         }
 
-        private string randomChineseAccountType()
+        protected string randomChineseAccountType()
         {
             Random rand = new Random();
             int choice = rand.Next(0, 8);
@@ -4570,7 +4555,7 @@ namespace BotLibrary
             return type;
         }
 
-        private string randomAccountStatus()
+        protected string randomAccountStatus()
         {
             Random rand = new Random();
             int choice = rand.Next(0, 4);
@@ -4596,7 +4581,7 @@ namespace BotLibrary
             return status;
         }
 
-        private string randomChineseAccountStatus()
+        protected string randomChineseAccountStatus()
         {
             Random rand = new Random();
             int choice = rand.Next(0, 4);
@@ -4622,7 +4607,7 @@ namespace BotLibrary
             return status;
         }
 
-        private string randomCategoryGenerator(string type)
+        protected string randomCategoryGenerator(string type)
         {
             Random rand = new Random();
             string category = "";
@@ -4694,7 +4679,7 @@ namespace BotLibrary
             return category;
         }
 
-        private string leadCategoryGenerator(string type)
+        protected string leadCategoryGenerator(string type)
         {
             Random rand = new Random();
             string category = "";
@@ -4741,7 +4726,7 @@ namespace BotLibrary
             return category;
         }
 
-        private string randomChineseCategoryGenerator(string type)
+        protected string randomChineseCategoryGenerator(string type)
         {
             Random rand = new Random();
             string category = "";
@@ -4813,7 +4798,7 @@ namespace BotLibrary
             return category;
         }
 
-        private string randomDescriptionGenerator(string type)
+        protected string randomDescriptionGenerator(string type)
         {
             Random rand = new Random();
             // For the random number generation
@@ -4919,7 +4904,7 @@ namespace BotLibrary
             return returnDescription;
         }
 
-        private string leadDescriptionGenerator(string type)
+        protected string leadDescriptionGenerator(string type)
         {
             Random rand = new Random();
             // For the random number generation
@@ -4984,7 +4969,7 @@ namespace BotLibrary
             return returnDescription;
         }
 
-        private string randomCampaignDescriptionGenerator()
+        protected string randomCampaignDescriptionGenerator()
         {
             string value = null;
             string[] description = new string[]
@@ -5000,7 +4985,7 @@ namespace BotLibrary
             return value;
         }
 
-        private string randomCampaignObjective()
+        protected string randomCampaignObjective()
         {
             string value = null;
             string[] objective = new string[]
@@ -5017,7 +5002,7 @@ namespace BotLibrary
             return value;
         }
 
-        private string randomChineseDescriptionGenerator(string type)
+        protected string randomChineseDescriptionGenerator(string type)
         {
             Random rand = new Random();
             // For the random number generation
@@ -5123,7 +5108,7 @@ namespace BotLibrary
         }
 
         /*
-        private string randomLeadSource()
+        protected string randomLeadSource()
         {
             Random rand = new Random();
             int x = rand.Next(0, 8);
@@ -5166,7 +5151,7 @@ namespace BotLibrary
             return source;
         }
 
-        private string randomChineseLeadSource()
+        protected string randomChineseLeadSource()
         {
             Random rand = new Random();
             string source = "电子邮件";
@@ -5209,7 +5194,7 @@ namespace BotLibrary
         }
         */
 
-        private string randomNoteGenerator(string type, string accountName, string description)
+        protected string randomNoteGenerator(string type, string accountName, string description)
         {
             Random rand = new Random();
             string note = "";
@@ -5346,7 +5331,7 @@ namespace BotLibrary
             return note;
         }
 
-        private string randomNoteforLeadGenerator(string value, SDataPayload payload, string type)
+        protected string randomNoteforLeadGenerator(string value, SDataPayload payload, string type)
         {
             Random rand = new Random();
             string note = "";
@@ -5423,7 +5408,7 @@ namespace BotLibrary
             return note;
         }
 
-        private string randomChineseNoteGenerator(string type, SDataPayload payload, string description)
+        protected string randomChineseNoteGenerator(string type, SDataPayload payload, string description)
         {
             Random rand = new Random();
             string note = "";
@@ -5560,7 +5545,7 @@ namespace BotLibrary
             return note;
         }
 
-        private string randomLocationGenerator(string type)
+        protected string randomLocationGenerator(string type)
         {
             Random rand = new Random();
             string location = "";
@@ -5647,7 +5632,7 @@ namespace BotLibrary
             return location;
         }
 
-        private string randomChineseLocationGenerator(string type)
+        protected string randomChineseLocationGenerator(string type)
         {
             Random rand = new Random();
             string location = "";
@@ -5734,7 +5719,7 @@ namespace BotLibrary
             return location;
         }
 
-        private string randomReason(bool won)
+        protected string randomReason(bool won)
         {
             Random rand = new Random();
             string reason = "";
@@ -5807,7 +5792,7 @@ namespace BotLibrary
             }
         }
 
-        private string randomChineseReason(bool won)
+        protected string randomChineseReason(bool won)
         {
             Random rand = new Random();
             string reason = "";
@@ -5881,7 +5866,7 @@ namespace BotLibrary
         }
 
         // Creates a random date for the activity to occur
-        private DateTime randomDateGenerator()
+        protected DateTime randomDateGenerator()
         {
             Random rand = new Random();
             DateTime lowerLim = Convert.ToDateTime("8:00AM");
@@ -5923,7 +5908,7 @@ namespace BotLibrary
             return date;
         }
 
-        private DateTime randomEuroDateGenerator()
+        protected DateTime randomEuroDateGenerator()
         {
             Random rand = new Random();
             DateTime lowerLim = Convert.ToDateTime("8:00AM");
@@ -5965,7 +5950,7 @@ namespace BotLibrary
             return date;
         }
 
-        private string randomPriorityGenerator()
+        protected string randomPriorityGenerator()
         {
             Random rand = new Random();
             string priority = "None";
@@ -5988,7 +5973,7 @@ namespace BotLibrary
             return priority;
         }
 
-        private string randomChinesePriorityGenerator()
+        protected string randomChinesePriorityGenerator()
         {
             Random rand = new Random();
             string priority = "无";
@@ -17167,6 +17152,11 @@ namespace BotLibrary
             StreamWriter write = new StreamWriter(filename, true);
             write.WriteLine(message);
             write.Close();
+        }
+
+        public void LogException(Exception e)
+        {
+            Log(e.ToString(), fileName);
         }
         #endregion
 

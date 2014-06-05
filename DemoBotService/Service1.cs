@@ -26,13 +26,16 @@ namespace DemoBotService
         private string AM = "8:00 AM";
         private string PM = "5:00 PM";
         private LinkedList<string> endPoints = new LinkedList<string>();
+        private LinkedList<string> companies = new LinkedList<string>();
         private LinkedList<string> users = new LinkedList<string>();
+        private LinkedList<bool> fromSpreadSheet = new LinkedList<bool>();
         private int endPointIndex = 0;
         // These are the paths for the configuration files of the service
         private string path = @"c:/Swiftpage/Configuration/RunUserProfile.txt";
         private string threadPath = @"c:/Swiftpage/Configuration/EndPoints.txt";
         private string serverLog = @"c:/Swiftpage/Configuration/ServerLog.txt";
         private string compPath = @"c:/Swiftpage/Configuration/Companies.txt";
+        private string spreadSheetPath = @"c:/Swiftpage/Spreadsheets";
         private DateTime previousModification;
 
         public DemoBotService()
@@ -64,8 +67,9 @@ namespace DemoBotService
                 write.Write("user|password|reliability");
                 write.Close();
                 write = new StreamWriter(threadPath);
-                write.Write("Company Name|Endpoint");
+                write.Write("Company Name|Endpoint|Read from spreasheet? (true/false)");
                 write.Close();
+                System.IO.Directory.CreateDirectory(spreadSheetPath);
             }
             readEndpoints(threadPath);
             setTimer();
@@ -109,6 +113,7 @@ namespace DemoBotService
                 Log("Making " + (endPoints.Count() * users.Count()) + " Bots", serverLog);
                 for (int j = endPointIndex; j < endPoints.Count(); j++)
                 {
+                    int spreadCounter = 0;
                     for (int i = 0; i < users.Count(); i++)
                     {
                         text = users.ElementAt(i);
@@ -116,11 +121,21 @@ namespace DemoBotService
                         string userName = words[0];
                         string password = words[1];
                         int reliability = Convert.ToInt32(words[2]);
-                        Bot tempBot = new Bot(userName, password, reliability, endPoints.ElementAt(j), j);
+                        Bot tempBot;
+                        //if (fromSpreadSheet.ElementAt(j))
+                        //{
+                            //tempBot = new SpreadSheetBot(userName, password, reliability, endPoints.ElementAt(j), j, companies.ElementAt(j));
+                            //spreadCounter++;
+                        //}
+                        //else
+                        //{
+                            tempBot = new Bot(userName, password, reliability, endPoints.ElementAt(j), j);
+                        //}
                         tempBot.setStopCommand(false);
                         bot.AddLast(tempBot);
                         counter++;
                     }
+                    Log("Made " + spreadCounter + " spreadsheet bots for company " + companies.ElementAt(j), serverLog);
                     endPointIndex++;
                 }
                 Log("Made " + counter + " bots", serverLog);
@@ -169,7 +184,12 @@ namespace DemoBotService
                     if (!doesExist)
                     {
                         writeFile.WriteLine(words[0]);
+                        companies.AddLast(words[0]);
                         endPoints.AddLast(words[1]);
+                        //if (string.Compare(words[2].ToLower(), "true") == 0 || string.Compare(words[2].ToLower(), "y") == 0 || string.Compare(words[2].ToLower(), "yes") == 0)
+                            //fromSpreadSheet.AddLast(true);
+                        //else
+                            //fromSpreadSheet.AddLast(false);
                     }
                 }
                 for(int j = 0; j < endPoints.Count; j++)
@@ -219,10 +239,18 @@ namespace DemoBotService
             else
             {
                 int hour = 0, minute = 0;
-                if (DateTime.Now.Hour <= shiftAM.Hour && DateTime.Now.Minute <= shiftAM.Minute)
+                if (DateTime.Now.Hour <= shiftAM.Hour)
                 {
-                    hour = shiftAM.Hour - DateTime.Now.Hour;
-                    minute = shiftAM.Minute - DateTime.Now.Minute;
+                    if (DateTime.Now.Minute <= shiftAM.Minute)
+                    {
+                        hour = shiftAM.Hour - DateTime.Now.Hour;
+                        minute = shiftAM.Minute - DateTime.Now.Minute;
+                    }
+                    else
+                    {
+                        hour = shiftAM.Hour - (DateTime.Now.Hour + 1);
+                        minute = 60 - DateTime.Now.Minute;
+                    }
                 }
                 if (DateTime.Now.Hour >= shiftPM.Hour && DateTime.Now.Minute >= shiftPM.Minute)
                 {
@@ -236,7 +264,7 @@ namespace DemoBotService
                 }
                 double time = (hour * 3600 * 1000) + (minute * 60 * 1000);
                 timer.Interval = time;
-                Log("Waiting " + time / 1000 + "seconds", serverLog);
+                Log("Waiting " + time / 1000 + " seconds", serverLog);
                 timer.Elapsed += new ElapsedEventHandler(runBot);
                 timer.Enabled = true;
             }
@@ -255,11 +283,18 @@ namespace DemoBotService
                 int counter = 0;
                 if (bot.Count > 0)
                 {
-                    Log("Running " + bot.Count + " Bots", serverLog);
+                    Log("Running " + bot.Count + " Bots at: " + DateTime.Now.ToString(), serverLog);
                     for (int i = 0; i < bot.Count; i++)
                     {
-                        bot.ElementAt(i).Run();
-                        counter++;
+                        try
+                        {
+                            bot.ElementAt(i).Run();
+                            counter++;
+                        }
+                        catch (Exception e)
+                        {
+                            bot.ElementAt(i).LogException(e);
+                        }
                     }
                     Log("Finished Running " + counter + " Bots of " + bot.Count, serverLog);
                 }
@@ -326,6 +361,7 @@ namespace DemoBotService
         {
             shiftAM = Convert.ToDateTime(AM);
             shiftPM = Convert.ToDateTime(PM);
+            Log("AM: " + shiftAM + "     PM: " + shiftPM, serverLog);
         }
 
         public void stopAll()
