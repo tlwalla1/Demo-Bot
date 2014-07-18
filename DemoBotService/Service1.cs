@@ -309,7 +309,7 @@ namespace DemoBotService
                         }
                         Log("Finished Running " + counter + " Bots of " + bot.Count, serverLog);
                     }
-                    /*
+                    
                     minTime = lower * 60000;
                     maxTime = upper * 60000;
                     double time = 300000;
@@ -323,8 +323,7 @@ namespace DemoBotService
                         {
                             time = maxTime * rand.NextDouble();
                         } while (time < minTime || time == 0);
-                    } */
-                    double time = 10000;
+                    }
                     timer.Interval = time;
                     Log("Waiting " + time / 1000 + " seconds", serverLog);
                     timer.Enabled = true;
