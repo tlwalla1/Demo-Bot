@@ -54,14 +54,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="DemoBotService.exe" size="13824">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="DemoBotService.exe" size="14336">
       <assemblyIdentity name="DemoBotService" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>3uYBCaD4j8nZd+pfezFjacFy+/iXLSd3kaRsDN5waus=</dsig:DigestValue>
+        <dsig:DigestValue>63oAj52QYbt1qT7EJdRGdleHoKHyT9nN40cMKHzEh38=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
