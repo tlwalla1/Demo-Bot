@@ -1,0 +1,13 @@
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\BotLibrary\obj\Debug\BotLibrary.csprojResolveAssemblyReference.cache
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\BotLibrary\bin\Debug\BotLibrary.dll.config
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\BotLibrary\bin\Debug\BotLibrary.dll
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\BotLibrary\bin\Debug\BotLibrary.pdb
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\BotLibrary\bin\Debug\Sage.SData.Client.dll
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\BotLibrary\obj\Debug\BotLibrary.dll
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\BotLibrary\obj\Debug\BotLibrary.pdb
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\BotLibrary\bin\Debug\Google.GData.Client.dll
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\BotLibrary\bin\Debug\Google.GData.Documents.dll
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\BotLibrary\bin\Debug\Google.GData.Spreadsheets.dll
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\BotLibrary\bin\Debug\Newtonsoft.Json.dll
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\BotLibrary\bin\Debug\Google.GData.Extensions.dll
+C:\Users\tyler.wallace.SWIFTPAGE\documents\visual studio 2012\Projects\DemoBotService\BotLibrary\bin\Debug\Google.GData.AccessControl.dll
