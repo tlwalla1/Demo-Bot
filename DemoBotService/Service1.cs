@@ -23,6 +23,7 @@ namespace DemoBotService
         private double minTime, maxTime;
         private DateTime shiftAM;
         private DateTime shiftPM;
+        // Modify AM and PM string values to change when the worker's shift is
         private string AM = "8:00 AM";
         private string PM = "5:00 PM";
         private LinkedList<string> endPoints = new LinkedList<string>();
@@ -45,7 +46,7 @@ namespace DemoBotService
 
         protected override void OnStart(string[] args)
         {
-            // Clears the ServerLog.txt file
+            // Clears the ServerLog.txt file and Companies.txt file (which is written to after reading EndPoints.txt)
             try
             {
                 StreamWriter write = new StreamWriter(serverLog);
@@ -227,11 +228,13 @@ namespace DemoBotService
             }
         }
 
+        // This function is only called once when the program initially starts, its algorithms are used again within the RunBots function
+        // (not very well planned by me) but that is how it was created.
         public void setTimer()
         {
             updateShift();
             timer = new System.Timers.Timer();
-            if (DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftAM.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftPM.ToUniversalTime()) <= 0)
+            /*if (DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftAM.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftPM.ToUniversalTime()) <= 0)
             {
                 timer.Elapsed += new ElapsedEventHandler(runBot);
                 timer.Enabled = true;
@@ -264,77 +267,134 @@ namespace DemoBotService
                 }
                 double time = (hour * 3600 * 1000) + (minute * 60 * 1000);
                 timer.Interval = time;
-                Log("Waiting " + time / 1000 + " seconds", serverLog);
+                Log("Waiting " + time / 1000 + " seconds", serverLog); */
                 timer.Elapsed += new ElapsedEventHandler(runBot);
                 timer.Enabled = true;
-            }
+            //}
         }
 
+        // This function will loop through all of the bots located in the bot array and call the Run function. It first checks to ensure that the time
+        // is correct for the bot to run (i.e. it is between the shiftAM time and shiftPM and is a weekday [based on the local machine time])
         public void runBot(object source, ElapsedEventArgs z)
         {
+            // Update the shift in order to account for day changes
             updateShift();
             timer.Enabled = false;
             if (DateTime.Compare(File.GetLastWriteTimeUtc(threadPath), previousModification.ToUniversalTime()) > 0 || DateTime.Compare(File.GetLastWriteTimeUtc(path), previousModification.ToUniversalTime()) > 0)
             {
                 readEndpoints(threadPath);
             }
-            if (DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftAM.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftPM.ToUniversalTime()) <= 0)
+            int day = (int)DateTime.Now.DayOfWeek;
+
+            // Day 0 is Sunday and day 6 is Saturday
+            if (day > 0 && day < 6)
             {
-                int counter = 0;
-                if (bot.Count > 0)
+                if (DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftAM.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftPM.ToUniversalTime()) <= 0)
                 {
-                    Log("Running " + bot.Count + " Bots at: " + DateTime.Now.ToString(), serverLog);
-                    for (int i = 0; i < bot.Count; i++)
+                    int counter = 0;
+                    if (bot.Count > 0)
                     {
-                        try
+                        Log("Running " + bot.Count + " Bots at: " + DateTime.Now.ToString(), serverLog);
+                        for (int i = 0; i < bot.Count; i++)
                         {
-                            bot.ElementAt(i).Run();
-                            counter++;
+                            try
+                            {
+                                bot.ElementAt(i).Run();
+                                counter++;
+                            }
+                            catch (Exception e)
+                            {
+                                bot.ElementAt(i).LogException(e);
+                            }
                         }
-                        catch (Exception e)
-                        {
-                            bot.ElementAt(i).LogException(e);
-                        }
+                        Log("Finished Running " + counter + " Bots of " + bot.Count, serverLog);
                     }
-                    Log("Finished Running " + counter + " Bots of " + bot.Count, serverLog);
-                }
-                minTime = lower * 60000;
-                maxTime = upper * 60000;
-                double time = 300000;
-                if (maxTime == minTime)
-                {
-                    time = maxTime;
+                    /*
+                    minTime = lower * 60000;
+                    maxTime = upper * 60000;
+                    double time = 300000;
+                    if (maxTime == minTime)
+                    {
+                        time = maxTime;
+                    }
+                    else
+                    {
+                        do
+                        {
+                            time = maxTime * rand.NextDouble();
+                        } while (time < minTime || time == 0);
+                    } */
+                    double time = 10000;
+                    timer.Interval = time;
+                    Log("Waiting " + time / 1000 + " seconds", serverLog);
+                    timer.Enabled = true;
                 }
                 else
                 {
-                    do
+                    int hour = 0, minute = 0;
+                    if (DateTime.Now.Hour <= shiftAM.Hour && DateTime.Now.Minute <= shiftAM.Minute)
                     {
-                        time = maxTime * rand.NextDouble();
-                    } while (time < minTime || time == 0);
+                        hour = shiftAM.Hour - DateTime.Now.Hour;
+                        minute = shiftAM.Minute - DateTime.Now.Minute;
+                    }
+                    if (DateTime.Now.Hour >= shiftPM.Hour && DateTime.Now.Minute >= shiftPM.Minute)
+                    {
+                        hour = 24 - DateTime.Now.Hour + shiftAM.Hour;
+                        minute = shiftAM.Minute - DateTime.Now.Minute;
+                        if (minute < 0)
+                        {
+                            hour--;
+                            minute = minute + 60;
+                        }
+                    }
+                    double time = (hour * 3600 * 1000) + (minute * 60 * 1000);
+                    timer.Interval = time;
+                    Log("Waiting " + time / 1000 + " seconds", serverLog);
+                    timer.Enabled = true;
                 }
-                timer.Interval = time;
-                Log("Waiting " + time / 1000 + " seconds", serverLog);
-                timer.Enabled = true;
             }
             else
             {
-                int hour = 0, minute = 0;
-                if (DateTime.Now.Hour <= shiftAM.Hour && DateTime.Now.Minute <= shiftAM.Minute)
+                int hour = 0;
+                int minute = 0;
+                double time;
+                if (day == 6) // Saturday
                 {
-                    hour = shiftAM.Hour - DateTime.Now.Hour;
-                    minute = shiftAM.Minute - DateTime.Now.Minute;
-                }
-                if (DateTime.Now.Hour >= shiftPM.Hour && DateTime.Now.Minute >= shiftPM.Minute)
-                {
-                    hour = 24 - DateTime.Now.Hour + shiftAM.Hour;
-                    minute = shiftAM.Minute - DateTime.Now.Minute;
-                    if (minute < 0)
+                    if (DateTime.Now.Hour <= shiftAM.Hour && DateTime.Now.Minute <= shiftAM.Minute)
                     {
-                        hour--;
-                        minute = minute + 60;
+                        hour = 24 + shiftAM.Hour - DateTime.Now.Hour;
+                        minute = shiftAM.Minute - DateTime.Now.Minute;
+                    }
+                    if (DateTime.Now.Hour >= shiftPM.Hour && DateTime.Now.Minute >= shiftPM.Minute)
+                    {
+                        hour = 48 - DateTime.Now.Hour + shiftAM.Hour;
+                        minute = shiftAM.Minute - DateTime.Now.Minute;
+                        if (minute < 0)
+                        {
+                            hour--;
+                            minute = minute + 60;
+                        }
                     }
                 }
-                double time = (hour * 3600 * 1000) + (minute * 60 * 1000);
+                else // day == 0 or Sunday
+                {
+                    if (DateTime.Now.Hour <= shiftAM.Hour && DateTime.Now.Minute <= shiftAM.Minute)
+                    {
+                        hour = shiftAM.Hour - DateTime.Now.Hour;
+                        minute = shiftAM.Minute - DateTime.Now.Minute;
+                    }
+                    if (DateTime.Now.Hour >= shiftPM.Hour && DateTime.Now.Minute >= shiftPM.Minute)
+                    {
+                        hour = 24 - DateTime.Now.Hour + shiftAM.Hour;
+                        minute = shiftAM.Minute - DateTime.Now.Minute;
+                        if (minute < 0)
+                        {
+                            hour--;
+                            minute = minute + 60;
+                        }
+                    }
+                }
+                time = (hour * 3600 * 1000) + (minute * 60 * 1000);
                 timer.Interval = time;
                 Log("Waiting " + time / 1000 + " seconds", serverLog);
                 timer.Enabled = true;
@@ -361,7 +421,6 @@ namespace DemoBotService
         {
             shiftAM = Convert.ToDateTime(AM);
             shiftPM = Convert.ToDateTime(PM);
-            Log("AM: " + shiftAM + "     PM: " + shiftPM, serverLog);
         }
 
         public void stopAll()

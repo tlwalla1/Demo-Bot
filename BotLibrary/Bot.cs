@@ -15,6 +15,7 @@ namespace BotLibrary
 {
     public class Bot
     {
+        #region Declaration of Variables
         protected SDataService service { get; set; }
         protected SDataService dynamic;
         protected string endPoint;
@@ -29,11 +30,12 @@ namespace BotLibrary
         protected SDataPayload actPayload;
         protected bool stopCommand = false;
         protected double reliability;
-        protected Random rand = new Random();
         protected int upperBoundMonth = 0;
         protected string language = "English";
         protected string fileName = "";
         protected int dirty;
+        protected static Random rand;
+        #endregion
 
         public Bot()
         {
@@ -52,6 +54,7 @@ namespace BotLibrary
             reliability = reliable;
             dirty = 0;
             upperBoundMonth = 2;
+            rand = new Random();
             //writer = new StreamWriter(@"C:\Swiftpage\" + UserID + DateTime.Now.Month + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute + ".txt");
             fileName = @"C:\Swiftpage\UserLogs\" + UserID + server + DateTime.Now.Month + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute + ".txt";
             // Change which user creates data in Chinese (Simplified) by adding '|| UserID == "user"' after current value, or merely replace 'China' with the desired user.
@@ -202,14 +205,11 @@ namespace BotLibrary
 
         protected void runSalesRep()
         {
-            Random rand = new Random();
-            double tempReliability = reliability / 100;
-            double reliable = rand.NextDouble();
-            int choice = rand.Next(6);
+            
+            double reliable = rand.NextDouble() * 100;
+            int choice = rand.Next(5);
 
-            //int choice = 1;
-
-            if (reliable <= tempReliability)
+            if (reliable <= reliability)
             {
                 switch (choice)
                 {
@@ -228,46 +228,33 @@ namespace BotLibrary
                     case 4:
                         updateOpportunity();
                         break;
-                    case 5:
-                        makeNote();
-                        completeActivity();
-                        break;
-
-                    // Won't go to case 8 until changed above...
-                    case 8:
-                        promoteLead();
-                        break;
                 }
-            }
+            } 
         }
 
         protected void runSalesManager()
         {
-            double tempReliability = reliability / 100;
-            double reliable = rand.NextDouble();
-            int choice = rand.Next(1, 5);
+            
+            double reliable = rand.NextDouble() * 100;
+            int choice = rand.Next(5);
 
-            if (reliable <= tempReliability)
+            if (reliable <= reliability)
             {
                 switch (choice)
                 {
-                    case 1:
+                    case 0:
                         makeNote();
                         break;
-                    case 2:
+                    case 1:
                         makeActivity();
                         break;
-                    case 3:
+                    case 2:
                         makeOpportunity();
                         break;
-                    case 4:
+                    case 3:
                         updateOpportunity();
                         break;
-                    case 5:
-                        completeActivity();
-                        break;
-                    case 6:
-                        makeNote();
+                    case 4:
                         completeActivity();
                         break;
                 }
@@ -277,32 +264,28 @@ namespace BotLibrary
 
         protected void runSupportRep()
         {
-            double tempReliability = reliability / 100;
-            double reliable = rand.NextDouble();
-            int choice = rand.Next(1, 3);
+            
+            double reliable = rand.NextDouble() * 100;
+            int choice = rand.Next(3);
 
-            if (reliable <= tempReliability)
+            if (reliable <= reliability)
             {
                 switch (choice)
                 {
-                    case 1:
+                    case 0:
                         makeNote();
                         break;
-                    case 2:
+                    case 1:
                         makeActivity();
                         break;
-                    case 3:
+                    case 2:
                         makeTicket();
                         break;
-                    // Won't go beyond case 3 until changed above...
-                    case 4:
+                    // Won't go beyond case 2 until changed above...
+                    case 3:
                         makeTicketActivity();
                         break;
-                    case 5:
-                        completeTicketActivity();
-                        break;
-                    case 6:
-                        makeNote();
+                    case 4:
                         completeTicketActivity();
                         break;
                 }
@@ -311,25 +294,25 @@ namespace BotLibrary
 
         protected void runSupportManager()
         {
-            double tempReliability = reliability / 100;
-            double reliable = rand.NextDouble();
-            int choice = rand.Next(1, 3);
+            
+            double reliable = rand.NextDouble() * 100;
+            int choice = rand.Next(3);
 
-            if (reliable <= tempReliability)
+            if (reliable <= reliability)
             {
                 switch (choice)
                 {
-                    case 1:
+                    case 0:
                         makeNote();
                         break;
-                    case 2:
+                    case 1:
                         makeActivity();
                         break;
-                    case 3:
+                    case 2:
                         makeTicket();
                         break;
-                    // Won't go beyond case 3 until changed above...
-                    case 4:
+                    // Won't go beyond case 2 until changed above...
+                    case 3:
                         makeTicketActivity();
                         break;
                 }
@@ -338,24 +321,24 @@ namespace BotLibrary
 
         protected void runMarketingRep()
         {
-            double tempReliability = reliability / 100;
-            double reliable = rand.NextDouble();
-            int choice = rand.Next(1, 4);
+            
+            double reliable = rand.NextDouble() * 100;
+            int choice = rand.Next(3);
 
-            if (reliable <= tempReliability)
+            if (reliable <= reliability)
             {
                 switch (choice)
                 {
-                    case 1:
+                    case 0:
                         makeNote();
                         break;
-                    case 2:
+                    case 1:
                         makeActivity();
                         break;
-                    case 3:
+                    case 2:
                         makeCampaign();
                         break;
-                    case 4:
+                    case 3:
                         updateCampaign();
                         break;
                 }
@@ -364,24 +347,24 @@ namespace BotLibrary
 
         protected void runMarketingManager()
         {
-            double tempReliability = reliability / 100;
-            double reliable = rand.NextDouble();
-            int choice = rand.Next(1, 4);
+            
+            double reliable = rand.NextDouble() * 100;
+            int choice = rand.Next(4);
 
-            if (reliable < tempReliability)
+            if (reliable <= reliability)
             {
                 switch (choice)
                 {
-                    case 1:
+                    case 0:
                         makeNote();
                         break;
-                    case 2:
+                    case 1:
                         makeActivity();
                         break;
-                    case 3:
+                    case 2:
                         makeCampaign();
                         break;
-                    case 4:
+                    case 3:
                         updateCampaign();
                         break;
                 }
@@ -390,6 +373,7 @@ namespace BotLibrary
 
         protected void fieldRep()
         {
+            
             // Run update opportunity. Also include random event to create activity and complete it, such as phone call, and ability to do notes.
             int choice = rand.Next(4);
             switch (choice)
@@ -401,27 +385,23 @@ namespace BotLibrary
                     makeActivity();
                     break;
                 case 2:
-                    makeActivity();
                     makeNote();
                     break;
                 case 3:
                     completeActivity();
-                    makeNote();
                     break;
                 default:
                     completeActivity();
-                    makeNote();
                     break;
             }
         }
 
         protected void leadQual()
         {
-            Random rand = new Random();
-            double tempReliability = reliability / 100;
-            double reliable = rand.NextDouble();
+            
+            double reliable = rand.NextDouble() * 100;
 
-            if (reliable < tempReliability)
+            if (reliable < reliability)
             {
                 // Runs update lead. Include random chance to write note about current stage
                 switch (dirty)
@@ -551,11 +531,10 @@ namespace BotLibrary
 
         protected void leadGen()
         {
-            Random rand = new Random();
-            double tempReliability = reliability / 100;
-            double reliable = rand.NextDouble();
+            
+            double reliable = rand.NextDouble() * 100;
 
-            if (reliable < tempReliability)
+            if (reliable < reliability)
             {
                 // Runs the makelead. Creates the first activity for the lead.
                 SDataPayload leadPayload = null;
@@ -578,6 +557,7 @@ namespace BotLibrary
 
         protected void marketingRep()
         {
+            
             double tempReliability = reliability / 100;
             double reliable = rand.NextDouble();
             int choice = rand.Next(1, 4);
@@ -934,6 +914,7 @@ namespace BotLibrary
                 Log(DateTime.Now + " | " + guid + " | Get | History Template |  | " + tempTime, fileName);
 
                 SDataPayload payload = tempEntry.GetSDataPayload();
+                payload.Values["CreateSource"] = "Demo-Bot";
                 payload.Values["Type"] = type;
                 payload.Values["Category"] = category;
                 payload.Values["Description"] = description;
@@ -1064,6 +1045,7 @@ namespace BotLibrary
                 Log(DateTime.Now + " | " + guid + " | Get | History Template |  | " + tempTime, fileName);
 
                 SDataPayload payload = tempEntry.GetSDataPayload();
+                payload.Values["CreateSource"] = "Demo-Bot";
                 payload.Values["OpportunityName"] = opportunityPayload.Values["Description"];
                 payload.Values["OpportunityId"] = opportunityPayload.Key;
                 payload.Values["Type"] = type;
@@ -1142,6 +1124,7 @@ namespace BotLibrary
                 Log(DateTime.Now + " | " + guid + " | Get | History Template |  | " + tempTime, fileName);
 
                 SDataPayload payload = tempEntry.GetSDataPayload();
+                payload.Values["CreateSource"] = "Demo-Bot";
                 payload.Values["Type"] = type;
                 payload.Values["Category"] = category;
                 payload.Values["Description"] = description;
@@ -1195,6 +1178,7 @@ namespace BotLibrary
         {
             try
             {
+                
                 Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 // Initializing the variables used to populate the payload. Each variable gets a value using a random value
@@ -1314,6 +1298,7 @@ namespace BotLibrary
                     }
                      * */
 
+                    payload.Values["CreateSource"] = "Demo-Bot";
                     payload.Values["Location"] = location;
                     payload.Values["Priority"] = priority;
                     payload.Values["LongNotes"] = notes;
@@ -1353,6 +1338,7 @@ namespace BotLibrary
         {
             try
             {
+                
                 Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
 
@@ -1381,6 +1367,7 @@ namespace BotLibrary
                 Log(DateTime.Now + " | " + guid + " | Get | TicketActivityItem |  | " + tempTime, fileName);
                 SDataPayload payload = tempEntry.GetSDataPayload();
 
+                payload.Values["CreateSource"] = "Demo-Bot";
                 //payload.Values["ActivityTypeCode"] = ratePayload.Values["RateTypeCode"];
                 payload.Values["Ticket"] = ticketPayload.Key;
                 payload.Values["CreateDate"] = DateTime.Now;
@@ -1452,6 +1439,7 @@ namespace BotLibrary
 
                 SDataPayload payload = tempEntry.GetSDataPayload();
 
+                payload.Values["CreateSource"] = "Demo-Bot";
                 payload.Values["OpportunityName"] = opportunityPayload.Values["Description"];
                 payload.Values["OpportunityId"] = opportunityPayload.Key;
                 payload.Values["Type"] = type;
@@ -1530,6 +1518,7 @@ namespace BotLibrary
 
                 SDataPayload payload = tempEntry.GetSDataPayload();
 
+                payload.Values["CreateSource"] = "Demo-Bot";
                 payload.Values["Type"] = type;
                 payload.Values["Category"] = category;
                 // Get the program to query the server for the contact name, account name, and retrieve the respective ids for each.
@@ -1585,6 +1574,7 @@ namespace BotLibrary
         {
             try
             {
+                
                 Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
@@ -1624,12 +1614,52 @@ namespace BotLibrary
                     }
                 } while (checker == true);
 
+
+                payload.Values["CreateSource"] = "Demo-Bot";
                 payload.Values["AccountName"] = accountName;
                 payload.Values["AccountNameUpper"] = accountName.ToUpper();
                 //payload.Values["CreateDate"] = DateTime.Now;
                 //payload.Values["CreateUser"] = UserID;
                 payload.Values["Type"] = localize(language, "Account Type", null, null, null, true);
                 payload.Values["Status"] = localize(language, "Account Status", null, null, null, true);
+                payload.Values["WebAddress"] = createWebAddress(accountName);
+                payload.Values["MainPhone"] = phoneNumberGenerator();
+                payload.Values["Employees"] = rand.Next(1000) + 1;
+                SDataPayload address = fetchAddress();
+                payload.Values["Address"] = address;
+                string[] region = getRegion((string)address.Values["State"]);
+                payload.Values["Region"] = region[0];
+                string accountMan = region[1];
+
+                SDataResourceCollectionRequest users = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "users",
+                    QueryValues = { { "where", "UserName eq '" + accountMan.ToLower() + "'" } }
+                };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var feed5 = users.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Users |  | " + tempTime, fileName);
+                SDataPayload accountManager = feed5.Entries.ElementAt(0).GetSDataPayload();
+
+                payload.Values["AccountManager"] = accountManager;
+
+                SDataPayload owner = null;
+
+                SDataResourceCollectionRequest owners = new SDataResourceCollectionRequest(dynamic)
+                {
+                    ResourceKind = "owners",
+                    QueryValues = { { "where", "OwnerDescription eq '" + region[0] + "'" } }
+                };
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                var feed3 = owners.Read();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Owners |  | " + tempTime, fileName);
+                owner = feed3.Entries.ElementAt(0).GetSDataPayload();
+
+                payload.Values["Owner"] = owner;
 
                 tempEntry.SetSDataPayload(payload);
 
@@ -1659,6 +1689,7 @@ namespace BotLibrary
             SDataPayload accountPayload = null;
             try
             {
+                
                 Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
@@ -1714,29 +1745,17 @@ namespace BotLibrary
                     return accPayload;
                 }
 
-                SDataPayload address = null;
-
-                SDataResourceCollectionRequest addresses = new SDataResourceCollectionRequest(dynamic)
-                {
-                    ResourceKind = "addresses",
-                    QueryValues = { { "where", "Country eq 'USA'" } }
-                };
-                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                var feed2 = addresses.Read();
-                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                tempTime = (tempAfter - tempPre) / 1000;
-                Log(DateTime.Now + " | " + guid + " | Get | Addresses |  | " + tempTime, fileName);
-                int count2 = feed2.Entries.Count();
-                int choice = rand.Next(count2);
-                address = feed2.Entries.ElementAt(choice).GetSDataPayload();
-
+                payload.Values["CreateSource"] = "Demo-Bot";
                 payload.Values["AccountName"] = accountName;
                 payload.Values["AccountNameUpper"] = accountName.ToUpper();
                 //payload.Values["CreateDate"] = DateTime.Now;
                 //payload.Values["CreateUser"] = UserID;
                 payload.Values["Type"] = localize(language, "Account Type", null, null, null, true);
                 payload.Values["Status"] = localize(language, "Account Status", null, null, null, true);
-                //payload.Values["Notes"] = leadPayload.Values["Notes"];
+                payload.Values["WebAddress"] = createWebAddress(accountName);
+                payload.Values["MainPhone"] = phoneNumberGenerator();
+                payload.Values["Employees"] = rand.Next(1000) + 1;
+                SDataPayload address = fetchAddress();
                 payload.Values["Address"] = address;
                 string[] region = getRegion((string)address.Values["State"]);
                 payload.Values["Region"] = region[0];
@@ -1745,14 +1764,14 @@ namespace BotLibrary
                 SDataResourceCollectionRequest users = new SDataResourceCollectionRequest(dynamic)
                 {
                     ResourceKind = "users",
-                    QueryValues = { { "where", "UserName eq '" + accountMan + "'" } }
+                    QueryValues = { { "where", "UserName eq '" + accountMan.ToLower() + "'" } }
                 };
                 tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                var feed4 = users.Read();
+                var feed5 = users.Read();
                 tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 tempTime = (tempAfter - tempPre) / 1000;
                 Log(DateTime.Now + " | " + guid + " | Get | Users |  | " + tempTime, fileName);
-                SDataPayload accountManager = feed4.Entries.ElementAt(0).GetSDataPayload();
+                SDataPayload accountManager = feed5.Entries.ElementAt(0).GetSDataPayload();
 
                 payload.Values["AccountManager"] = accountManager;
 
@@ -1779,14 +1798,15 @@ namespace BotLibrary
                     ResourceKind = "accounts",
                     Entry = tempEntry
                 };
-                float requestPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 var response = request.Create();
+                accountPayload = response.GetSDataPayload();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Push | Account |  | " + tempTime, fileName);
                 float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                float requestTime = (after - requestPre) / 1000;
-                Log(DateTime.Now + " | " + guid + " | Push | Account |  | " + requestTime, fileName);
                 float timed = (after - previous) / 1000;
-                accountPayload = (SDataPayload)response.GetSDataPayload();
-                Log(DateTime.Now + " | " + guid + " | Total | Account | " + payload.Values["AccountName"] + " | " + timed, fileName);
+                Log(DateTime.Now + " | " + guid + " | Total | Account | " + payload.Values["AccountName"] + " | " + tempTime, fileName);
             }
             catch (Exception e) { Log(DateTime.Now + " |  |  | Error | " + e.Message, fileName); }
             return accountPayload;
@@ -1797,6 +1817,7 @@ namespace BotLibrary
         {
             try
             {
+                
                 Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
@@ -1812,11 +1833,14 @@ namespace BotLibrary
                 do
                 {
                     accountPayload = fetchAccount();
-                    i++;
-                } while (accountPayload == null && i < 50);
+                    i++; 
+                    if (i == 50)
+                    {
+                        return;
+                    }
+                } while (accountPayload == null);
 
-                if (i == 50)
-                    return;
+                
 
                 string firstName = localize(language, "Fake First Name", null, null, null, true);
                 string lastName = localize(language, "Fake Last Name", null, null, null, true);
@@ -1873,6 +1897,7 @@ namespace BotLibrary
                         break;
                 }
 
+                payload.Values["CreateSource"] = "Demo-Bot";
                 payload.Values["FirstName"] = firstName;
                 payload.Values["LastName"] = lastName;
                 payload.Values["LastNameUpper"] = lastName.ToUpper();
@@ -1889,11 +1914,8 @@ namespace BotLibrary
                 payload.Values["ModifyUser"] = UserID;
                 payload.Values["CreateUser"] = UserID;
                 payload.Values["Email"] = firstName + lastName + "@" + emailProvider + ".com";
-                string phone = rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString() +
-                    rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString() +
-                    rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString();
-                payload.Values["WorkPhone"] = phone;
-                payload.Values["Mobile"] = phone;
+                payload.Values["WorkPhone"] = phoneNumberGenerator();
+                payload.Values["Mobile"] = phoneNumberGenerator();
                 payload.Values["DoNotEmail"] = false;
                 payload.Values["DoNotFax"] = false;
                 payload.Values["DoNotMail"] = false;
@@ -1902,7 +1924,8 @@ namespace BotLibrary
                 payload.Values["IsServiceAuthorized"] = false;
                 payload.Values["WebAddress"] = accountPayload.Values["WebAddress"];
                 payload.Values["Status"] = "Active";
-                payload.Values["Address"] = new SDataPayload
+                payload.Values["Address"] = accountPayload.Values["Address"];
+                /*payload.Values["Address"] = new SDataPayload
                 {
                     ResourceName = "addresses",
                     Values = {
@@ -1913,7 +1936,7 @@ namespace BotLibrary
                                             {"IsPrimary", true},
                                             {"AddressType", "Billing &amp; Shipping"}
                                         }
-                };
+                };*/
 
                 payload.Values["Description"] = accountPayload.Values["Description"];
                 payload.Values["PreferredContact"] = "Unknown";
@@ -1946,6 +1969,7 @@ namespace BotLibrary
             SDataPayload contactPayload = null;
             try
             {
+                
                 Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
@@ -1957,17 +1981,17 @@ namespace BotLibrary
                 Log(DateTime.Now + " | " + guid + " | Get | Contact Template |  | " + tempTime, fileName);
                 SDataPayload payload = tempEntry.GetSDataPayload();
 
-                actPayload = makeAccountWithName(leadPayload);
+                SDataPayload accountPayload = makeAccountWithName(leadPayload);
                 string firstName = (string)leadPayload.Values["FirstName"];
                 string lastName = (string)leadPayload.Values["LastName"];
 
-                if (actPayload.Values["Contacts"] != null)
+                if (accountPayload.Values["Contacts"] != null)
                 {
                     tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                     SDataResourceCollectionRequest contact = new SDataResourceCollectionRequest(dynamic)
                     {
                         ResourceKind = "contacts",
-                        QueryValues = { { "where", "Account.Id eq '" + actPayload.Key + "'" } }
+                        QueryValues = { { "where", "Account.Id eq '" + accountPayload.Key + "'" } }
                     };
                     var feed = contact.Read();
                     tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
@@ -2008,6 +2032,7 @@ namespace BotLibrary
                         break;
                 }
 
+                payload.Values["CreateSource"] = "Demo-Bot";
                 payload.Values["FirstName"] = firstName;
                 payload.Values["LastName"] = lastName;
                 payload.Values["LastNameUpper"] = lastName.ToUpper();
@@ -2017,27 +2042,25 @@ namespace BotLibrary
                 payload.Values["NamePFL"] = " " + firstName + " " + lastName;
                 payload.Values["IsPrimary"] = false;
                 payload.Values["Salutation"] = firstName;
-                payload.Values["AccountName"] = actPayload.Values["AccountName"];
-                payload.Values["Account"] = actPayload;
+                payload.Values["AccountName"] = accountPayload.Values["AccountName"];
+                payload.Values["Account"] = accountPayload;
                 payload.Values["CreateDate"] = DateTime.Now;
                 payload.Values["ModifyDate"] = DateTime.Now;
                 payload.Values["ModifyUser"] = UserID;
                 payload.Values["CreateUser"] = UserID;
                 payload.Values["Email"] = firstName + lastName + "@" + emailProvider + ".com";
-                string phone = rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString() +
-                    rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString() +
-                    rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString();
-                payload.Values["WorkPhone"] = phone;
-                payload.Values["Mobile"] = phone;
+                payload.Values["WorkPhone"] = phoneNumberGenerator();
+                payload.Values["Mobile"] = phoneNumberGenerator();
                 payload.Values["DoNotEmail"] = false;
                 payload.Values["DoNotFax"] = false;
                 payload.Values["DoNotMail"] = false;
                 payload.Values["DoNotPhone"] = false;
                 payload.Values["DoNotSolicit"] = false;
                 payload.Values["IsServiceAuthorized"] = false;
-                payload.Values["WebAddress"] = actPayload.Values["WebAddress"];
+                payload.Values["WebAddress"] = accountPayload.Values["WebAddress"];
                 payload.Values["Status"] = "Active";
-                payload.Values["Address"] = new SDataPayload
+                payload.Values["Address"] = accountPayload.Values["Address"];
+                /*payload.Values["Address"] = new SDataPayload
                 {
                     ResourceName = "addresses",
                     Values = {
@@ -2048,9 +2071,9 @@ namespace BotLibrary
                                             {"IsPrimary", true},
                                             {"AddressType", "Billing &amp; Shipping"}
                                         }
-                };
+                };*/
 
-                payload.Values["Description"] = actPayload.Values["Description"];
+                payload.Values["Description"] = accountPayload.Values["Description"];
                 payload.Values["PreferredContact"] = "Unknown";
 
                 tempEntry.SetSDataPayload(payload);
@@ -2081,12 +2104,12 @@ namespace BotLibrary
                 {
                     SDataPayload tempPayload = entry.GetSDataPayload();
 
-                    tempPayload.Values["ContactName"] = tempPayload.Values["LeadName"];
+                    tempPayload.Values["ContactName"] = contactPayload.Values["NameLF"];
                     tempPayload.Values["ContactId"] = contactPayload.Key;
                     tempPayload.Values["LeadName"] = null;
                     tempPayload.Values["LeadId"] = null;
-                    tempPayload.Values["AccountId"] = actPayload.Key;
-                    tempPayload.Values["AccountName"] = actPayload.Values["AccountName"];
+                    tempPayload.Values["AccountId"] = accountPayload.Key;
+                    tempPayload.Values["AccountName"] = accountPayload.Values["AccountName"];
 
                     entry.SetSDataPayload(tempPayload);
                     SDataSingleResourceRequest request2 = new SDataSingleResourceRequest(dynamic)
@@ -2128,6 +2151,7 @@ namespace BotLibrary
             SDataPayload leadPayload = null;
             try
             {
+                
                 Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float tempPre;
@@ -2192,20 +2216,29 @@ namespace BotLibrary
                         break;
 
                 }
-                string phone = rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString()
-                    + rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString()
-                    + rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString() + rand.Next(9).ToString();
+                payload.Values["CreateSource"] = "Demo-Bot";
+                string phone = phoneNumberGenerator();
+                string company = localize(language, "Fake Company Name", null, null, null, true);
                 payload.Values["CreateUser"] = UserID;
                 payload.Values["CreateDate"] = DateTime.Now.ToUniversalTime();
-                payload.Values["Company"] = localize(language, "Fake Company Name", null, null, null, true);
+                payload.Values["Company"] = company;
                 payload.Values["Email"] = firstName.ToLower() + lastName.ToLower() + "@" + emailProvider + ".com";
                 payload.Values["FirstName"] = firstName;
                 payload.Values["LastName"] = lastName;
                 payload.Values["LastNameUpper"] = lastName.ToUpper();
                 payload.Values["Mobile"] = phone;
+                payload.Values["WorkPhone"] = phone;
                 payload.Values["LeadNameFirstLast"] = firstName + " " + lastName;
                 payload.Values["LeadNameLastFirst"] = lastName + ", " + firstName;
                 payload.Values["LeadSource"] = fetchLeadSource();
+                payload.Values["Title"] = randomTitle();
+                payload.Values["WebAddress"] = createWebAddress(company);
+                //tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                //SDataPayload address = fetchAddress();
+                //payload.Values["Address"] = address;
+                //tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                //tempTime = (tempAfter - tempPre) / 1000;
+                //Log(DateTime.Now + " | " + guid + " | Get | Addresses |  | " + tempTime, fileName);
 
                 SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
                 {
@@ -2230,7 +2263,7 @@ namespace BotLibrary
             return leadPayload;
         }
 
-        // Roundabout way of doing this method is used in LeadQual above. promoteLead cannot be done using SData right now.
+        // Roundabout way of doing this method is used in LeadQual above. promoteLead cannot be done using SData right now. (this function is not called)
         public void promoteLead()
         {
             try
@@ -2378,6 +2411,7 @@ namespace BotLibrary
         {
             try
             {
+                
                 Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float tempPre;
@@ -2446,8 +2480,9 @@ namespace BotLibrary
                 userPayload = (SDataPayload)userPayload.Values["response"]; */
 
                 //payload.Values["ActualAmount"] = oppValue;
+                payload.Values["CreateSource"] = "Demo-Bot";
                 payload.Values["CreateUser"] = UserID;
-                payload.Values["Description"] = accountPayload.Values["AccountName"] + " - Phase " + rand.Next(0, 10);
+                payload.Values["Description"] = accountPayload.Values["AccountName"] + " - Phase " + rand.Next(0, 10) + "." + rand.Next(0,10);
                 payload.Values["Account"] = accountPayload;
                 payload.Values["Owner"] = accountPayload.Values["Owner"];
                 //payload.Values["SalesAmount"] = oppValue;
@@ -2516,6 +2551,7 @@ namespace BotLibrary
         {
             try
             {
+                
                 Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float tempPre;
@@ -2574,6 +2610,7 @@ namespace BotLibrary
                 var userPayload = temp.GetSDataPayload();
                 userPayload = (SDataPayload)userPayload.Values["response"]; */
 
+                payload.Values["CreateSource"] = "Demo-Bot";
                 //payload.Values["ActualAmount"] = oppValue;
                 //payload.Values["CreateUser"] = UserID;
                 payload.Values["Description"] = accountPayload.Values["AccountName"] + " - Phase " + rand.Next(0, 10);
@@ -2646,6 +2683,7 @@ namespace BotLibrary
         {
             try
             {
+                
                 Guid guid = Guid.NewGuid();
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 float tempPre;
@@ -2713,6 +2751,7 @@ namespace BotLibrary
                 var userPayload = temp.GetSDataPayload();
                 userPayload = (SDataPayload)userPayload.Values["response"]; */
 
+                payload.Values["CreateSource"] = "Demo-Bot";
                 //payload.Values["ActualAmount"] = oppValue;
                 payload.Values["CreateUser"] = UserID;
                 payload.Values["Description"] = accountPayload.Values["AccountName"] + " - Phase " + rand.Next(0, 10);
@@ -2796,6 +2835,8 @@ namespace BotLibrary
                 float tempTime = (tempAfter - previous) / 1000;
                 Log(DateTime.Now + " | " + guid + " | Get | Ticket Template |  | " + tempTime, fileName);
                 SDataPayload payload = tempEntry.GetSDataPayload();
+
+                payload.Values["CreateSource"] = "Demo-Bot";
 
                 SDataPayload accountPayload = null;
                 int j = 0;
@@ -2892,6 +2933,7 @@ namespace BotLibrary
         {
             try
             {
+                
                 // Include adding TicketActivity and completing TicketActivities
                 int chance = rand.Next(0, 7);
                 if (chance <= 7)
@@ -3240,6 +3282,9 @@ namespace BotLibrary
                 {
                     checker = false;
                     tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                    counter = 0;
+                    // Get a valid Opportunity from the Users list of opportunities, ensure that the opportunity is Open (this is because the fetchOpportunity
+                    // function only gets the opportunities for the currentUser and doesn't limit it based on the Status being Open)
                     do
                     {
                         entry = fetchOpportunity();
@@ -3249,7 +3294,7 @@ namespace BotLibrary
                             Log("Unable to locate a valid opportunity at " + DateTime.Now, fileName);
                             return;
                         }
-                    } while (entry == null);
+                    } while (entry == null && (string)entry.GetSDataPayload().Values["Status"] != "Open");
                     tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                     tempTime = (tempAfter - tempPre) / 1000;
                     Log(DateTime.Now + " | " + guid + " | Get | Opportunity |  | " + tempTime, fileName);
@@ -3264,9 +3309,11 @@ namespace BotLibrary
 
                     if (temp == "0.0000")
                         checker = true;
-                } while (((string)payload.Values["Closed"]) == "true" || checker == true);
+                } while (string.Compare((string)payload.Values["Closed"],"true") == 0 || checker == true);
 
                 int x = rand.Next(0, 100);
+
+                // If the opportunity is near closing, add it to the forecast
                 if (x < (Convert.ToInt32(payload.Values["CloseProbability"]) + 20) && payload.Values["AddToForecast"].ToString() == "false")
                 {
                     tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
@@ -3283,6 +3330,7 @@ namespace BotLibrary
                     Log(DateTime.Now + " | " + guid + " | Put | Opportunity | Added " + payload.Values["Description"] + " to forecast | " + tempTime, fileName);
                 }
 
+                // If the close probability is 100 (went through all of the stages) then close the opportunity with a win
                 if ((string)payload.Values["CloseProbability"] == 100.ToString())
                 {
                     string reason = localize(language, "Reason", null, null, null, true);
@@ -3300,8 +3348,8 @@ namespace BotLibrary
                             payload.Values["Status"] = "关闭 - 韩元";
                             break;
                     }
-                    payload.Values["SalesAmount"] = payload.Values["SalesPotential"];
-                    payload.Values["ActualAmount"] = payload.Values["SalesAmount"];
+                    payload.Values["SalesAmount"] = payload.Values["SalesPotential"].ToString();
+                    payload.Values["ActualAmount"] = payload.Values["SalesAmount"].ToString();
 
                     entry.SetSDataPayload(payload);
 
@@ -3328,7 +3376,7 @@ namespace BotLibrary
                     {
                         if (choice < .3)
                         {
-                            // Close the opportunity (either winning or losing it based on the 'close prob'
+                            // Close the opportunity (either winning or losing it based on the 'close prob')
                             int luckyOne = Convert.ToInt32(payload.Values["CloseProbability"]) + 10;
                             int testMyLuck = rand.Next(0, 100);
                             if (testMyLuck <= luckyOne)
@@ -3349,8 +3397,8 @@ namespace BotLibrary
                                         payload.Values["Status"] = "关闭 - 韩元";
                                         break;
                                 }
-                                payload.Values["SalesAmount"] = payload.Values["SalesPotential"];
-                                payload.Values["ActualAmount"] = payload.Values["SalesAmount"];
+                                payload.Values["SalesAmount"] = payload.Values["SalesPotential"].ToString();
+                                payload.Values["ActualAmount"] = payload.Values["SalesAmount"].ToString();
 
                                 entry.SetSDataPayload(payload);
 
@@ -3409,6 +3457,7 @@ namespace BotLibrary
                         }
                         else
                         {
+                            // Random occurance of the opportunity being lost
                             float after;
                             float timed;
                             int unlucky = rand.Next(0, 100);
@@ -3439,15 +3488,16 @@ namespace BotLibrary
                                 Log(DateTime.Now + " | " + guid + " | Put | Opportunity | Updated Opp with loss: " + payload.Values["Description"] + " | " + timed, fileName);
                                 return;
                             }
-                            if (payload.Values["Account"] != "")
+                            SDataPayload account = (SDataPayload)payload.Values["Account"];
+                            if (string.Compare((string)account.Values["AccountName"], "") == 0)
                             {
                                 // Add a note to the opportunity
                                 makeNoteFor(payload, guid);
                                 after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                                 timed = (after - previous) / 1000;
                                 Log(DateTime.Now + " | " + guid + " | Total | Note | For: " + payload.Values["Description"] + " | " + timed, fileName);
+                                return;
                             }
-                            return;
                         }
                     }
                     else
@@ -3472,9 +3522,11 @@ namespace BotLibrary
                             float after = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                             float timed = (after - previous) / 1000;
                             Log(DateTime.Now + " | " + guid + " | Put | Opportunity | " + payload.Values["Description"] + " moved to the next stage | " + timed, fileName);
+                            return;
                         }
                         else
                         {
+                            // Another random chance of being unlucky and losing the opportunity
                             int unlucky = rand.Next(0, 100);
                             float after;
                             float timed;
@@ -3512,8 +3564,9 @@ namespace BotLibrary
                                 timed = (after - previous) / 1000;
                                 Log(DateTime.Now + " | " + guid + " | Put | Opportunity | " + payload.Values["Description"] + " updated with loss | " + timed, fileName);
                                 return;
-                            }
-                            if (payload.Values["Account"] != "")
+                            } 
+                            SDataPayload account = (SDataPayload)payload.Values["Account"];
+                            if (string.Compare((string)account.Values["AccountName"], "") == 0)
                             {
                                 // Add an activity to the opportunity
                                 makeActivityFor(payload, guid);
@@ -3561,6 +3614,7 @@ namespace BotLibrary
         {
             try
             {
+                
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataTemplateResourceRequest campaignTemplate = new SDataTemplateResourceRequest(dynamic);
                 campaignTemplate.ResourceKind = "campaigns";
@@ -3615,6 +3669,7 @@ namespace BotLibrary
         {
             try
             {
+                
                 float previous = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 SDataTemplateResourceRequest campaignProductsTemplate = new SDataTemplateResourceRequest(dynamic);
                 campaignProductsTemplate.ResourceKind = "campaignProducts";
@@ -3685,6 +3740,7 @@ namespace BotLibrary
 
         public SDataPayload updateAccount(SDataPayload accountPayload)
         {
+            
             Guid guid = Guid.NewGuid();
             try
             {
@@ -3713,6 +3769,7 @@ namespace BotLibrary
                 accountPayload.Values["Address"] = address;
                 string[] region = getRegion((string)address.Values["State"]);
                 accountPayload.Values["Region"] = region[0];
+                accountPayload.Values["CreateSource"] = "Demo-Bot";
                 string accountMan = region[1];
 
                 SDataResourceCollectionRequest users = new SDataResourceCollectionRequest(dynamic)
@@ -3820,10 +3877,46 @@ namespace BotLibrary
         #endregion
 
         #region RandomDataGenerators
+        protected SDataPayload fetchAddress()
+        {
+            
+            SDataPayload address;
+            SDataResourceCollectionRequest addresses = new SDataResourceCollectionRequest(dynamic)
+            {
+                ResourceKind = "addresses",
+                QueryValues = { { "where", "Country eq 'USA'" } }
+            };
+            var feed = addresses.Read();
+            int count = feed.Entries.Count();
+            int choice = rand.Next(count);
+            address = feed.Entries.ElementAt(choice).GetSDataPayload();
+            return address;
+        }
+
+        // So far does nothing, would be nice to have an array of locations to pull from...
+        protected SDataPayload fetchLeadAddress()
+        {
+            SDataPayload address;
+            address = new SDataPayload
+            {
+                ResourceName = "leadAddresses",
+                Values = {
+                                            {"Description", "Office"},
+                                            {"CreateDate", DateTime.Now},
+                                            {"CreateUser", UserID},
+                                            {"IsMailing", true},
+                                            {"IsPrimary", true},
+                                            {"AddressType", "Billing &amp; Shipping"}
+                                        }
+            };
+            return address;
+        }
+
         protected SDataPayload fetchAccount()
         {
             SDataPayload payload = null;
 
+            
             try
             {
                 var getUserRequest = new SDataServiceOperationRequest(service)
@@ -3863,6 +3956,7 @@ namespace BotLibrary
         {
             Sage.SData.Client.Atom.AtomEntry tempEntry = null;
 
+            
             try
             {
                 SDataResourceCollectionRequest leads = new SDataResourceCollectionRequest(dynamic)
@@ -3892,6 +3986,7 @@ namespace BotLibrary
         {
             SDataPayload payload = null;
 
+            
             try
             {
                 SDataResourceCollectionRequest leadSources = new SDataResourceCollectionRequest(dynamic)
@@ -3921,12 +4016,24 @@ namespace BotLibrary
         {
             Sage.SData.Client.Atom.AtomEntry returnEntry = null;
 
+            
             try
             {
+                 float tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                // From the Whitepaper pdf to get the user payload
+                var getUserRequest = new SDataServiceOperationRequest(service)
+                {
+                    OperationName = "getCurrentUser",
+                    Entry = new Sage.SData.Client.Atom.AtomEntry()
+                };
+                var temp = getUserRequest.Create();
+                var userPayload = temp.GetSDataPayload();
+                userPayload = (SDataPayload)userPayload.Values["response"];;
+
                 SDataResourceCollectionRequest opportunities = new SDataResourceCollectionRequest(dynamic)
                 {
                     ResourceKind = "opportunities",
-                    QueryValues = { { "where", "Status eq 'Open'" } }
+                    QueryValues = { { "where", "AccountManager.Id eq '" + userPayload.Values["userId"] + "'" } }
                 };
 
                 var feed = opportunities.Read();
@@ -3950,6 +4057,7 @@ namespace BotLibrary
 
         protected SDataPayload fetchTicket()
         {
+            
             SDataPayload ticketPayload = null;
             try
             {
@@ -3980,6 +4088,7 @@ namespace BotLibrary
         {
             SDataPayload rate = null;
 
+            
             try
             {
                 SDataResourceCollectionRequest ticketActivityRate = new SDataResourceCollectionRequest(dynamic)
@@ -4007,6 +4116,7 @@ namespace BotLibrary
         {
             SDataPayload item = null;
 
+            
             try
             {
                 SDataResourceCollectionRequest ticketActivityItem = new SDataResourceCollectionRequest(dynamic)
@@ -4034,6 +4144,7 @@ namespace BotLibrary
         {
             SDataPayload item = null;
 
+            
             try
             {
                 SDataResourceCollectionRequest campaigns = new SDataResourceCollectionRequest(dynamic)
@@ -4061,6 +4172,7 @@ namespace BotLibrary
         {
             SDataPayload item = null;
 
+            
             try
             {
                 SDataResourceCollectionRequest campaignProducts = new SDataResourceCollectionRequest(dynamic)
@@ -4088,6 +4200,7 @@ namespace BotLibrary
         {
             SDataPayload item = null;
 
+            
             try
             {
                 SDataResourceCollectionRequest targetResponses = new SDataResourceCollectionRequest(dynamic)
@@ -4115,6 +4228,7 @@ namespace BotLibrary
         {
             SDataPayload item = null;
 
+            
             try
             {
                 SDataResourceCollectionRequest campaignTargets = new SDataResourceCollectionRequest(dynamic)
@@ -4142,6 +4256,7 @@ namespace BotLibrary
         {
             SDataPayload item = null;
 
+            
             try
             {
                 SDataResourceCollectionRequest opportunityCampaigns = new SDataResourceCollectionRequest(dynamic)
@@ -4168,6 +4283,7 @@ namespace BotLibrary
 
         protected string getCallToAction(string objective)
         {
+            
             string call = null;
             switch (objective)
             {
@@ -4397,7 +4513,7 @@ namespace BotLibrary
         // Currently excludes Event Activity due to it causing problems on activity creation.
         protected string randomTypeGenerator()
         {
-            Random rand = new Random();
+            
             // Random number to determine which type will be created.
 
             double choice = 5 * rand.NextDouble();
@@ -4429,7 +4545,7 @@ namespace BotLibrary
 
         protected string leadTypeGenerator()
         {
-            Random rand = new Random();
+            
             // Random number to determine which type will be created.
 
             int choice = rand.Next(1, 2);
@@ -4445,7 +4561,7 @@ namespace BotLibrary
 
         protected string randomChineseTypeGenerator()
         {
-            Random rand = new Random();
+            
             // Random number to determine which type will be created.
 
             double choice = 5 * rand.NextDouble();
@@ -4481,7 +4597,7 @@ namespace BotLibrary
 
         protected string randomAccountType()
         {
-            Random rand = new Random();
+            
             int choice = rand.Next(0, 8);
             string type = "";
             switch (choice)
@@ -4519,7 +4635,7 @@ namespace BotLibrary
 
         protected string randomChineseAccountType()
         {
-            Random rand = new Random();
+            
             int choice = rand.Next(0, 8);
             string type = "";
             switch (choice)
@@ -4557,7 +4673,7 @@ namespace BotLibrary
 
         protected string randomAccountStatus()
         {
-            Random rand = new Random();
+            
             int choice = rand.Next(0, 4);
             string status = "";
             switch (choice)
@@ -4583,7 +4699,7 @@ namespace BotLibrary
 
         protected string randomChineseAccountStatus()
         {
-            Random rand = new Random();
+            
             int choice = rand.Next(0, 4);
             string status = "";
             switch (choice)
@@ -4609,7 +4725,7 @@ namespace BotLibrary
 
         protected string randomCategoryGenerator(string type)
         {
-            Random rand = new Random();
+            
             string category = "";
             int index;
 
@@ -4681,7 +4797,7 @@ namespace BotLibrary
 
         protected string leadCategoryGenerator(string type)
         {
-            Random rand = new Random();
+            
             string category = "";
             int index;
 
@@ -4728,7 +4844,7 @@ namespace BotLibrary
 
         protected string randomChineseCategoryGenerator(string type)
         {
-            Random rand = new Random();
+            
             string category = "";
             int index;
 
@@ -4800,7 +4916,7 @@ namespace BotLibrary
 
         protected string randomDescriptionGenerator(string type)
         {
-            Random rand = new Random();
+            
             // For the random number generation
 
             int index;
@@ -4906,7 +5022,7 @@ namespace BotLibrary
 
         protected string leadDescriptionGenerator(string type)
         {
-            Random rand = new Random();
+            
             // For the random number generation
 
             int index;
@@ -4971,6 +5087,7 @@ namespace BotLibrary
 
         protected string randomCampaignDescriptionGenerator()
         {
+            
             string value = null;
             string[] description = new string[]
             {
@@ -4987,6 +5104,7 @@ namespace BotLibrary
 
         protected string randomCampaignObjective()
         {
+            
             string value = null;
             string[] objective = new string[]
             {
@@ -5004,7 +5122,7 @@ namespace BotLibrary
 
         protected string randomChineseDescriptionGenerator(string type)
         {
-            Random rand = new Random();
+            
             // For the random number generation
 
             int index;
@@ -5107,96 +5225,9 @@ namespace BotLibrary
             return returnDescription;
         }
 
-        /*
-        protected string randomLeadSource()
-        {
-            Random rand = new Random();
-            int x = rand.Next(0, 8);
-            string source = "E-mail";
-
-            int value = rand.Next(8);
-            switch (value)
-            {
-                case 0:
-                    source = "Advertising";
-                    break;
-                case 1:
-                    source = "Direct Mail";
-                    break;
-                case 2:
-                    source = "E-mail";
-                    break;
-                case 3:
-                    source = "Event";
-                    break;
-                case 4:
-                    source = "Seminar";
-                    break;
-                case 5:
-                    source = "Telemarketing";
-                    break;
-                case 6:
-                    source = "Trade Show";
-                    break;
-                case 7:
-                    source = "Web";
-                    break;
-                case 8:
-                    source = "Word of Mouth /Referral";
-                    break;
-                default:
-                    source = "E-mail";
-                    break;
-            }
-            return source;
-        }
-
-        protected string randomChineseLeadSource()
-        {
-            Random rand = new Random();
-            string source = "电子邮件";
-
-            int value = rand.Next(8);
-            switch (value)
-            {
-                case 0:
-                    source = "广告";
-                    break;
-                case 1:
-                    source = "商函";
-                    break;
-                case 2:
-                    source = "电子邮件";
-                    break;
-                case 3:
-                    source = "事件";
-                    break;
-                case 4:
-                    source = "研讨会";
-                    break;
-                case 5:
-                    source = "电话营销";
-                    break;
-                case 6:
-                    source = "展会";
-                    break;
-                case 7:
-                    source = "卷筒纸";
-                    break;
-                case 8:
-                    source = "口碑 /转介";
-                    break;
-                default:
-                    source = "电子邮件";
-                    break;
-            }
-            return source;
-        }
-        */
-
         protected string randomNoteGenerator(string type, string accountName, string description)
         {
-            Random rand = new Random();
+            
             string note = "";
             // Array of note structures to be used
             string[] notes = new string[]
@@ -5333,7 +5364,7 @@ namespace BotLibrary
 
         protected string randomNoteforLeadGenerator(string value, SDataPayload payload, string type)
         {
-            Random rand = new Random();
+            
             string note = "";
             string company = "";
             string name = "";
@@ -5410,7 +5441,7 @@ namespace BotLibrary
 
         protected string randomChineseNoteGenerator(string type, SDataPayload payload, string description)
         {
-            Random rand = new Random();
+            
             string note = "";
             // Array of note structures to be used
             string[] notes = new string[]
@@ -5547,7 +5578,7 @@ namespace BotLibrary
 
         protected string randomLocationGenerator(string type)
         {
-            Random rand = new Random();
+            
             string location = "";
 
             if (type == "Appointment" || type == "Personal")
@@ -5634,7 +5665,7 @@ namespace BotLibrary
 
         protected string randomChineseLocationGenerator(string type)
         {
-            Random rand = new Random();
+            
             string location = "";
 
             if (type == "任命" || type == "个人")
@@ -5719,9 +5750,39 @@ namespace BotLibrary
             return location;
         }
 
+        protected string randomTitle()
+        {
+            
+            string title = "";
+            string[] titles = new string[]
+            {
+                "Assistant",
+                "CEO",
+                "CFO",
+                "Director of Cust Service",
+                "Director of Finance",
+                "Director of IT",
+                "Director of Marketing",
+                "Director of Sales",
+                "Manager",
+                "Managing Director",
+                "Owner",
+                "President",
+                "Principal",
+                "VP Finance",
+                "VP Marketing",
+                "VP Sales",
+                "VP of Cust Service",
+                "Vice President"
+            };
+            int i = rand.Next(titles.Length);
+            title = titles[i];
+            return title;
+        }
+
         protected string randomReason(bool won)
         {
-            Random rand = new Random();
+            
             string reason = "";
             string[] reasons = new string[]
             {
@@ -5763,11 +5824,13 @@ namespace BotLibrary
                 else
                 {
                     string reason2 = "";
+                    int count = 0;
                     int j = rand.Next(0, 15);
                     do
                     {
                         reason2 = reasons[j];
-                    } while (reason == reason2);
+                        count++;
+                    } while (reason == reason2 && count < 10);
                     reason = reason + " and " + reason2;
                     return reason;
                 }
@@ -5782,10 +5845,12 @@ namespace BotLibrary
                 {
                     string reason2 = "";
                     int j = rand.Next(16, 26);
+                    int count = 0;
                     do
                     {
                         reason2 = reasons[j];
-                    } while (reason == reason2);
+                        count++;
+                    } while (reason == reason2 && count < 10);
                     reason = reason + " and " + reason2;
                     return reason;
                 }
@@ -5794,7 +5859,7 @@ namespace BotLibrary
 
         protected string randomChineseReason(bool won)
         {
-            Random rand = new Random();
+            
             string reason = "";
             string[] reasons = new string[]
             {
@@ -5868,7 +5933,7 @@ namespace BotLibrary
         // Creates a random date for the activity to occur
         protected DateTime randomDateGenerator()
         {
-            Random rand = new Random();
+            
             DateTime lowerLim = Convert.ToDateTime("8:00AM");
             DateTime upperLim = Convert.ToDateTime("5:00PM");
             int hour;
@@ -5910,7 +5975,7 @@ namespace BotLibrary
 
         protected DateTime randomEuroDateGenerator()
         {
-            Random rand = new Random();
+            
             DateTime lowerLim = Convert.ToDateTime("8:00AM");
             DateTime upperLim = Convert.ToDateTime("5:00PM");
             int hour;
@@ -5950,9 +6015,50 @@ namespace BotLibrary
             return date;
         }
 
+        // This function randomly creates a phone number based on US phone lines
+        protected string phoneNumberGenerator()
+        {
+            
+            string number = "(";
+            rand = new Random();
+            for (int i = 0; i < 10; i++)
+            {
+                if (i == 3)
+                    number += ") ";
+                if (i == 6)
+                    number += "-";
+
+                number += rand.Next(10);
+            }
+            return number;
+        }
+
+        // This function takes an input string and outputs that string without spaces in it
+        protected string removeSpaces(string input)
+        {
+            string spacesRemoved = "";
+            char[] characters = input.ToLower().ToCharArray();
+            for (int i = 0; i < characters.Length; i++)
+            {
+                if (characters[i] != ' ')
+                {
+                    spacesRemoved += characters[i];
+                }
+            }
+            return spacesRemoved;
+        }
+
+        // This function takes an input string (company name) and returns a URL address as a string
+        protected string createWebAddress(string company)
+        {
+            string nameToLowerWithoutSpaces = removeSpaces(company);
+            string webAddress = "www." + nameToLowerWithoutSpaces + ".com";
+            return webAddress;
+        }
+
         protected string randomPriorityGenerator()
         {
-            Random rand = new Random();
+            
             string priority = "None";
 
             int value = rand.Next(4);
@@ -5975,7 +6081,7 @@ namespace BotLibrary
 
         protected string randomChinesePriorityGenerator()
         {
-            Random rand = new Random();
+            
             string priority = "无";
 
             int value = rand.Next(4);
@@ -5998,7 +6104,7 @@ namespace BotLibrary
 
         public string GetFakeCompanyName()
         {
-            Random rand = new Random();
+            
             // Want to make a request to see if the account already exists
             SDataSingleResourceRequest request = new SDataSingleResourceRequest(service)
             {
@@ -6741,7 +6847,7 @@ namespace BotLibrary
 
         public string GetFakeChineseCompanyName()
         {
-            Random rand = new Random();
+            
             // Want to make a request to see if the account already exists
             SDataSingleResourceRequest request = new SDataSingleResourceRequest(service)
             {
@@ -6852,7 +6958,7 @@ namespace BotLibrary
 
         public string GetFakeFirstName()
         {
-            Random rand = new Random();
+            
             var firstNames = new[]
                              {
                                  #region FirstNames
@@ -12358,7 +12464,7 @@ namespace BotLibrary
 
         public string GetFakeChineseFirstName()
         {
-            Random rand = new Random();
+            
             var firstNames = new[]
                              {
                                  #region FirstNames
@@ -12468,7 +12574,7 @@ namespace BotLibrary
 
         public string GetFakeLastName()
         {
-            Random rand = new Random();
+            
             var lastNames = new[]
                             {
                                 #region LastNames
@@ -16884,7 +16990,7 @@ namespace BotLibrary
 
         public string GetFakeChineseLastName()
         {
-            Random rand = new Random();
+            
             var lastNames = new[]
                             {
                                 #region LastNames
@@ -17147,7 +17253,7 @@ namespace BotLibrary
             Log("Bot removed from service", fileName);
         }
 
-        public static void Log(string message, string filename)
+        public virtual void Log(string message, string filename)
         {
             StreamWriter write = new StreamWriter(filename, true);
             write.WriteLine(message);

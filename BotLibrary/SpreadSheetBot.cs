@@ -313,7 +313,7 @@ namespace BotLibrary
             }
         }
 
-        override private void Log(string message, string filename)
+        override public void Log(string message, string filename)
         {
             StreamWriter write = new StreamWriter(filename, true);
             write.WriteLine(message);
