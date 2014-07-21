@@ -2646,3 +2646,150 @@ Affected parameters are:
    logtoconsole = 
    logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
    assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Uninstalling assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Removing EventLog source DemoBotService.
+Service DemoBotService is being removed from the system...
+Service DemoBotService was successfully removed from the system.
+Installing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Installing service DemoBotService...
+Service DemoBotService has been successfully installed.
+Creating EventLog source DemoBotService in log Application...
+Committing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Uninstalling assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Removing EventLog source DemoBotService.
+Service DemoBotService is being removed from the system...
+Service DemoBotService was successfully removed from the system.
+Installing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Installing service DemoBotService...
+Service DemoBotService has been successfully installed.
+Creating EventLog source DemoBotService in log Application...
+Committing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Uninstalling assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Removing EventLog source DemoBotService.
+Service DemoBotService is being removed from the system...
+Service DemoBotService was successfully removed from the system.
+Installing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Installing service DemoBotService...
+Service DemoBotService has been successfully installed.
+Creating EventLog source DemoBotService in log Application...
+Committing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Uninstalling assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Removing EventLog source DemoBotService.
+Service DemoBotService is being removed from the system...
+Service DemoBotService was successfully removed from the system.
+Installing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Installing service DemoBotService...
+Service DemoBotService has been successfully installed.
+Creating EventLog source DemoBotService in log Application...
+Committing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Uninstalling assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Removing EventLog source DemoBotService.
+Service DemoBotService is being removed from the system...
+Service DemoBotService was successfully removed from the system.
+Installing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Installing service DemoBotService...
+Service DemoBotService has been successfully installed.
+Creating EventLog source DemoBotService in log Application...
+Committing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Uninstalling assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Removing EventLog source DemoBotService.
+Service DemoBotService is being removed from the system...
+Service DemoBotService was successfully removed from the system.
+Installing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Installing service DemoBotService...
+Service DemoBotService has been successfully installed.
+Creating EventLog source DemoBotService in log Application...
+Committing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Uninstalling assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Removing EventLog source DemoBotService.
+Service DemoBotService is being removed from the system...
+Service DemoBotService was successfully removed from the system.
+Installing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe
+Installing service DemoBotService...
+Service DemoBotService has been successfully installed.
+Creating EventLog source DemoBotService in log Application...
+Committing assembly 'C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.InstallLog
+   assemblypath = C:\Users\tyler.wallace.SWIFTPAGE\Documents\Visual Studio 2012\Projects\DemoBotService\DemoBotService\bin\Debug\demobotservice.exe

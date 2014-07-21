@@ -324,7 +324,7 @@ namespace DemoBotService
                             time = maxTime * rand.NextDouble();
                         } while (time < minTime || time == 0);
                     }
-                    timer.Interval = time;
+                    timer.Interval = time; 
                     Log("Waiting " + time / 1000 + " seconds", serverLog);
                     timer.Enabled = true;
                 }

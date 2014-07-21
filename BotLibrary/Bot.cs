@@ -1621,6 +1621,7 @@ namespace BotLibrary
                 //payload.Values["CreateDate"] = DateTime.Now;
                 //payload.Values["CreateUser"] = UserID;
                 payload.Values["Type"] = localize(language, "Account Type", null, null, null, true);
+                payload.Values["SubType"] = getSubType();
                 payload.Values["Status"] = localize(language, "Account Status", null, null, null, true);
                 payload.Values["WebAddress"] = createWebAddress(accountName);
                 payload.Values["MainPhone"] = phoneNumberGenerator();
@@ -1642,7 +1643,6 @@ namespace BotLibrary
                 tempTime = (tempAfter - tempPre) / 1000;
                 Log(DateTime.Now + " | " + guid + " | Get | Users |  | " + tempTime, fileName);
                 SDataPayload accountManager = feed5.Entries.ElementAt(0).GetSDataPayload();
-
                 payload.Values["AccountManager"] = accountManager;
 
                 SDataPayload owner = null;
@@ -1702,8 +1702,6 @@ namespace BotLibrary
                 SDataPayload payload = tempEntry.GetSDataPayload();
                 string accountName = (string)leadPayload.Values["Company"];
 
-                SDataPayload accPayload = null;
-
                 try
                 {
                     tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
@@ -1729,7 +1727,7 @@ namespace BotLibrary
                             }
                             else
                             {
-                                accPayload = entry.GetSDataPayload();
+                                accountPayload = entry.GetSDataPayload();
                             }
                         }
                     }
@@ -1740,9 +1738,9 @@ namespace BotLibrary
                     //SetText("Connection to server lost... Please check your connection");
                     //this.stop();
                 }
-                if (accPayload != null)
+                if (accountPayload != null)
                 {
-                    return accPayload;
+                    return accountPayload;
                 }
 
                 payload.Values["CreateSource"] = "Demo-Bot";
@@ -1751,6 +1749,7 @@ namespace BotLibrary
                 //payload.Values["CreateDate"] = DateTime.Now;
                 //payload.Values["CreateUser"] = UserID;
                 payload.Values["Type"] = localize(language, "Account Type", null, null, null, true);
+                payload.Values["SubType"] = getSubType();
                 payload.Values["Status"] = localize(language, "Account Status", null, null, null, true);
                 payload.Values["WebAddress"] = createWebAddress(accountName);
                 payload.Values["MainPhone"] = phoneNumberGenerator();
@@ -1772,7 +1771,6 @@ namespace BotLibrary
                 tempTime = (tempAfter - tempPre) / 1000;
                 Log(DateTime.Now + " | " + guid + " | Get | Users |  | " + tempTime, fileName);
                 SDataPayload accountManager = feed5.Entries.ElementAt(0).GetSDataPayload();
-
                 payload.Values["AccountManager"] = accountManager;
 
                 SDataPayload owner = null;
@@ -1801,6 +1799,7 @@ namespace BotLibrary
                 tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 var response = request.Create();
                 accountPayload = response.GetSDataPayload();
+                actPayload = accountPayload;
                 tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
                 tempTime = (tempAfter - tempPre) / 1000;
                 Log(DateTime.Now + " | " + guid + " | Push | Account |  | " + tempTime, fileName);
@@ -4279,6 +4278,15 @@ namespace BotLibrary
                 //SetText("Connection to server lost... Please check your connection");
             }
             return item;
+        }
+
+        protected string getSubType()
+        {
+            string type = "";
+            String[] types = { "Hardware", "Type A", "Type B", "Software", "Network", "Type C", "Services" };
+            int choice = rand.Next(7);
+            type = types[choice];
+            return type;
         }
 
         protected string getCallToAction(string objective)
