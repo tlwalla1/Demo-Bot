@@ -2232,12 +2232,34 @@ namespace BotLibrary
                 payload.Values["LeadSource"] = fetchLeadSource();
                 payload.Values["Title"] = randomTitle();
                 payload.Values["WebAddress"] = createWebAddress(company);
-                //tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                //SDataPayload address = fetchAddress();
-                //payload.Values["Address"] = address;
-                //tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
-                //tempTime = (tempAfter - tempPre) / 1000;
-                //Log(DateTime.Now + " | " + guid + " | Get | Addresses |  | " + tempTime, fileName);
+
+
+                // This section takes an existing address in the database and uses it to fill out a lead address (which is different from a regular address)
+                tempPre = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                SDataPayload address = fetchAddress();
+                tempAfter = DateTime.Now.Minute * 60 * 1000 + DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
+                tempTime = (tempAfter - tempPre) / 1000;
+                Log(DateTime.Now + " | " + guid + " | Get | Addresses |  | " + tempTime, fileName);
+
+                 SDataPayload leadAddressPayload =  new SDataPayload
+                 {
+                     Values =
+                     {
+                         {"Address1" , address.Values["Address1"]},
+                         {"Address2" , address.Values["Address2"]},
+                         {"Address3" , address.Values["Address3"]},
+                         {"City" , address.Values["City"]},
+                         {"State" , address.Values["State"]},
+                         {"Country" , address.Values["Country"]},
+                         {"County" , address.Values["County"]},
+                         {"Description" , address.Values["Description"]},
+                         {"IsMailing" , address.Values["IsMailing"]},
+                         {"IsPrimary" , address.Values["IsPrimary"]},
+                         {"PostalCode" , address.Values["PostalCode"]},
+                         {"Type" , address.Values["Type"]}
+                     }
+                 };
+                payload.Values["Address"] = leadAddressPayload;
 
                 SDataSingleResourceRequest request = new SDataSingleResourceRequest(dynamic)
                 {

@@ -42,26 +42,26 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="BotLibrary.dll" size="410624">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="BotLibrary.dll" size="411136">
       <assemblyIdentity name="BotLibrary" version="0.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>wCoUPpZADNyPqpTnCXeG2u1a8G3+XJQ2TQINT5oGuXw=</dsig:DigestValue>
+        <dsig:DigestValue>FTufE7HL5S4dy+K6AP5UDkLo3E8kewfGQMK2s+qEc/k=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="DemoBotService.exe" size="14336">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="DemoBotService.exe" size="14848">
       <assemblyIdentity name="DemoBotService" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>9TUN9CW7AVLsxbRI8ajIibQVbCNe/PZxXbAwvN6UaLs=</dsig:DigestValue>
+        <dsig:DigestValue>IPYWWZovf9GoZSdXx/QZo6OFsvvCXp9RP7M1/vIuofo=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

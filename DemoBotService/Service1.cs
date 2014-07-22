@@ -234,7 +234,7 @@ namespace DemoBotService
         {
             updateShift();
             timer = new System.Timers.Timer();
-            /*if (DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftAM.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftPM.ToUniversalTime()) <= 0)
+            if (DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftAM.ToUniversalTime()) >= 0 && DateTime.Compare(DateTime.Now.ToUniversalTime(), shiftPM.ToUniversalTime()) <= 0)
             {
                 timer.Elapsed += new ElapsedEventHandler(runBot);
                 timer.Enabled = true;
@@ -267,10 +267,10 @@ namespace DemoBotService
                 }
                 double time = (hour * 3600 * 1000) + (minute * 60 * 1000);
                 timer.Interval = time;
-                Log("Waiting " + time / 1000 + " seconds", serverLog); */
+                Log("Waiting " + time / 1000 + " seconds", serverLog); 
                 timer.Elapsed += new ElapsedEventHandler(runBot);
                 timer.Enabled = true;
-            //}
+            }
         }
 
         // This function will loop through all of the bots located in the bot array and call the Run function. It first checks to ensure that the time
